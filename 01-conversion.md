@@ -5,7 +5,7 @@ The Sony DAR-1000ES is an old relic that used to be a satellite tuner. Its front
 <img src="media/image1.jpeg" alt="The image shows a SONY audio equipment with various settings and controls, including a display showing 118.0MHz, a linear converter, and a fine-tuning dial. AI-generated content may be incorrect." />
 
 ## Design objective 
-The conversion should retain as much of the original Sony audio chain as practical. The preferred design therefore keeps the existing digital-filter, D/A-converter and analogue output stages, and replaces only the obsolete programme source with an ESP32-generated digital audio stream.
+The conversion should retain as much of the original Sony as practical. The preferred design therefore keeps the existing digital-filter, D/A-converter and analogue output stages. It also re-uses the original VFD display and keys and replaces only the obsolete programme source with an ESP32-generated digital audio stream.
 
 The idea is to reuse the original Sony digital-filter and DAC stages where possible and feeding the digital audio from the ESP32 rather than adding an external DAC. This should preserve the original analogue filtering, muting and output circuitry (and therefore sound profile).
 
