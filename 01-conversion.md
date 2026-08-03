@@ -9,8 +9,6 @@ The conversion should retain as much of the original Sony audio chain as practic
 
 The idea is to reuse the original Sony digital-filter and DAC stages where possible and feeding the digital audio from the ESP32 rather than adding an external DAC. This should preserve the original analogue filtering, muting and output circuitry (and therefore sound profile).
 
-But we need to keep a documented fallback injection point if the CXD2560M control interface proves incompatible.
-
 Given the front panel buttons (with items like NEWS, AFFAIRS, INFO, SPORT, etc..) this unit is actually pretty good to become a streamer. [Piotr D. on YouTube](https://youtu.be/dSmdoRHq8-w?si=nIIm9IDE0pOxPFWs) for example managed to convert it already. However, for his conversion he replaced the entire display, used his own DA conversion and picked up at the analog stage of the old unit (from what I can see in the pictures). In my conversion I will be attempting to use as much as possible from the original unit, including the DAC, the analog amplifiers, the display, the buttons and powersupply.
 
 The main idea:
