@@ -2,15 +2,7 @@
 
 Internet-radio sound interface, and control logic
 
-## Design objective 
-
-The conversion should retain as much of the original Sony audio chain as practical. The preferred design therefore keeps the existing digital-filter, D/A-converter and analogue output stages, and replaces only the obsolete programme source with an ESP32-generated digital audio stream. 
-
-The idea is to reuse the original Sony digital-filter and DAC stages where possible and feeding the digital audio from the ESP32 rather than adding an external DAC.  This should preserve the original analogue filtering, muting and output circuitry (and therefore sound profile).
-
-But we need to keep a documented fallback injection point if the CXD2560M control interface proves incompatible. 
-
-**Original audio architecture **
+## Original audio architecture
 
 The service documentation shows two distinct Sony devices in the digital audio path: IC501, a CXD2560M digital-filter device, and IC601, a CXD2562Q D/A converter. The intended reuse path is therefore: 
 
