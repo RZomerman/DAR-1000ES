@@ -2,6 +2,12 @@
 
 Internet-radio user interface, display drivers and logic 
 
+## Approach Selection
+
+**Option 1 is to investigate reuse of the original display/front-panel controller IC701 and default controls through its bus with the system controller.** See the [internal parallel bus protocol proposal](SONY_DAR1000ES_Protocol_Spec.md). This approach and the proposed protocol have **not been validated**.
+
+The direct IC702/IC703 driver approach described below is **Option 2, the fallback**, rather than the first implementation path.
+
 The display in the 1000ES is driven by a central proprietary SONY chip (IC701) that sends commands to two display driver chips. The display itself is a VFD (vacuum fluorescent display). More info on those on Youtube: https://youtu.be/gZIRPJt69sM?si=HwfT3PWyx6F6qvj4
 
 While others have used “new” VFD’s and drivers, I was wondering if I can reuse the existing driver chips, IC702 and IC703 which are “common” TD62C950RF chips that run on regular 40 bits signal inputs. IC702 seems to drive the Grid, while IC703 runs the individual segments. Each chip has separate inputs that come straight from the main controller IC701:

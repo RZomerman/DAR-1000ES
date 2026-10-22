@@ -33,7 +33,9 @@ This allows the DAR-1000ES to receive modern digital audio streams while continu
 
 ### 2. IC701 Controller Bus Injection
 
-The primary Controller ESP can emulate and inject data directly onto the internal Sony communication bus.
+The primary Controller ESP is intended to test emulation and injection on the internal Sony communication bus. **This has not been validated.** This is **Option 1**: investigate retaining IC701, the display/front-panel controller, and the default controls before directly driving IC702 and IC703.
+
+See the [unvalidated internal bus protocol proposal](../SONY_DAR1000ES_Protocol_Spec.md) for the working hypotheses and required validation. Signal directions, timing, electrical assumptions, and message formats are not established.
 
 Supported signals:
 
@@ -45,7 +47,7 @@ Supported signals:
 | REQ |
 | NCK |
 
-The intention is to determine whether the original firmware architecture can be leveraged by presenting the system with data equivalent to what IC701 would normally generate.
+The intention is to determine whether the original firmware architecture can be leveraged by communicating with IC701 over its interface to the system controller.
 
 If successful, this becomes the preferred approach because it preserves most of the original Sony subsystem interactions.
 
