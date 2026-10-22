@@ -94,7 +94,27 @@ Display Controller (Transmitter)               System Controller (Receiver)
 
 An ESP32 uses 3.3V GPIO and must not be exposed to incompatible signal levels. The blueprint below assumes a 5V Sony interface and proposes **SN74LVC8T245** (8-bit bus) and **SN74LVC1T45** (1-bit transceivers). Confirm actual bus voltages and the exact parts' supply ranges, input tolerance, direction control, and isolation capabilities before selecting hardware.
 
-The diagram and table are conceptual, not a verified schematic: the diagram groups STB/ACK/NCK under a shared direction control, whereas the table assigns separate directions to STB and ACK/NCK. Boot/reset isolation and the proposed GPIO assignments also require review for the selected ESP32 variant.
+The GPIO assignments below reflect the selected wiring, not a validated protocol implementation. IO17 controls ACK/NCK direction, while STB uses the inverse direction. Boot/reset isolation and electrical compatibility still require hardware validation.
+
+### ESP32 GPIO Assignments
+
+| Signal | ESP32 GPIO | Function |
+| :--- | :--- | :--- |
+| ACK | IO6 | Acknowledge signal |
+| STB | IO5 | Strobe signal |
+| REQ | IO7 | Request signal; proposed Sony-to-ESP input |
+| NCK | IO15 | NCK signal; protocol meaning remains unvalidated |
+| Handshake DIR | IO17 | HIGH: ACK/NCK ESP-to-Sony, STB Sony-to-ESP; LOW: reverse |
+| BUS_OE | IO42 | Active-low output enable on the 8-bit transceiver |
+| BUS_DIR | IO41 | Direction control on the 8-bit transceiver |
+| DBS0 | IO40 | Data bit 0 |
+| DBS1 | IO39 | Data bit 1 |
+| DBS2 | IO38 | Data bit 2 |
+| DBS3 | IO37 | Data bit 3 |
+| DBS4 | IO36 | Data bit 4 |
+| DBS5 | IO35 | Data bit 5 |
+| DBS6 | IO48 | Data bit 6 |
+| DBS7 | IO47 | Data bit 7 |
 
 ### Level-Shifter Hardware Interface Blueprint
 
@@ -119,12 +139,12 @@ The diagram and table are conceptual, not a verified schematic: the diagram grou
             v                  v                  v
     [SN74LVC8T245]       [SN74LVC1T45]     3x [SN74LVC1T45]
      (Data Bus)           (REQ Line)        (STB/ACK/NCK)
-      DIR & OE              Fixed DIR          Shared DIR
+      DIR & OE              Fixed DIR       DIR / inverted DIR
          |                     |                  |
          v                     v                  v
      +-------+             +-------+          +-------+
-     | GPIO5 |             |  GND  |          | GPIO4 |
-     | GPIO16|             |       |          |       |
+     | IO41  |             |  IO7  |          | IO17  |
+     | IO42  |             |       |          |       |
      +-------+             +-------+          +-------+
          |                     |                  |
          +-----------------+   |   +--------------+
@@ -135,15 +155,19 @@ The diagram and table are conceptual, not a verified schematic: the diagram grou
                       +-------------------+
 ```
 
+The data signals use IO40, IO39, IO38, IO37, IO36, IO35, IO48, and IO47 in DBS0-to-DBS7 order. ACK, STB, and NCK connect to IO6, IO5, and IO15 respectively. IO17 drives the ACK/NCK transceiver direction controls and the inverse drives STB direction; it does not invert the STB data signal.
+
 ### Proposed Directional State Matrix (Not Safety-Validated)
 
-To prevent bus contention and hardware damage, the software execution block must enforce a strict **Break-Before-Make** isolation sequence by floating the data bus via Output Enable (`OE`) prior to pivoting transceiver configurations.
+Use **Break-Before-Make** sequencing: disable the 8-bit transceiver with IO42 HIGH before changing IO41 or the ESP32 data-pin modes, then enable it only after directions and data are stable. IO42 isolates only the 8-bit data bus, not ACK/STB/NCK. Safe handshake turnaround and reset behavior need separate validation.
 
-| Target Action State | BUS_OE (GPIO16) | BUS_DIR (GPIO5) | DIR_STB (GPIO4) | DIR_HANDSHAKE (GPIO22) | ESP32 Data Pins |
-| :--- | :--- | :--- | :--- | :--- | :--- |
-| **System Boot / Reset Initialization** | **HIGH** (Safe / Isolated) | High-Z State | High-Z State | High-Z State | `INPUT` (High-Z) |
-| **VFD Display Update Mode** | **LOW** (Connected) | **HIGH** (Outbound) | **HIGH** (Outbound) | **LOW** (Inbound) | `OUTPUT` |
-| **Keyboard Ingestion Mode** | **LOW** (Connected) | **LOW** (Inbound) | **LOW** (Inbound) | **HIGH** (Outbound) | `INPUT` |
+| Target Action State | BUS_OE (IO42) | BUS_DIR (IO41) | Handshake DIR (IO17) | STB Direction | ACK/NCK Direction | ESP32 Data Pins |
+| :--- | :--- | :--- | :--- | :--- | :--- | :--- |
+| **System Boot / Reset Initialization** | **HIGH** required to isolate data bus | Set before enabling | Establish before driving; reset isolation unvalidated | Unvalidated at reset | Unvalidated at reset | `INPUT` (High-Z) |
+| **VFD Display Update Mode** | **LOW** (Connected) | **HIGH** (Outbound, assumed) | **LOW** | ESP-to-Sony | Sony-to-ESP | `OUTPUT` |
+| **Keyboard Ingestion Mode** | **LOW** (Connected) | **LOW** (Inbound, assumed) | **HIGH** | Sony-to-ESP | ESP-to-Sony | `INPUT` |
+
+IO41 HIGH=outbound and LOW=inbound retain the proposed polarity and must be checked against the 8-bit transceiver's A/B wiring. IO17 polarity is the specified wiring convention above; the Sony transaction sequence remains unvalidated. A GPIO being an input at reset does not itself establish a safe level on OE or DIR; verify hardware biasing and startup behavior.
 
 ---
 *Unvalidated investigation proposal for open-source hardware modernization. No working protocol implementation or hardware validation is claimed.*
