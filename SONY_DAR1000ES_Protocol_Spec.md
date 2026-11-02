@@ -1,6 +1,10 @@
-# Sony DAR-1000ES Internal Parallel Bus & Handshake Protocol Proposal (Unvalidated)
+# Sony DAR-1000ES Internal Parallel Bus and Handshake Specification (Partial)
 
-> **Status: UNVALIDATED.** This is a working hypothesis, not a verified reverse-engineered protocol specification. The signal names alone do not establish polarity, direction, timing, arbitration, message contents, or the meaning of `NCK`. The sequences and hardware suggestions below have not been validated on a DAR-1000ES and must not be treated as implementation-ready instructions.
+> **Status: PARTIALLY CHARACTERIZED, NOT IMPLEMENTATION-READY.** Passive bench
+> captures on 2026-11-02 establish repeatable handshake framing and correlate
+> display fields and key-state reports. Capture bits remain compromised and
+> controller ownership, electrical characteristics, arbitration and checksum
+> are unresolved. See [capture findings and key tables](05-bus-capture-findings.md).
 
 ## Option 1: Retain the Original Controls
 
@@ -16,7 +20,47 @@ Direct control of IC702 and IC703 is **Option 2, the fallback**, described in [D
 - Decode message framing and command/key payloads; do not assume raw display matrices or key codes.
 - Verify level shifting, output-enable behavior, and isolation from any original controller being replaced before actively driving the bus.
 
-The remaining sections preserve the proposed model for investigation. All specific electrical values, handshake sequences, pin assignments, and hardware choices below are unverified assumptions, not measured facts.
+## Measured transaction model (2026-11-02)
+
+This section supersedes the historical directional hypotheses in sections 1
+and 2 below. Those sections are retained for context, not as measured behavior.
+
+All monitored lines idle HIGH in the connected baseline. Both short reports
+associated with keys and long reports associated with the display start with
+REQ/ACK, followed by acknowledged STB transfers:
+
+```text
+REQ LOW -> ACK LOW -> REQ HIGH -> ACK HIGH
+repeat 4 or 32 times:
+    STB LOW -> ACK LOW -> STB HIGH -> ACK HIGH
+NCK LOW -> final STB LOW -> NCK HIGH -> final STB HIGH
+return to idle
+```
+
+The closing STB has no additional ACK in the examined startup sequences and
+samples the same value as the preceding transfer in the aligned captures.
+It is not counted as an additional payload byte.
+
+**NCK is associated with transaction completion.** The previous claim that it
+means buffer-busy/error is unsupported. An end-of-message role is a working
+interpretation; the precise ownership and meaning remain unverified.
+
+| Class | Apparent payload | Observed association |
+|-------|------------------|----------------------|
+| Short | 4 bytes, often `base key base key` | Button press and release |
+| Long | 32 bytes, including unresolved control/check byte(s) | Fixed-layout display state |
+
+Long messages repeat approximately every 508 ms, with additional event-driven
+updates. They resend unchanged fields when one digit changes. Text appears
+ASCII-compatible, with unresolved forced-HIGH capture bits: initially `0xD8`,
+then `0xD0` after a probe correction. Do not treat masked reports as complete
+byte values or assign unique key codes from them.
+
+Direction is inferred from screen/key correlations, not electrically proven.
+REQ does not by itself establish which controller sends or receives.
+No safe active bus-emulation procedure has yet been established.
+
+## Historical hypotheses (superseded where contradicted above)
 
 ---
 
@@ -24,7 +68,7 @@ The remaining sections preserve the proposed model for investigation. All specif
 
 The proposed model assumes an 8-bit bidirectional data bus and four asynchronous handshaking lines, using a hardware-interlocked sequence to negotiate data ownership and avoid bus contention. This model and the controllers' timing relationship require validation.
 
-### Proposed Signal Definitions (Unvalidated)
+### Historical Proposed Signal Definitions (Unvalidated)
 
 | Signal Name | Mnemonic | Hardware Direction | Native Voltage | Protocol Description |
 | :--- | :--- | :--- | :--- | :--- |
@@ -37,6 +81,10 @@ The proposed model assumes an 8-bit bidirectional data bus and four asynchronous
 ---
 
 ## 2. Bidirectional State Machinery
+
+> **Historical only:** the diagrams below omit measured framing and incorrectly
+> suggest NCK is a busy/error alternative to ACK. Use the measured model above
+> for the current capture interpretation. Do not implement these diagrams.
 
 The hypothesis below assumes that `REQ` controls arbitration between **Write Mode** (System updating the display) and **Read Mode** (System receiving user interactions). Actual direction control and transaction initiation are unknown.
 
