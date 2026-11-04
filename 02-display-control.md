@@ -2,9 +2,15 @@
 
 Internet-radio user interface, display drivers and logic 
 
+> **Measured update, 2026-11-04:** See [Direct Display driving](06-direct-display-driving.md)
+> for passive captures, timing and decoded text/indicator mappings. The observed
+> scan uses **40 segment clocks and one grid clock per latch, across 26 slots**,
+> not 40 grid clocks per latch as hypothesized below. Active driving, electrical
+> compatibility and the proposed ESP32 connections remain unverified.
+
 ## Approach Selection
 
-**Option 1 is to investigate reuse of the original display/front-panel controller IC701 and default controls through its bus with the system controller.** See the [internal parallel bus protocol proposal](SONY_DAR1000ES_Protocol_Spec.md). This approach and the proposed protocol have **not been validated**.
+**Option 1 is to investigate reuse of the original display/front-panel controller IC701 and default controls through its bus with the system controller.** See the [partially characterized internal parallel bus](SONY_DAR1000ES_Protocol_Spec.md). Passive framing and key/display correlations have been measured; active bus emulation has **not been validated**.
 
 The direct IC702/IC703 driver approach described below is **Option 2, the fallback**, rather than the first implementation path.
 
@@ -75,7 +81,7 @@ IC702 has similar paths but closer to IC701
 
 - STB (pin 26) (shared)
 
-The hypothesis is that we see something like
+The original hypothesis (superseded by the [measured scan](06-direct-display-driving.md)) was:
 
 > 40 bits to segment driver  
 > 40 bits to grid driver  
