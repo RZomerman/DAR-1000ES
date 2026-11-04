@@ -10,6 +10,7 @@ This repository contains the project documentation converted from the original W
 4. [DAR-1000ES Program and Keypad Baseline](04-program-and-keypad-baseline.md)
 5. [Bus Capture Findings and Key Reports](05-bus-capture-findings.md)
 6. [Direct Display driving](06-direct-display-driving.md)
+7. [Audio Control Findings and Next-Step Plan](07-audio-control-findings-and-plan.md)
 
 Images used by the chapters are stored in [`media/`](media/).
 

@@ -2,6 +2,13 @@
 
 Internet-radio sound interface, and control logic
 
+> **Measured update, 2026-11-04:** [Audio control findings and next-step plan](07-audio-control-findings-and-plan.md)
+> documents ATT/SHIFT/LATCH/INIT captures. Startup includes two **16-clock**
+> LATCH windows, not the previously hypothesized 12-clock transfer. The
+> LSB-first interpretations are `0x442C` and `0x0400`; command meanings,
+> voltage compatibility and working audio remain unverified. INIT and the
+> other controls currently reside on different ESP boards.
+
 ## Original audio architecture
 
 The service documentation shows two distinct Sony devices in the digital audio path: IC501, a CXD2560M digital-filter device, and IC601, a CXD2562Q D/A converter. The intended reuse path is therefore: 
@@ -51,17 +58,15 @@ IC501 also has ATT, SHIFT, LATCH and INIT control inputs. The related Sony CXD12
 
  
 
-The CXD1244S uses a 12-bit attenuation word transferred least-significant bit first. In that device 0x400 represents 0 dB and 0x000 represents silence. The same ATT/SHIFT/LATCH naming makes this a strong starting hypothesis for IC501, but the exact CXD2560M word length, encoding and edge behaviour remain to be proven on the bench. 
-
-> Working test hypothesis for full scale   
->    
-> 1. Hold LATCH high.   
-> 2. Present one ATT data bit.   
-> 3. Pulse SHIFT and repeat for all control bits.   
-> 4. Pulse LATCH to activate the word.   
-> 5. Use INIT to establish synchronisation after clocks are stable.   
->    
-> Candidate first word: 0x400, 12 bits, LSB first. 
+The related CXD1244S documentation originally motivated a 12-bit LSB-first
+attenuation hypothesis, with 0x400 representing 0 dB and 0x000 silence.
+That is not a validated CXD2560M command specification. The measured Sony
+startup has two 16-clock transfers with LATCH HIGH during shifting and falling
+afterward. Rising-edge data interpreted LSB-first gives `0x442C` then `0x0400`.
+The latter matches the candidate value, but no attenuation response has been
+confirmed. INIT rises earlier in startup and remains HIGH. Use the measured
+findings and verification gates in the linked plan, not the old 12-bit replay
+proposal or a guessed INIT pulse sequence.
 
 **Fallback injection point: IC601 **
 
@@ -85,7 +90,12 @@ The CXD2562Q pin information provides a second, documented injection route that 
 
 **Logic levels and protection **
 
-The Sony devices operate in a 5 V logic environment, while the ESP32 uses 3.3 V GPIO. Direct 3.3 V drive is a reasonable non-destructive experiment for the slow ATT, SHIFT, LATCH and INIT lines, but it is not guaranteed by the related Sony input-threshold specifications. A failed response may therefore be an electrical-level problem rather than a protocol problem. 
+The Sony devices are described in a 5 V logic environment, while the ESP32 uses
+3.3 V GPIO. Measure the actual supplies and verify exact input thresholds
+before connecting active outputs. Do not assume direct 3.3 V drive will work
+or be safe under all power states; use a verified interface and isolate the
+original source first. A failed response may be an electrical-level problem
+rather than a protocol problem.
 
 - For initial bench testing, reuse existing Sony series resistors where they are already present. 
 
@@ -102,6 +112,10 @@ The Sony devices operate in a 5 V logic environment, while the ESP32 uses 3.3 V 
 - For the final design, use a unidirectional 3.3 V to 5 V buffer from the 74AHCT or 74HCT family. Avoid common BSS138 bidirectional I2C level-shifter modules on BCK, LRCK or MCLK because those modules are not the preferred choice for clean clock edges. 
 
 **Complete ESP32 allocation **
+
+This is the original single-ESP proposal, not the current verified allocation.
+INIT is currently on a different ESP from ATT/SHIFT/LATCH; reconcile both
+boards' assignments and startup coordination before implementing this table.
 
 |     **Function**       | **Signal**      | **GPIO**  |
 |:----------------------:|-----------------|-----------|
@@ -146,11 +160,11 @@ The Sony devices operate in a 5 V logic environment, while the ESP32 uses 3.3 V 
 
 <!-- -->
 
-6.  Apply a controlled INIT transition after the clocks are stable. 
+6.  Establish the datasheet-supported INIT sequence and safe mute state; the captured power-up rise alone does not specify a replay sequence.
 
 <!-- -->
 
-7.  Try the candidate IC501 attenuation command, beginning with 0x400 as a 12-bit LSB-first working hypothesis. 
+7.  Validate the measured 16-clock transfer framing on an unconnected ESP first. Do not treat 0x0400 as confirmed full scale or send guessed 12-bit commands.
 
 <!-- -->
 
@@ -158,7 +172,7 @@ The Sony devices operate in a 5 V logic environment, while the ESP32 uses 3.3 V 
 
 <!-- -->
 
-9.  If IC501 does not respond, verify 3.3 V logic-high recognition with a scope or substitute a proper 5 V logic buffer before rejecting the protocol hypothesis. 
+9.  If IC501 does not respond, check the verified logic levels, clock/PCM format, INIT and mute states before rejecting the protocol hypothesis.
 
 **Known facts, deductions and open questions **
 
@@ -166,9 +180,9 @@ The Sony devices operate in a 5 V logic environment, while the ESP32 uses 3.3 V 
 |----|----|
 | Confirmed  | IC501 is the CXD2560M digital-filter stage and IC601 is the CXD2562Q D/A-converter stage in the receiver.  |
 | Confirmed  | IC601 accepts LRCKI, BCKI, DLI and DRI and provides independent left/right mute inputs.  |
-| Confirmed  | The project GPIO allocation reserves GPIO10 to GPIO13 for IC501 control and GPIO16, GPIO17, GPIO18 and GPIO21 for digital audio.  |
+| Proposed  | The original single-ESP GPIO allocation reserves GPIO10 to GPIO13 for IC501 control and GPIO16, GPIO17, GPIO18 and GPIO21 for digital audio; reconcile with the actual split-board wiring.  |
 | Strong deduction  | ATT, SHIFT and LATCH on IC501 form a serial attenuation/control interface similar to the documented CXD1244S implementation.  |
-| Unverified  | The CXD2560M uses the same 12-bit, LSB-first, 0x400 = 0 dB encoding as the CXD1244S.  |
+| Measured  | Startup contains two 16-clock LATCH HIGH windows; rising-edge ATT data interpreted LSB-first gives 0x442C and 0x0400. Command meanings and specified sampling edge remain unverified. |
 | Unverified  | The CXD2560M reliably recognises 3.3 V ESP32 outputs as logic high.  |
 | Unverified  | The exact PCM format, sample rate, bit alignment and required MCLK ratio accepted by IC501 in this receiver.  |
 
