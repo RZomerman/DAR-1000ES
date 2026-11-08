@@ -525,3 +525,59 @@ window is not universal across all original-controller states.
 Evidence: `sony-original-red-c-20261108-2120.bin` and
 `sony-original-red-c-20261108-2120-analysis.json`. This is a captured C
 pattern, not proof of an independently mapped physical segment geometry.
+
+## Native VFD text API and scrolling
+
+The local firmware exposes a text-display interface, independent of the browser:
+
+```c
+sony_vfd_show("Now Playing: blabla", true, true);
+/* UTF-8 text, scroll enabled, dim enabled */
+```
+
+The driver owns UTF-8 lookup, glyph selection, the nine-character message
+window and scrolling. Sony/custom glyphs remain authoritative. Only slots
+22 down to 14 change; frequency, source, indicators and red fields are preserved.
+The application must first start an explicitly authorized continuous Display
+scan. Text calls never start output and return an invalid-state error if the
+display is stopped or another scan mode is active.
+
+| Setting | Behavior |
+|---------|----------|
+| At most nine display characters | Static text, padded with blanks |
+| Longer text with scroll enabled | One-second initial pause, then one-cell steps every 300 ms |
+| Loop separator | Four blank cells; pause again at the first window |
+| Scroll disabled | First nine display characters, without motion |
+| Dim enabled | Measured delayed grid CLEAR enable |
+| Dim disabled | Original bright fixture CLEAR waveform |
+| New title | Atomically replaces the old title and restarts its initial pause |
+| Identical rendered title / scroll setting | Retains the current scroll position |
+| Empty title | Clears only the message field |
+
+POST `/api/screen` accepts the same operation:
+
+```json
+{"sample":"Text","text":"Now Playing: blabla","scroll":true,"dim":true,"live_confirmed":true}
+```
+
+An isolated bench uses `bench_confirmed:true` instead. Scroll and dim default
+to true; supplied values must be JSON booleans. Raw `sample:"Display"` updates
+cancel scrolling. Stop/blank retain their existing behavior.
+
+Native UTF-8 validation rejects malformed input without replacing the current
+title. Limits are 1,024 UTF-8 bytes, 256 display clusters and the existing
+2,047-byte JSON request body. Native conversion supports the catalogue's
+composed/decomposed accents, combining marks, presentation selectors, emoji
+modifiers, ZWJ grouping and regional-indicator pairs. Other complex-script
+shaping, bidi layout and complete Unicode grapheme segmentation are not
+implemented; unmatched characters retain the `*` fallback.
+
+ICY metadata can submit titles through this API when the screen feature is
+compiled, but never enables output itself. Non-UTF-8 metadata requires prior
+charset conversion; it is not automatically guessed. The current screen-only
+profile does not enable radio playback.
+
+The native font is generated from the same Sony/custom dictionaries as the
+bitmap catalogue. This implementation is local, not yet deployed or validated
+on the Sony. Timing is quantized by the existing roughly 63 ms DMA chunks;
+the backend is not yet a persistent gap-free display scan.
