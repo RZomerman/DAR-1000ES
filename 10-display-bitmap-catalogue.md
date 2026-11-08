@@ -1111,10 +1111,18 @@ The music note is photo-derived; extended glyphs are generated approximations.
 
 ## Extended Latin, punctuation and symbols
 
-These are application-designed 5x7 approximations, not captured Sony
+These are generated or user-supplied 5x7 approximations, not captured Sony
 glyphs. Accents use compact letter bodies to fit the seven-row grid;
 fine details and some distinctions are necessarily lost. Hardware appearance
 has not yet been validated. Each record below is supported by text lookup.
+
+The speaker (U+1F508) uses the supplied rows 02, 06, 1E, 1E, 1E, 06, 02
+when bit 4 is the leftmost pixel in each source row. Sony instead assigns
+bit 0 to the leftmost pixel, so each five-bit row is reversed before packing
+with `bit = row * 5 + column`. Generic row bytes are not sent directly.
+The supplied AirPlay-style icon uses project-private U+E000, not a standard
+Unicode AirPlay character. Its source row bytes are 0E, 11, 04, 0A, 04,
+0E, 1F. Applications must deliberately insert U+E000 to select this icon.
 
 | Character | Unicode | Name | 40-bit HEX | Provenance |
 |-----------|---------|------|------------|------------|
@@ -1168,6 +1176,8 @@ has not yet been validated. Each record below is supported by text lookup.
 | ö | U+00F6 | LATIN SMALL LETTER O WITH DIAERESIS | `0x03A310000A` | Generated approximation |
 | ü | U+00FC | LATIN SMALL LETTER U WITH DIAERESIS | `0x05B310000A` | Generated approximation |
 | ÿ | U+00FF | LATIN SMALL LETTER Y WITH DIAERESIS | `0x03A110000A` | Generated approximation |
+| 🔈 | U+1F508 | SPEAKER | `0x0218F7BD88` | User-supplied bitmap |
+|  | U+E000 | PRIVATE USE: AIRPLAY-STYLE ICON | `0x07DC45122E` | User-supplied bitmap |
 | * | U+002A | ASTERISK | `0x002AEFBAA0` | Generated approximation |
 | Å | U+00C5 | LATIN CAPITAL LETTER A WITH RING ABOVE | `0x0463F8B94E` | Generated approximation |
 | å | U+00E5 | LATIN SMALL LETTER A WITH RING ABOVE | `0x07BD071144` | Generated approximation |
@@ -2012,6 +2022,38 @@ has not yet been validated. Each record below is supported by text lookup.
 #...#
 ....#
 .###.
+```
+
+### 🔈
+
+**HEX:** `0x0218F7BD88` — User-supplied bitmap
+
+**Unicode:** U+1F508 — SPEAKER
+
+```text
+...#.
+..##.
+####.
+####.
+####.
+..##.
+...#.
+```
+
+### 
+
+**HEX:** `0x07DC45122E` — User-supplied bitmap
+
+**Unicode:** U+E000 — PRIVATE USE: AIRPLAY-STYLE ICON
+
+```text
+.###.
+#...#
+..#..
+.#.#.
+..#..
+.###.
+#####
 ```
 
 ### *

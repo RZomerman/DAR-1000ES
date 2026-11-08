@@ -1,7 +1,7 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="1080" height="5075" viewBox="0 0 1080 5075">
+<svg xmlns="http://www.w3.org/2000/svg" width="1080" height="5250" viewBox="0 0 1080 5250">
 <title>DAR-1000ES character bitmap and 40-bit HEX chart</title>
 <desc>Each cell shows a character name, its five-column seven-row bitmap, hexadecimal word and evidence source. Cyan pixels are lit; dark pixels are unlit.</desc>
-<rect width="1080" height="5075" fill="#101820"/>
+<rect width="1080" height="5250" fill="#101820"/>
 <g transform="translate(0 0)">
 <rect x="3" y="3" width="174" height="169" rx="5" fill="#182630" stroke="#40505c"/>
 <text x="90" y="24" text-anchor="middle" fill="#ffffff" font-family="monospace" font-size="16">A</text>
@@ -4924,6 +4924,88 @@
 </g>
 <g transform="translate(0 3500)">
 <rect x="3" y="3" width="174" height="169" rx="5" fill="#182630" stroke="#40505c"/>
+<text x="90" y="24" text-anchor="middle" fill="#ffffff" font-family="monospace" font-size="16">🔈 (U+1F508)</text>
+<rect x="60" y="35" width="10" height="10" rx="1" fill="#293c48"/>
+<rect x="72" y="35" width="10" height="10" rx="1" fill="#293c48"/>
+<rect x="84" y="35" width="10" height="10" rx="1" fill="#293c48"/>
+<rect x="96" y="35" width="10" height="10" rx="1" fill="#66f5ee"/>
+<rect x="108" y="35" width="10" height="10" rx="1" fill="#293c48"/>
+<rect x="60" y="47" width="10" height="10" rx="1" fill="#293c48"/>
+<rect x="72" y="47" width="10" height="10" rx="1" fill="#293c48"/>
+<rect x="84" y="47" width="10" height="10" rx="1" fill="#66f5ee"/>
+<rect x="96" y="47" width="10" height="10" rx="1" fill="#66f5ee"/>
+<rect x="108" y="47" width="10" height="10" rx="1" fill="#293c48"/>
+<rect x="60" y="59" width="10" height="10" rx="1" fill="#66f5ee"/>
+<rect x="72" y="59" width="10" height="10" rx="1" fill="#66f5ee"/>
+<rect x="84" y="59" width="10" height="10" rx="1" fill="#66f5ee"/>
+<rect x="96" y="59" width="10" height="10" rx="1" fill="#66f5ee"/>
+<rect x="108" y="59" width="10" height="10" rx="1" fill="#293c48"/>
+<rect x="60" y="71" width="10" height="10" rx="1" fill="#66f5ee"/>
+<rect x="72" y="71" width="10" height="10" rx="1" fill="#66f5ee"/>
+<rect x="84" y="71" width="10" height="10" rx="1" fill="#66f5ee"/>
+<rect x="96" y="71" width="10" height="10" rx="1" fill="#66f5ee"/>
+<rect x="108" y="71" width="10" height="10" rx="1" fill="#293c48"/>
+<rect x="60" y="83" width="10" height="10" rx="1" fill="#66f5ee"/>
+<rect x="72" y="83" width="10" height="10" rx="1" fill="#66f5ee"/>
+<rect x="84" y="83" width="10" height="10" rx="1" fill="#66f5ee"/>
+<rect x="96" y="83" width="10" height="10" rx="1" fill="#66f5ee"/>
+<rect x="108" y="83" width="10" height="10" rx="1" fill="#293c48"/>
+<rect x="60" y="95" width="10" height="10" rx="1" fill="#293c48"/>
+<rect x="72" y="95" width="10" height="10" rx="1" fill="#293c48"/>
+<rect x="84" y="95" width="10" height="10" rx="1" fill="#66f5ee"/>
+<rect x="96" y="95" width="10" height="10" rx="1" fill="#66f5ee"/>
+<rect x="108" y="95" width="10" height="10" rx="1" fill="#293c48"/>
+<rect x="60" y="107" width="10" height="10" rx="1" fill="#293c48"/>
+<rect x="72" y="107" width="10" height="10" rx="1" fill="#293c48"/>
+<rect x="84" y="107" width="10" height="10" rx="1" fill="#293c48"/>
+<rect x="96" y="107" width="10" height="10" rx="1" fill="#66f5ee"/>
+<rect x="108" y="107" width="10" height="10" rx="1" fill="#293c48"/>
+<text x="90" y="140" text-anchor="middle" fill="#ffffff" font-family="monospace" font-size="13">0x0218F7BD88</text>
+<text x="90" y="158" text-anchor="middle" fill="#bccbd5" font-family="sans-serif" font-size="11">User-supplied bitmap</text>
+</g>
+<g transform="translate(180 3500)">
+<rect x="3" y="3" width="174" height="169" rx="5" fill="#182630" stroke="#40505c"/>
+<text x="90" y="24" text-anchor="middle" fill="#ffffff" font-family="monospace" font-size="16"> (U+E000)</text>
+<rect x="60" y="35" width="10" height="10" rx="1" fill="#293c48"/>
+<rect x="72" y="35" width="10" height="10" rx="1" fill="#66f5ee"/>
+<rect x="84" y="35" width="10" height="10" rx="1" fill="#66f5ee"/>
+<rect x="96" y="35" width="10" height="10" rx="1" fill="#66f5ee"/>
+<rect x="108" y="35" width="10" height="10" rx="1" fill="#293c48"/>
+<rect x="60" y="47" width="10" height="10" rx="1" fill="#66f5ee"/>
+<rect x="72" y="47" width="10" height="10" rx="1" fill="#293c48"/>
+<rect x="84" y="47" width="10" height="10" rx="1" fill="#293c48"/>
+<rect x="96" y="47" width="10" height="10" rx="1" fill="#293c48"/>
+<rect x="108" y="47" width="10" height="10" rx="1" fill="#66f5ee"/>
+<rect x="60" y="59" width="10" height="10" rx="1" fill="#293c48"/>
+<rect x="72" y="59" width="10" height="10" rx="1" fill="#293c48"/>
+<rect x="84" y="59" width="10" height="10" rx="1" fill="#66f5ee"/>
+<rect x="96" y="59" width="10" height="10" rx="1" fill="#293c48"/>
+<rect x="108" y="59" width="10" height="10" rx="1" fill="#293c48"/>
+<rect x="60" y="71" width="10" height="10" rx="1" fill="#293c48"/>
+<rect x="72" y="71" width="10" height="10" rx="1" fill="#66f5ee"/>
+<rect x="84" y="71" width="10" height="10" rx="1" fill="#293c48"/>
+<rect x="96" y="71" width="10" height="10" rx="1" fill="#66f5ee"/>
+<rect x="108" y="71" width="10" height="10" rx="1" fill="#293c48"/>
+<rect x="60" y="83" width="10" height="10" rx="1" fill="#293c48"/>
+<rect x="72" y="83" width="10" height="10" rx="1" fill="#293c48"/>
+<rect x="84" y="83" width="10" height="10" rx="1" fill="#66f5ee"/>
+<rect x="96" y="83" width="10" height="10" rx="1" fill="#293c48"/>
+<rect x="108" y="83" width="10" height="10" rx="1" fill="#293c48"/>
+<rect x="60" y="95" width="10" height="10" rx="1" fill="#293c48"/>
+<rect x="72" y="95" width="10" height="10" rx="1" fill="#66f5ee"/>
+<rect x="84" y="95" width="10" height="10" rx="1" fill="#66f5ee"/>
+<rect x="96" y="95" width="10" height="10" rx="1" fill="#66f5ee"/>
+<rect x="108" y="95" width="10" height="10" rx="1" fill="#293c48"/>
+<rect x="60" y="107" width="10" height="10" rx="1" fill="#66f5ee"/>
+<rect x="72" y="107" width="10" height="10" rx="1" fill="#66f5ee"/>
+<rect x="84" y="107" width="10" height="10" rx="1" fill="#66f5ee"/>
+<rect x="96" y="107" width="10" height="10" rx="1" fill="#66f5ee"/>
+<rect x="108" y="107" width="10" height="10" rx="1" fill="#66f5ee"/>
+<text x="90" y="140" text-anchor="middle" fill="#ffffff" font-family="monospace" font-size="13">0x07DC45122E</text>
+<text x="90" y="158" text-anchor="middle" fill="#bccbd5" font-family="sans-serif" font-size="11">User-supplied bitmap</text>
+</g>
+<g transform="translate(360 3500)">
+<rect x="3" y="3" width="174" height="169" rx="5" fill="#182630" stroke="#40505c"/>
 <text x="90" y="24" text-anchor="middle" fill="#ffffff" font-family="monospace" font-size="16">* (U+002A)</text>
 <rect x="60" y="35" width="10" height="10" rx="1" fill="#293c48"/>
 <rect x="72" y="35" width="10" height="10" rx="1" fill="#293c48"/>
@@ -4963,7 +5045,7 @@
 <text x="90" y="140" text-anchor="middle" fill="#ffffff" font-family="monospace" font-size="13">0x002AEFBAA0</text>
 <text x="90" y="158" text-anchor="middle" fill="#bccbd5" font-family="sans-serif" font-size="11">Generated approximation</text>
 </g>
-<g transform="translate(180 3500)">
+<g transform="translate(540 3500)">
 <rect x="3" y="3" width="174" height="169" rx="5" fill="#182630" stroke="#40505c"/>
 <text x="90" y="24" text-anchor="middle" fill="#ffffff" font-family="monospace" font-size="16">Å (U+00C5)</text>
 <rect x="60" y="35" width="10" height="10" rx="1" fill="#293c48"/>
@@ -5004,7 +5086,7 @@
 <text x="90" y="140" text-anchor="middle" fill="#ffffff" font-family="monospace" font-size="13">0x0463F8B94E</text>
 <text x="90" y="158" text-anchor="middle" fill="#bccbd5" font-family="sans-serif" font-size="11">Generated approximation</text>
 </g>
-<g transform="translate(360 3500)">
+<g transform="translate(720 3500)">
 <rect x="3" y="3" width="174" height="169" rx="5" fill="#182630" stroke="#40505c"/>
 <text x="90" y="24" text-anchor="middle" fill="#ffffff" font-family="monospace" font-size="16">å (U+00E5)</text>
 <rect x="60" y="35" width="10" height="10" rx="1" fill="#293c48"/>
@@ -5045,7 +5127,7 @@
 <text x="90" y="140" text-anchor="middle" fill="#ffffff" font-family="monospace" font-size="13">0x07BD071144</text>
 <text x="90" y="158" text-anchor="middle" fill="#bccbd5" font-family="sans-serif" font-size="11">Generated approximation</text>
 </g>
-<g transform="translate(540 3500)">
+<g transform="translate(900 3500)">
 <rect x="3" y="3" width="174" height="169" rx="5" fill="#182630" stroke="#40505c"/>
 <text x="90" y="24" text-anchor="middle" fill="#ffffff" font-family="monospace" font-size="16">Ç (U+00C7)</text>
 <rect x="60" y="35" width="10" height="10" rx="1" fill="#293c48"/>
@@ -5086,7 +5168,7 @@
 <text x="90" y="140" text-anchor="middle" fill="#ffffff" font-family="monospace" font-size="13">0x0089E0843E</text>
 <text x="90" y="158" text-anchor="middle" fill="#bccbd5" font-family="sans-serif" font-size="11">Generated approximation</text>
 </g>
-<g transform="translate(720 3500)">
+<g transform="translate(0 3675)">
 <rect x="3" y="3" width="174" height="169" rx="5" fill="#182630" stroke="#40505c"/>
 <text x="90" y="24" text-anchor="middle" fill="#ffffff" font-family="monospace" font-size="16">ç (U+00E7)</text>
 <rect x="60" y="35" width="10" height="10" rx="1" fill="#293c48"/>
@@ -5127,7 +5209,7 @@
 <text x="90" y="140" text-anchor="middle" fill="#ffffff" font-family="monospace" font-size="13">0x0088E0B800</text>
 <text x="90" y="158" text-anchor="middle" fill="#bccbd5" font-family="sans-serif" font-size="11">Generated approximation</text>
 </g>
-<g transform="translate(900 3500)">
+<g transform="translate(180 3675)">
 <rect x="3" y="3" width="174" height="169" rx="5" fill="#182630" stroke="#40505c"/>
 <text x="90" y="24" text-anchor="middle" fill="#ffffff" font-family="monospace" font-size="16">Ø (U+00D8)</text>
 <rect x="60" y="35" width="10" height="10" rx="1" fill="#293c48"/>
@@ -5168,7 +5250,7 @@
 <text x="90" y="140" text-anchor="middle" fill="#ffffff" font-family="monospace" font-size="13">0x03E73AD73E</text>
 <text x="90" y="158" text-anchor="middle" fill="#bccbd5" font-family="sans-serif" font-size="11">Generated approximation</text>
 </g>
-<g transform="translate(0 3675)">
+<g transform="translate(360 3675)">
 <rect x="3" y="3" width="174" height="169" rx="5" fill="#182630" stroke="#40505c"/>
 <text x="90" y="24" text-anchor="middle" fill="#ffffff" font-family="monospace" font-size="16">ø (U+00F8)</text>
 <rect x="60" y="35" width="10" height="10" rx="1" fill="#293c48"/>
@@ -5209,7 +5291,7 @@
 <text x="90" y="140" text-anchor="middle" fill="#ffffff" font-family="monospace" font-size="13">0x03E75CF800</text>
 <text x="90" y="158" text-anchor="middle" fill="#bccbd5" font-family="sans-serif" font-size="11">Generated approximation</text>
 </g>
-<g transform="translate(180 3675)">
+<g transform="translate(540 3675)">
 <rect x="3" y="3" width="174" height="169" rx="5" fill="#182630" stroke="#40505c"/>
 <text x="90" y="24" text-anchor="middle" fill="#ffffff" font-family="monospace" font-size="16">Ł (U+0141)</text>
 <rect x="60" y="35" width="10" height="10" rx="1" fill="#66f5ee"/>
@@ -5250,7 +5332,7 @@
 <text x="90" y="140" text-anchor="middle" fill="#ffffff" font-family="monospace" font-size="13">0x07C2119421</text>
 <text x="90" y="158" text-anchor="middle" fill="#bccbd5" font-family="sans-serif" font-size="11">Generated approximation</text>
 </g>
-<g transform="translate(360 3675)">
+<g transform="translate(720 3675)">
 <rect x="3" y="3" width="174" height="169" rx="5" fill="#182630" stroke="#40505c"/>
 <text x="90" y="24" text-anchor="middle" fill="#ffffff" font-family="monospace" font-size="16">ł (U+0142)</text>
 <rect x="60" y="35" width="10" height="10" rx="1" fill="#293c48"/>
@@ -5291,7 +5373,7 @@
 <text x="90" y="140" text-anchor="middle" fill="#ffffff" font-family="monospace" font-size="13">0x0388433086</text>
 <text x="90" y="158" text-anchor="middle" fill="#bccbd5" font-family="sans-serif" font-size="11">Generated approximation</text>
 </g>
-<g transform="translate(540 3675)">
+<g transform="translate(900 3675)">
 <rect x="3" y="3" width="174" height="169" rx="5" fill="#182630" stroke="#40505c"/>
 <text x="90" y="24" text-anchor="middle" fill="#ffffff" font-family="monospace" font-size="16">ß (U+00DF)</text>
 <rect x="60" y="35" width="10" height="10" rx="1" fill="#293c48"/>
@@ -5332,7 +5414,7 @@
 <text x="90" y="140" text-anchor="middle" fill="#ffffff" font-family="monospace" font-size="13">0x036316A526</text>
 <text x="90" y="158" text-anchor="middle" fill="#bccbd5" font-family="sans-serif" font-size="11">Generated approximation</text>
 </g>
-<g transform="translate(720 3675)">
+<g transform="translate(0 3850)">
 <rect x="3" y="3" width="174" height="169" rx="5" fill="#182630" stroke="#40505c"/>
 <text x="90" y="24" text-anchor="middle" fill="#ffffff" font-family="monospace" font-size="16">ẞ (U+1E9E)</text>
 <rect x="60" y="35" width="10" height="10" rx="1" fill="#66f5ee"/>
@@ -5373,7 +5455,7 @@
 <text x="90" y="140" text-anchor="middle" fill="#ffffff" font-family="monospace" font-size="13">0x036316A62F</text>
 <text x="90" y="158" text-anchor="middle" fill="#bccbd5" font-family="sans-serif" font-size="11">Generated approximation</text>
 </g>
-<g transform="translate(900 3675)">
+<g transform="translate(180 3850)">
 <rect x="3" y="3" width="174" height="169" rx="5" fill="#182630" stroke="#40505c"/>
 <text x="90" y="24" text-anchor="middle" fill="#ffffff" font-family="monospace" font-size="16">Æ (U+00C6)</text>
 <rect x="60" y="35" width="10" height="10" rx="1" fill="#293c48"/>
@@ -5414,7 +5496,7 @@
 <text x="90" y="140" text-anchor="middle" fill="#ffffff" font-family="monospace" font-size="13">0x074A5F94BE</text>
 <text x="90" y="158" text-anchor="middle" fill="#bccbd5" font-family="sans-serif" font-size="11">Generated approximation</text>
 </g>
-<g transform="translate(0 3850)">
+<g transform="translate(360 3850)">
 <rect x="3" y="3" width="174" height="169" rx="5" fill="#182630" stroke="#40505c"/>
 <text x="90" y="24" text-anchor="middle" fill="#ffffff" font-family="monospace" font-size="16">æ (U+00E6)</text>
 <rect x="60" y="35" width="10" height="10" rx="1" fill="#293c48"/>
@@ -5455,7 +5537,7 @@
 <text x="90" y="140" text-anchor="middle" fill="#ffffff" font-family="monospace" font-size="13">0x078BEA2C00</text>
 <text x="90" y="158" text-anchor="middle" fill="#bccbd5" font-family="sans-serif" font-size="11">Generated approximation</text>
 </g>
-<g transform="translate(180 3850)">
+<g transform="translate(540 3850)">
 <rect x="3" y="3" width="174" height="169" rx="5" fill="#182630" stroke="#40505c"/>
 <text x="90" y="24" text-anchor="middle" fill="#ffffff" font-family="monospace" font-size="16">Œ (U+0152)</text>
 <rect x="60" y="35" width="10" height="10" rx="1" fill="#293c48"/>
@@ -5496,7 +5578,7 @@
 <text x="90" y="140" text-anchor="middle" fill="#ffffff" font-family="monospace" font-size="13">0x078A5E94BE</text>
 <text x="90" y="158" text-anchor="middle" fill="#bccbd5" font-family="sans-serif" font-size="11">Generated approximation</text>
 </g>
-<g transform="translate(360 3850)">
+<g transform="translate(720 3850)">
 <rect x="3" y="3" width="174" height="169" rx="5" fill="#182630" stroke="#40505c"/>
 <text x="90" y="24" text-anchor="middle" fill="#ffffff" font-family="monospace" font-size="16">œ (U+0153)</text>
 <rect x="60" y="35" width="10" height="10" rx="1" fill="#293c48"/>
@@ -5537,7 +5619,7 @@
 <text x="90" y="140" text-anchor="middle" fill="#ffffff" font-family="monospace" font-size="13">0x078BDAA800</text>
 <text x="90" y="158" text-anchor="middle" fill="#bccbd5" font-family="sans-serif" font-size="11">Generated approximation</text>
 </g>
-<g transform="translate(540 3850)">
+<g transform="translate(900 3850)">
 <rect x="3" y="3" width="174" height="169" rx="5" fill="#182630" stroke="#40505c"/>
 <text x="90" y="24" text-anchor="middle" fill="#ffffff" font-family="monospace" font-size="16">&apos; (U+0027)</text>
 <rect x="60" y="35" width="10" height="10" rx="1" fill="#293c48"/>
@@ -5578,7 +5660,7 @@
 <text x="90" y="140" text-anchor="middle" fill="#ffffff" font-family="monospace" font-size="13">0x0000000884</text>
 <text x="90" y="158" text-anchor="middle" fill="#bccbd5" font-family="sans-serif" font-size="11">Generated approximation</text>
 </g>
-<g transform="translate(720 3850)">
+<g transform="translate(0 4025)">
 <rect x="3" y="3" width="174" height="169" rx="5" fill="#182630" stroke="#40505c"/>
 <text x="90" y="24" text-anchor="middle" fill="#ffffff" font-family="monospace" font-size="16">&quot; (U+0022)</text>
 <rect x="60" y="35" width="10" height="10" rx="1" fill="#293c48"/>
@@ -5619,7 +5701,7 @@
 <text x="90" y="140" text-anchor="middle" fill="#ffffff" font-family="monospace" font-size="13">0x000000014A</text>
 <text x="90" y="158" text-anchor="middle" fill="#bccbd5" font-family="sans-serif" font-size="11">Generated approximation</text>
 </g>
-<g transform="translate(900 3850)">
+<g transform="translate(180 4025)">
 <rect x="3" y="3" width="174" height="169" rx="5" fill="#182630" stroke="#40505c"/>
 <text x="90" y="24" text-anchor="middle" fill="#ffffff" font-family="monospace" font-size="16">‘ (U+2018)</text>
 <rect x="60" y="35" width="10" height="10" rx="1" fill="#293c48"/>
@@ -5660,7 +5742,7 @@
 <text x="90" y="140" text-anchor="middle" fill="#ffffff" font-family="monospace" font-size="13">0x0000000844</text>
 <text x="90" y="158" text-anchor="middle" fill="#bccbd5" font-family="sans-serif" font-size="11">Generated approximation</text>
 </g>
-<g transform="translate(0 4025)">
+<g transform="translate(360 4025)">
 <rect x="3" y="3" width="174" height="169" rx="5" fill="#182630" stroke="#40505c"/>
 <text x="90" y="24" text-anchor="middle" fill="#ffffff" font-family="monospace" font-size="16">’ (U+2019)</text>
 <rect x="60" y="35" width="10" height="10" rx="1" fill="#293c48"/>
@@ -5701,7 +5783,7 @@
 <text x="90" y="140" text-anchor="middle" fill="#ffffff" font-family="monospace" font-size="13">0x0000000442</text>
 <text x="90" y="158" text-anchor="middle" fill="#bccbd5" font-family="sans-serif" font-size="11">Generated approximation</text>
 </g>
-<g transform="translate(180 4025)">
+<g transform="translate(540 4025)">
 <rect x="3" y="3" width="174" height="169" rx="5" fill="#182630" stroke="#40505c"/>
 <text x="90" y="24" text-anchor="middle" fill="#ffffff" font-family="monospace" font-size="16">“ (U+201C)</text>
 <rect x="60" y="35" width="10" height="10" rx="1" fill="#293c48"/>
@@ -5742,7 +5824,7 @@
 <text x="90" y="140" text-anchor="middle" fill="#ffffff" font-family="monospace" font-size="13">0x0000002954</text>
 <text x="90" y="158" text-anchor="middle" fill="#bccbd5" font-family="sans-serif" font-size="11">Generated approximation</text>
 </g>
-<g transform="translate(360 4025)">
+<g transform="translate(720 4025)">
 <rect x="3" y="3" width="174" height="169" rx="5" fill="#182630" stroke="#40505c"/>
 <text x="90" y="24" text-anchor="middle" fill="#ffffff" font-family="monospace" font-size="16">” (U+201D)</text>
 <rect x="60" y="35" width="10" height="10" rx="1" fill="#293c48"/>
@@ -5783,7 +5865,7 @@
 <text x="90" y="140" text-anchor="middle" fill="#ffffff" font-family="monospace" font-size="13">0x000000154A</text>
 <text x="90" y="158" text-anchor="middle" fill="#bccbd5" font-family="sans-serif" font-size="11">Generated approximation</text>
 </g>
-<g transform="translate(540 4025)">
+<g transform="translate(900 4025)">
 <rect x="3" y="3" width="174" height="169" rx="5" fill="#182630" stroke="#40505c"/>
 <text x="90" y="24" text-anchor="middle" fill="#ffffff" font-family="monospace" font-size="16">„ (U+201E)</text>
 <rect x="60" y="35" width="10" height="10" rx="1" fill="#293c48"/>
@@ -5824,7 +5906,7 @@
 <text x="90" y="140" text-anchor="middle" fill="#ffffff" font-family="monospace" font-size="13">0x0154A00000</text>
 <text x="90" y="158" text-anchor="middle" fill="#bccbd5" font-family="sans-serif" font-size="11">Generated approximation</text>
 </g>
-<g transform="translate(720 4025)">
+<g transform="translate(0 4200)">
 <rect x="3" y="3" width="174" height="169" rx="5" fill="#182630" stroke="#40505c"/>
 <text x="90" y="24" text-anchor="middle" fill="#ffffff" font-family="monospace" font-size="16">– (U+2013)</text>
 <rect x="60" y="35" width="10" height="10" rx="1" fill="#293c48"/>
@@ -5865,7 +5947,7 @@
 <text x="90" y="140" text-anchor="middle" fill="#ffffff" font-family="monospace" font-size="13">0x0000070000</text>
 <text x="90" y="158" text-anchor="middle" fill="#bccbd5" font-family="sans-serif" font-size="11">Generated approximation</text>
 </g>
-<g transform="translate(900 4025)">
+<g transform="translate(180 4200)">
 <rect x="3" y="3" width="174" height="169" rx="5" fill="#182630" stroke="#40505c"/>
 <text x="90" y="24" text-anchor="middle" fill="#ffffff" font-family="monospace" font-size="16">— (U+2014)</text>
 <rect x="60" y="35" width="10" height="10" rx="1" fill="#293c48"/>
@@ -5906,7 +5988,7 @@
 <text x="90" y="140" text-anchor="middle" fill="#ffffff" font-family="monospace" font-size="13">0x00000F8000</text>
 <text x="90" y="158" text-anchor="middle" fill="#bccbd5" font-family="sans-serif" font-size="11">Generated approximation</text>
 </g>
-<g transform="translate(0 4200)">
+<g transform="translate(360 4200)">
 <rect x="3" y="3" width="174" height="169" rx="5" fill="#182630" stroke="#40505c"/>
 <text x="90" y="24" text-anchor="middle" fill="#ffffff" font-family="monospace" font-size="16">… (U+2026)</text>
 <rect x="60" y="35" width="10" height="10" rx="1" fill="#293c48"/>
@@ -5947,7 +6029,7 @@
 <text x="90" y="140" text-anchor="middle" fill="#ffffff" font-family="monospace" font-size="13">0x0540000000</text>
 <text x="90" y="158" text-anchor="middle" fill="#bccbd5" font-family="sans-serif" font-size="11">Generated approximation</text>
 </g>
-<g transform="translate(180 4200)">
+<g transform="translate(540 4200)">
 <rect x="3" y="3" width="174" height="169" rx="5" fill="#182630" stroke="#40505c"/>
 <text x="90" y="24" text-anchor="middle" fill="#ffffff" font-family="monospace" font-size="16">, (U+002C)</text>
 <rect x="60" y="35" width="10" height="10" rx="1" fill="#293c48"/>
@@ -5988,7 +6070,7 @@
 <text x="90" y="140" text-anchor="middle" fill="#ffffff" font-family="monospace" font-size="13">0x0088400000</text>
 <text x="90" y="158" text-anchor="middle" fill="#bccbd5" font-family="sans-serif" font-size="11">Generated approximation</text>
 </g>
-<g transform="translate(360 4200)">
+<g transform="translate(720 4200)">
 <rect x="3" y="3" width="174" height="169" rx="5" fill="#182630" stroke="#40505c"/>
 <text x="90" y="24" text-anchor="middle" fill="#ffffff" font-family="monospace" font-size="16">; (U+003B)</text>
 <rect x="60" y="35" width="10" height="10" rx="1" fill="#293c48"/>
@@ -6029,7 +6111,7 @@
 <text x="90" y="140" text-anchor="middle" fill="#ffffff" font-family="monospace" font-size="13">0x0088400080</text>
 <text x="90" y="158" text-anchor="middle" fill="#bccbd5" font-family="sans-serif" font-size="11">Generated approximation</text>
 </g>
-<g transform="translate(540 4200)">
+<g transform="translate(900 4200)">
 <rect x="3" y="3" width="174" height="169" rx="5" fill="#182630" stroke="#40505c"/>
 <text x="90" y="24" text-anchor="middle" fill="#ffffff" font-family="monospace" font-size="16">&amp; (U+0026)</text>
 <rect x="60" y="35" width="10" height="10" rx="1" fill="#293c48"/>
@@ -6070,7 +6152,7 @@
 <text x="90" y="140" text-anchor="middle" fill="#ffffff" font-family="monospace" font-size="13">0x0593511526</text>
 <text x="90" y="158" text-anchor="middle" fill="#bccbd5" font-family="sans-serif" font-size="11">Generated approximation</text>
 </g>
-<g transform="translate(720 4200)">
+<g transform="translate(0 4375)">
 <rect x="3" y="3" width="174" height="169" rx="5" fill="#182630" stroke="#40505c"/>
 <text x="90" y="24" text-anchor="middle" fill="#ffffff" font-family="monospace" font-size="16">( (U+0028)</text>
 <rect x="60" y="35" width="10" height="10" rx="1" fill="#293c48"/>
@@ -6111,7 +6193,7 @@
 <text x="90" y="140" text-anchor="middle" fill="#ffffff" font-family="monospace" font-size="13">0x0208210888</text>
 <text x="90" y="158" text-anchor="middle" fill="#bccbd5" font-family="sans-serif" font-size="11">Generated approximation</text>
 </g>
-<g transform="translate(900 4200)">
+<g transform="translate(180 4375)">
 <rect x="3" y="3" width="174" height="169" rx="5" fill="#182630" stroke="#40505c"/>
 <text x="90" y="24" text-anchor="middle" fill="#ffffff" font-family="monospace" font-size="16">) (U+0029)</text>
 <rect x="60" y="35" width="10" height="10" rx="1" fill="#293c48"/>
@@ -6152,7 +6234,7 @@
 <text x="90" y="140" text-anchor="middle" fill="#ffffff" font-family="monospace" font-size="13">0x0088842082</text>
 <text x="90" y="158" text-anchor="middle" fill="#bccbd5" font-family="sans-serif" font-size="11">Generated approximation</text>
 </g>
-<g transform="translate(0 4375)">
+<g transform="translate(360 4375)">
 <rect x="3" y="3" width="174" height="169" rx="5" fill="#182630" stroke="#40505c"/>
 <text x="90" y="24" text-anchor="middle" fill="#ffffff" font-family="monospace" font-size="16">[ (U+005B)</text>
 <rect x="60" y="35" width="10" height="10" rx="1" fill="#293c48"/>
@@ -6193,7 +6275,7 @@
 <text x="90" y="140" text-anchor="middle" fill="#ffffff" font-family="monospace" font-size="13">0x038421084E</text>
 <text x="90" y="158" text-anchor="middle" fill="#bccbd5" font-family="sans-serif" font-size="11">Generated approximation</text>
 </g>
-<g transform="translate(180 4375)">
+<g transform="translate(540 4375)">
 <rect x="3" y="3" width="174" height="169" rx="5" fill="#182630" stroke="#40505c"/>
 <text x="90" y="24" text-anchor="middle" fill="#ffffff" font-family="monospace" font-size="16">] (U+005D)</text>
 <rect x="60" y="35" width="10" height="10" rx="1" fill="#293c48"/>
@@ -6234,7 +6316,7 @@
 <text x="90" y="140" text-anchor="middle" fill="#ffffff" font-family="monospace" font-size="13">0x039084210E</text>
 <text x="90" y="158" text-anchor="middle" fill="#bccbd5" font-family="sans-serif" font-size="11">Generated approximation</text>
 </g>
-<g transform="translate(360 4375)">
+<g transform="translate(720 4375)">
 <rect x="3" y="3" width="174" height="169" rx="5" fill="#182630" stroke="#40505c"/>
 <text x="90" y="24" text-anchor="middle" fill="#ffffff" font-family="monospace" font-size="16">° (U+00B0)</text>
 <rect x="60" y="35" width="10" height="10" rx="1" fill="#293c48"/>
@@ -6275,7 +6357,7 @@
 <text x="90" y="140" text-anchor="middle" fill="#ffffff" font-family="monospace" font-size="13">0x0000001926</text>
 <text x="90" y="158" text-anchor="middle" fill="#bccbd5" font-family="sans-serif" font-size="11">Generated approximation</text>
 </g>
-<g transform="translate(540 4375)">
+<g transform="translate(900 4375)">
 <rect x="3" y="3" width="174" height="169" rx="5" fill="#182630" stroke="#40505c"/>
 <text x="90" y="24" text-anchor="middle" fill="#ffffff" font-family="monospace" font-size="16">© (U+00A9)</text>
 <rect x="60" y="35" width="10" height="10" rx="1" fill="#293c48"/>
@@ -6316,7 +6398,7 @@
 <text x="90" y="140" text-anchor="middle" fill="#ffffff" font-family="monospace" font-size="13">0x03A3DAF62E</text>
 <text x="90" y="158" text-anchor="middle" fill="#bccbd5" font-family="sans-serif" font-size="11">Generated approximation</text>
 </g>
-<g transform="translate(720 4375)">
+<g transform="translate(0 4550)">
 <rect x="3" y="3" width="174" height="169" rx="5" fill="#182630" stroke="#40505c"/>
 <text x="90" y="24" text-anchor="middle" fill="#ffffff" font-family="monospace" font-size="16">® (U+00AE)</text>
 <rect x="60" y="35" width="10" height="10" rx="1" fill="#293c48"/>
@@ -6357,7 +6439,7 @@
 <text x="90" y="140" text-anchor="middle" fill="#ffffff" font-family="monospace" font-size="13">0x03A35EF62E</text>
 <text x="90" y="158" text-anchor="middle" fill="#bccbd5" font-family="sans-serif" font-size="11">Generated approximation</text>
 </g>
-<g transform="translate(900 4375)">
+<g transform="translate(180 4550)">
 <rect x="3" y="3" width="174" height="169" rx="5" fill="#182630" stroke="#40505c"/>
 <text x="90" y="24" text-anchor="middle" fill="#ffffff" font-family="monospace" font-size="16">™ (U+2122)</text>
 <rect x="60" y="35" width="10" height="10" rx="1" fill="#66f5ee"/>
@@ -6398,7 +6480,7 @@
 <text x="90" y="140" text-anchor="middle" fill="#ffffff" font-family="monospace" font-size="13">0x0000002B57</text>
 <text x="90" y="158" text-anchor="middle" fill="#bccbd5" font-family="sans-serif" font-size="11">Generated approximation</text>
 </g>
-<g transform="translate(0 4550)">
+<g transform="translate(360 4550)">
 <rect x="3" y="3" width="174" height="169" rx="5" fill="#182630" stroke="#40505c"/>
 <text x="90" y="24" text-anchor="middle" fill="#ffffff" font-family="monospace" font-size="16">€ (U+20AC)</text>
 <rect x="60" y="35" width="10" height="10" rx="1" fill="#293c48"/>
@@ -6439,7 +6521,7 @@
 <text x="90" y="140" text-anchor="middle" fill="#ffffff" font-family="monospace" font-size="13">0x0704F13C5C</text>
 <text x="90" y="158" text-anchor="middle" fill="#bccbd5" font-family="sans-serif" font-size="11">Generated approximation</text>
 </g>
-<g transform="translate(180 4550)">
+<g transform="translate(540 4550)">
 <rect x="3" y="3" width="174" height="169" rx="5" fill="#182630" stroke="#40505c"/>
 <text x="90" y="24" text-anchor="middle" fill="#ffffff" font-family="monospace" font-size="16">£ (U+00A3)</text>
 <rect x="60" y="35" width="10" height="10" rx="1" fill="#293c48"/>
@@ -6480,7 +6562,7 @@
 <text x="90" y="140" text-anchor="middle" fill="#ffffff" font-family="monospace" font-size="13">0x07C4278A4C</text>
 <text x="90" y="158" text-anchor="middle" fill="#bccbd5" font-family="sans-serif" font-size="11">Generated approximation</text>
 </g>
-<g transform="translate(360 4550)">
+<g transform="translate(720 4550)">
 <rect x="3" y="3" width="174" height="169" rx="5" fill="#182630" stroke="#40505c"/>
 <text x="90" y="24" text-anchor="middle" fill="#ffffff" font-family="monospace" font-size="16">¥ (U+00A5)</text>
 <rect x="60" y="35" width="10" height="10" rx="1" fill="#66f5ee"/>
@@ -6521,7 +6603,7 @@
 <text x="90" y="140" text-anchor="middle" fill="#ffffff" font-family="monospace" font-size="13">0x013E4F9151</text>
 <text x="90" y="158" text-anchor="middle" fill="#bccbd5" font-family="sans-serif" font-size="11">Generated approximation</text>
 </g>
-<g transform="translate(540 4550)">
+<g transform="translate(900 4550)">
 <rect x="3" y="3" width="174" height="169" rx="5" fill="#182630" stroke="#40505c"/>
 <text x="90" y="24" text-anchor="middle" fill="#ffffff" font-family="monospace" font-size="16">♥ (U+2665)</text>
 <rect x="60" y="35" width="10" height="10" rx="1" fill="#293c48"/>
@@ -6562,7 +6644,7 @@
 <text x="90" y="140" text-anchor="middle" fill="#ffffff" font-family="monospace" font-size="13">0x0008EFFFEA</text>
 <text x="90" y="158" text-anchor="middle" fill="#bccbd5" font-family="sans-serif" font-size="11">Generated approximation</text>
 </g>
-<g transform="translate(720 4550)">
+<g transform="translate(0 4725)">
 <rect x="3" y="3" width="174" height="169" rx="5" fill="#182630" stroke="#40505c"/>
 <text x="90" y="24" text-anchor="middle" fill="#ffffff" font-family="monospace" font-size="16">★ (U+2605)</text>
 <rect x="60" y="35" width="10" height="10" rx="1" fill="#293c48"/>
@@ -6603,7 +6685,7 @@
 <text x="90" y="140" text-anchor="middle" fill="#ffffff" font-family="monospace" font-size="13">0x0022E77C84</text>
 <text x="90" y="158" text-anchor="middle" fill="#bccbd5" font-family="sans-serif" font-size="11">Generated approximation</text>
 </g>
-<g transform="translate(900 4550)">
+<g transform="translate(180 4725)">
 <rect x="3" y="3" width="174" height="169" rx="5" fill="#182630" stroke="#40505c"/>
 <text x="90" y="24" text-anchor="middle" fill="#ffffff" font-family="monospace" font-size="16">← (U+2190)</text>
 <rect x="60" y="35" width="10" height="10" rx="1" fill="#293c48"/>
@@ -6644,7 +6726,7 @@
 <text x="90" y="140" text-anchor="middle" fill="#ffffff" font-family="monospace" font-size="13">0x00082F8880</text>
 <text x="90" y="158" text-anchor="middle" fill="#bccbd5" font-family="sans-serif" font-size="11">Generated approximation</text>
 </g>
-<g transform="translate(0 4725)">
+<g transform="translate(360 4725)">
 <rect x="3" y="3" width="174" height="169" rx="5" fill="#182630" stroke="#40505c"/>
 <text x="90" y="24" text-anchor="middle" fill="#ffffff" font-family="monospace" font-size="16">→ (U+2192)</text>
 <rect x="60" y="35" width="10" height="10" rx="1" fill="#293c48"/>
@@ -6685,7 +6767,7 @@
 <text x="90" y="140" text-anchor="middle" fill="#ffffff" font-family="monospace" font-size="13">0x00088FA080</text>
 <text x="90" y="158" text-anchor="middle" fill="#bccbd5" font-family="sans-serif" font-size="11">Generated approximation</text>
 </g>
-<g transform="translate(180 4725)">
+<g transform="translate(540 4725)">
 <rect x="3" y="3" width="174" height="169" rx="5" fill="#182630" stroke="#40505c"/>
 <text x="90" y="24" text-anchor="middle" fill="#ffffff" font-family="monospace" font-size="16">♫ (U+266B)</text>
 <rect x="60" y="35" width="10" height="10" rx="1" fill="#293c48"/>
@@ -6726,7 +6808,7 @@
 <text x="90" y="140" text-anchor="middle" fill="#ffffff" font-family="monospace" font-size="13">0x0037B94A5E</text>
 <text x="90" y="158" text-anchor="middle" fill="#bccbd5" font-family="sans-serif" font-size="11">Generated approximation</text>
 </g>
-<g transform="translate(360 4725)">
+<g transform="translate(720 4725)">
 <rect x="3" y="3" width="174" height="169" rx="5" fill="#182630" stroke="#40505c"/>
 <text x="90" y="24" text-anchor="middle" fill="#ffffff" font-family="monospace" font-size="16">NBSP (U+00A0)</text>
 <rect x="60" y="35" width="10" height="10" rx="1" fill="#293c48"/>
@@ -6767,7 +6849,7 @@
 <text x="90" y="140" text-anchor="middle" fill="#ffffff" font-family="monospace" font-size="13">0x0000000000</text>
 <text x="90" y="158" text-anchor="middle" fill="#bccbd5" font-family="sans-serif" font-size="11">Generated space</text>
 </g>
-<g transform="translate(540 4725)">
+<g transform="translate(900 4725)">
 <rect x="3" y="3" width="174" height="169" rx="5" fill="#182630" stroke="#40505c"/>
 <text x="90" y="24" text-anchor="middle" fill="#ffffff" font-family="monospace" font-size="16">♪ (U+266A)</text>
 <rect x="60" y="35" width="10" height="10" rx="1" fill="#293c48"/>
@@ -6808,7 +6890,7 @@
 <text x="90" y="140" text-anchor="middle" fill="#ffffff" font-family="monospace" font-size="13">0x00CE6A5184</text>
 <text x="90" y="158" text-anchor="middle" fill="#bccbd5" font-family="sans-serif" font-size="11">Photo-derived approximation</text>
 </g>
-<g transform="translate(720 4725)">
+<g transform="translate(0 4900)">
 <rect x="3" y="3" width="174" height="169" rx="5" fill="#182630" stroke="#40505c"/>
 <text x="90" y="24" text-anchor="middle" fill="#ffffff" font-family="monospace" font-size="16">Bar level 1</text>
 <rect x="60" y="35" width="10" height="10" rx="1" fill="#293c48"/>
@@ -6849,7 +6931,7 @@
 <text x="90" y="140" text-anchor="middle" fill="#ffffff" font-family="monospace" font-size="13">0x07C0000000</text>
 <text x="90" y="158" text-anchor="middle" fill="#bccbd5" font-family="sans-serif" font-size="11">Generated graphic</text>
 </g>
-<g transform="translate(900 4725)">
+<g transform="translate(180 4900)">
 <rect x="3" y="3" width="174" height="169" rx="5" fill="#182630" stroke="#40505c"/>
 <text x="90" y="24" text-anchor="middle" fill="#ffffff" font-family="monospace" font-size="16">Bar level 2</text>
 <rect x="60" y="35" width="10" height="10" rx="1" fill="#293c48"/>
@@ -6890,7 +6972,7 @@
 <text x="90" y="140" text-anchor="middle" fill="#ffffff" font-family="monospace" font-size="13">0x07FE000000</text>
 <text x="90" y="158" text-anchor="middle" fill="#bccbd5" font-family="sans-serif" font-size="11">Generated graphic</text>
 </g>
-<g transform="translate(0 4900)">
+<g transform="translate(360 4900)">
 <rect x="3" y="3" width="174" height="169" rx="5" fill="#182630" stroke="#40505c"/>
 <text x="90" y="24" text-anchor="middle" fill="#ffffff" font-family="monospace" font-size="16">Bar level 3</text>
 <rect x="60" y="35" width="10" height="10" rx="1" fill="#293c48"/>
@@ -6931,7 +7013,7 @@
 <text x="90" y="140" text-anchor="middle" fill="#ffffff" font-family="monospace" font-size="13">0x07FFF00000</text>
 <text x="90" y="158" text-anchor="middle" fill="#bccbd5" font-family="sans-serif" font-size="11">Generated graphic</text>
 </g>
-<g transform="translate(180 4900)">
+<g transform="translate(540 4900)">
 <rect x="3" y="3" width="174" height="169" rx="5" fill="#182630" stroke="#40505c"/>
 <text x="90" y="24" text-anchor="middle" fill="#ffffff" font-family="monospace" font-size="16">Bar level 4</text>
 <rect x="60" y="35" width="10" height="10" rx="1" fill="#293c48"/>
@@ -6972,7 +7054,7 @@
 <text x="90" y="140" text-anchor="middle" fill="#ffffff" font-family="monospace" font-size="13">0x07FFFF8000</text>
 <text x="90" y="158" text-anchor="middle" fill="#bccbd5" font-family="sans-serif" font-size="11">Generated graphic</text>
 </g>
-<g transform="translate(360 4900)">
+<g transform="translate(720 4900)">
 <rect x="3" y="3" width="174" height="169" rx="5" fill="#182630" stroke="#40505c"/>
 <text x="90" y="24" text-anchor="middle" fill="#ffffff" font-family="monospace" font-size="16">Bar level 5</text>
 <rect x="60" y="35" width="10" height="10" rx="1" fill="#293c48"/>
@@ -7013,7 +7095,7 @@
 <text x="90" y="140" text-anchor="middle" fill="#ffffff" font-family="monospace" font-size="13">0x07FFFFFC00</text>
 <text x="90" y="158" text-anchor="middle" fill="#bccbd5" font-family="sans-serif" font-size="11">Generated graphic</text>
 </g>
-<g transform="translate(540 4900)">
+<g transform="translate(900 4900)">
 <rect x="3" y="3" width="174" height="169" rx="5" fill="#182630" stroke="#40505c"/>
 <text x="90" y="24" text-anchor="middle" fill="#ffffff" font-family="monospace" font-size="16">Bar level 6</text>
 <rect x="60" y="35" width="10" height="10" rx="1" fill="#293c48"/>
@@ -7054,7 +7136,7 @@
 <text x="90" y="140" text-anchor="middle" fill="#ffffff" font-family="monospace" font-size="13">0x07FFFFFFE0</text>
 <text x="90" y="158" text-anchor="middle" fill="#bccbd5" font-family="sans-serif" font-size="11">Generated graphic</text>
 </g>
-<g transform="translate(720 4900)">
+<g transform="translate(0 5075)">
 <rect x="3" y="3" width="174" height="169" rx="5" fill="#182630" stroke="#40505c"/>
 <text x="90" y="24" text-anchor="middle" fill="#ffffff" font-family="monospace" font-size="16">Bar level 7</text>
 <rect x="60" y="35" width="10" height="10" rx="1" fill="#66f5ee"/>
