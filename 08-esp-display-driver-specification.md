@@ -308,6 +308,54 @@ The captured examples are not an exhaustive catalogue of the **original Sony
 font**. Its remaining glyph words, punctuation, reserved upper five bits and
 physical orientation of arbitrary generated glyphs are not fully validated.
 
+### Music note and extended song-title character requirements
+
+The close-up reference gives this **photo-derived, 14-pixel** music note:
+
+```text
+..#..
+..##.
+..#.#
+..#.#
+.##..
+###..
+##...
+```
+
+Its complete 40-bit word is **`0x00CE6A5184`**, using
+`bit = row * 5 + column`, with rows counted top to bottom and columns left
+to right. Bits 35-39 are zero; transmit bit 39 first. This replaces the
+earlier speculative `0x00CE425184`. It is not a Sony bus capture and has
+not been validated on the physical display. Use only mapped text slots,
+not fixed annunciators or the red slot-25 segment group.
+
+The application font must support song-title and artist-name characters
+beyond ASCII. The following are required extension categories, **not a
+claim of currently implemented glyphs**:
+
+| Category | Examples / intended coverage |
+|----------|------------------------------|
+| Music symbols | Music note; distinct single/double-note designs where the grid permits |
+| Title punctuation | Apostrophes, quotation marks, ampersand, parentheses, hyphen, en/em dash, ellipsis |
+| Accented letters | Uppercase/lowercase vowels with acute, grave, circumflex, tilde and diaeresis |
+| Other Latin letters | Cedilla, slashed letters, sharp s and ligatures |
+| Additional scripts/symbols | Explicitly catalogued 5x7 approximations or documented fallbacks |
+
+Each added glyph must record its Unicode code point(s), name, seven bitmap
+rows, complete 40-bit HEX word and provenance: captured, photo-derived or
+generated. Preserve captured Sony glyphs when available. Validate bitmap/HEX
+agreement and flag designs not yet checked on hardware.
+
+Normalize canonically equivalent composed/decomposed Unicode forms before
+lookup. Define a transliteration or visible replacement for unsupported
+characters; do not silently discard them. Multi-code-point symbols need an
+explicit single-cell approximation or fallback. The 5x7 grid limits accent
+detail, and this note design is not a verified encoding of every Unicode
+musical-note character. These requirements do not change the current editor.
+
+See the [music-note bitmap](09-music-note-bitmap.md) and
+[complete bitmap/HEX catalogue](10-display-bitmap-catalogue.md).
+
 ## 8. Captured actions and display outcomes
 
 | Action / capture | Data outcome | Visible interpretation / limit |
