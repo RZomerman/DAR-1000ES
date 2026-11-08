@@ -35,6 +35,17 @@ Individual live pixel orientation remains to be validated.
 Case matters. Missing captured characters use the generated shapes listed
 here. Identical generated shapes, such as O and 0, are font-design choices.
 
+## Visual character grid
+
+Each cell shows the character, its exact 5x7 rendering, complete 40-bit HEX
+word and source. Cyan pixels are lit; dark pixels are unlit. This chart uses
+our current glyphs, not a reproduction of the reference website's font.
+The music note is photo-derived; additional Unicode glyphs remain planned.
+
+![Character grid with 5x7 bitmaps, HEX values and provenance](media/display-bitmap-chart.svg)
+
+[Open the full-size character chart](media/display-bitmap-chart.svg).
+
 ## Character HEX index
 
 | Character | 40-bit HEX | Source |
