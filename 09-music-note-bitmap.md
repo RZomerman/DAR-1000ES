@@ -82,8 +82,8 @@ forms before lookup; where no glyph exists, use a documented transliteration
 or replacement symbol rather than silently dropping the character.
 Lookup normalizes NFC and uses one cell per grapheme. Unlisted decomposable
 Latin accents transliterate to the base letter; other unsupported graphemes
-use a visible question mark. Listed symbols with a presentation selector use
-the same monochrome bitmap; unsupported emoji sequences use one question mark.
+use a visible asterisk (U+002A). Listed symbols with a presentation selector use
+the same monochrome bitmap; unsupported emoji sequences use one asterisk.
 
 The 5x7 grid limits accent and symbol detail. This music-note bitmap is one
 stored design, not a verified encoding for every Unicode musical-note symbol.

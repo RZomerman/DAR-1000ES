@@ -1168,6 +1168,7 @@ has not yet been validated. Each record below is supported by text lookup.
 | ö | U+00F6 | LATIN SMALL LETTER O WITH DIAERESIS | `0x03A310000A` | Generated approximation |
 | ü | U+00FC | LATIN SMALL LETTER U WITH DIAERESIS | `0x05B310000A` | Generated approximation |
 | ÿ | U+00FF | LATIN SMALL LETTER Y WITH DIAERESIS | `0x03A110000A` | Generated approximation |
+| * | U+002A | ASTERISK | `0x002AEFBAA0` | Generated approximation |
 | Å | U+00C5 | LATIN CAPITAL LETTER A WITH RING ABOVE | `0x0463F8B94E` | Generated approximation |
 | å | U+00E5 | LATIN SMALL LETTER A WITH RING ABOVE | `0x07BD071144` | Generated approximation |
 | Ç | U+00C7 | LATIN CAPITAL LETTER C WITH CEDILLA | `0x0089E0843E` | Generated approximation |
@@ -2013,6 +2014,22 @@ has not yet been validated. Each record below is supported by text lookup.
 .###.
 ```
 
+### *
+
+**HEX:** `0x002AEFBAA0` — Generated approximation
+
+**Unicode:** U+002A — ASTERISK
+
+```text
+.....
+#.#.#
+.###.
+#####
+.###.
+#.#.#
+.....
+```
+
 ### Å
 
 **HEX:** `0x0463F8B94E` — Generated approximation
@@ -2844,18 +2861,28 @@ and RIGHT; physical channel allocation and audio analysis are separate.
 
 ## Unicode lookup and unsupported characters
 
+Inbound UTF-8 must first be decoded to Unicode text by the transport.
+The browser editor operates on decoded JavaScript strings, not font indexes
+derived from individual UTF-8 bytes. Invalid input must be rejected or
+decoded with U+FFFD, which renders as the unmatched-character asterisk.
+
 Text is normalized to NFC before lookup and split into grapheme clusters,
 so composed/decomposed accents occupy the same single cell. Captured Sony
-glyphs take precedence; extended glyphs use the records above.
+glyphs take precedence, followed by custom Unicode records and the existing
+application font. No broad external font replaces these designs.
 
 For an unlisted Latin letter with decomposable accents, lookup removes the
 combining marks and uses the base letter as a one-cell transliteration.
 Unlisted letters, scripts, standalone marks and unsupported multi-code-point
-symbols (including emoji ZWJ sequences) use one visible question mark per
+symbols (including Chinese characters and emoji ZWJ sequences) use one
+visible asterisk (U+002A) per
 grapheme, not a blank or one replacement per UTF-16 byte/code unit.
 A trailing text/emoji presentation selector on a listed symbol uses its
 same monochrome glyph. NBSP renders as a blank space.
 This is a finite repertoire, not complete Unicode coverage.
+Question marks in the original text retain their own question-mark glyph.
+A future broader fallback font may be inserted before the asterisk, but
+no Unifont conversion or contextual-script shaping is implemented.
 
 ## Reproduction and evidence
 

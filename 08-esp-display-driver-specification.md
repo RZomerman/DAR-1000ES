@@ -357,9 +357,24 @@ musical-note character.
 The local editor normalizes NFC and segments grapheme clusters before slot
 placement. Unlisted decomposable Latin accents transliterate to the base
 letter; other unsupported graphemes, including emoji ZWJ sequences, use one
-visible question mark each. A trailing presentation selector on a listed
+visible asterisk (U+002A) each. A trailing presentation selector on a listed
 symbol uses the same monochrome glyph. The current repertoire is finite,
 not complete Unicode coverage; all new shapes still need live validation.
+
+Inbound UTF-8 is decoded to Unicode text at the transport boundary, never
+treated as one display character per byte. The browser editor receives decoded
+strings. Invalid UTF-8 must be rejected or replaced with U+FFFD; U+FFFD maps to
+the asterisk. Lookup order is captured Sony glyph, custom Unicode glyph,
+existing application font, decomposable Latin base-letter transliteration,
+then the asterisk. Transliteration reuses the same lookup, preserving captured
+Sony base letters. Unsupported Chinese characters therefore show one `*` per
+grapheme. Literal question marks remain question marks.
+
+The asterisk has its own generated 5x7 record and HEX value in the catalogue.
+This is UTF-8 input mapping with finite glyph coverage, not a claim that all
+Unicode characters are readable on 35 pixels. A future broad-font approximation
+can precede the final asterisk without overriding Sony/custom glyphs; that
+external font conversion is not currently implemented.
 
 See the [music-note bitmap](09-music-note-bitmap.md) and
 [complete bitmap/HEX catalogue](10-display-bitmap-catalogue.md).
