@@ -59,7 +59,8 @@ pattern. The photo's full phrase "Network Audio Player" exceeds the currently
 mapped nine-character message field; it does not prove that all character
 positions on our hardware are mapped.
 
-The font/editor has not been changed by this documentation item.
+The local editor now includes this design as U+266A EIGHTH NOTE.
+This Unicode font update has not been deployed to the ESP.
 Verify orientation with a safe live pixel test before claiming the pictured
 appearance on the actual VFD.
 
@@ -68,18 +69,21 @@ for slot mapping, original Sony glyphs, derived font and scan timing.
 
 ## Special symbols and song-title characters
 
-The font catalogue must eventually include Unicode symbols and accented
-characters used in artist names and song titles, not only ASCII letters.
-Examples include music notes, apostrophes/quotation marks, ampersands,
-parentheses, accented vowels, umlauts, cedillas, slashed letters and sharp s.
-These are future additions, not currently supported glyphs.
+The [bitmap catalogue](10-display-bitmap-catalogue.md) now includes individual
+records for music notes, quotation marks, ampersands, parentheses, accented
+vowels, umlauts, cedillas, slashed letters, sharp s and other title symbols.
+Apart from this photo-derived note, the additions are generated approximations,
+not original Sony captures. The local editor supports these records.
 
-Each entry should record its Unicode code point, name, 5x7 bitmap, 40-bit HEX
+Each entry records its Unicode code point, name, 5x7 bitmap, 40-bit HEX
 word and provenance (captured, photo-derived or generated). Preserve original
 Sony glyphs where available. Normalize equivalent composed/decomposed Unicode
 forms before lookup; where no glyph exists, use a documented transliteration
 or replacement symbol rather than silently dropping the character.
-Multi-code-point symbols need an explicit one-cell approximation or fallback.
+Lookup normalizes NFC and uses one cell per grapheme. Unlisted decomposable
+Latin accents transliterate to the base letter; other unsupported graphemes
+use a visible question mark. Listed symbols with a presentation selector use
+the same monochrome bitmap; unsupported emoji sequences use one question mark.
 
 The 5x7 grid limits accent and symbol detail. This music-note bitmap is one
 stored design, not a verified encoding for every Unicode musical-note symbol.

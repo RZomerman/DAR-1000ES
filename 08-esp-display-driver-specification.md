@@ -330,8 +330,9 @@ not been validated on the physical display. Use only mapped text slots,
 not fixed annunciators or the red slot-25 segment group.
 
 The application font must support song-title and artist-name characters
-beyond ASCII. The following are required extension categories, **not a
-claim of currently implemented glyphs**:
+beyond ASCII. The catalogue and local editor now include generated records
+for the following categories; this update is **not yet deployed to the ESP**
+and does not establish original Sony shapes:
 
 | Category | Examples / intended coverage |
 |----------|------------------------------|
@@ -351,7 +352,14 @@ lookup. Define a transliteration or visible replacement for unsupported
 characters; do not silently discard them. Multi-code-point symbols need an
 explicit single-cell approximation or fallback. The 5x7 grid limits accent
 detail, and this note design is not a verified encoding of every Unicode
-musical-note character. These requirements do not change the current editor.
+musical-note character.
+
+The local editor normalizes NFC and segments grapheme clusters before slot
+placement. Unlisted decomposable Latin accents transliterate to the base
+letter; other unsupported graphemes, including emoji ZWJ sequences, use one
+visible question mark each. A trailing presentation selector on a listed
+symbol uses the same monochrome glyph. The current repertoire is finite,
+not complete Unicode coverage; all new shapes still need live validation.
 
 See the [music-note bitmap](09-music-note-bitmap.md) and
 [complete bitmap/HEX catalogue](10-display-bitmap-catalogue.md).
