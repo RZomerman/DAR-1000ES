@@ -4,6 +4,10 @@ This repository contains the project documentation converted from the original W
 
 ## Chapters
 
+The [complete display bitmap catalogue](10-display-bitmap-catalogue.md)
+includes 5x7 pixel patterns and HEX values for uppercase/lowercase letters,
+digits, punctuation, a music note and seven level bars.
+
 1. [DAR-1000ES Conversion](01-conversion.md)
 2. [DAR-1000ES Display Control](02-display-control.md)
 3. [DAR-1000ES Sound Path](03-sound-path.md)
