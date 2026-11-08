@@ -1100,19 +1100,19 @@ here. Identical generated shapes, such as O and 0, are font-design choices.
 
 ## Music-note symbol
 
-Proposed symbol inspired by the reference photograph; not extracted from
-a Sony capture. Documented here but not added as a text-input character.
+Photo-derived symbol: fourteen lit pixels counted from the close-up;
+not extracted from a Sony bus capture. Not yet added as a text-input character.
 
 ### Music note
 
-**HEX:** `0x00CE425184` — Generated symbol
+**HEX:** `0x00CE6A5184` — Photo-derived symbol
 
 ```text
 ..#..
 ..##.
 ..#.#
-..#..
-..#..
+..#.#
+.##..
 ###..
 ##...
 ```
@@ -1221,10 +1221,21 @@ and RIGHT; physical channel allocation and audio analysis are separate.
 #####
 ```
 
+## Future special characters and Unicode
+
+Song titles and artist names require more than ASCII: accented letters,
+umlauts, cedillas, slashed letters, sharp s, typographic punctuation and
+special symbols should be added as individual glyph records. Each must
+include a Unicode code point/name, bitmap, HEX word and provenance.
+These additions are planned, not implemented by the current catalogue.
+
+Normalize equivalent Unicode forms before lookup and define transliteration
+or a visible replacement for unsupported characters. Multi-code-point
+symbols require an explicit single-cell approximation or fallback.
+
 ## Reproduction and evidence
 
-Generated from the current local firmware editor dictionaries with the local
-generator (firmware source has not been published with this document):
+Generated from the current editor dictionaries with:
 
 ```sh
 cd firmware
