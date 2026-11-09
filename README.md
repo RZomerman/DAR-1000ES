@@ -15,6 +15,10 @@ digits, punctuation, a music note and seven level bars.
 5. [Bus Capture Findings and Key Reports](05-bus-capture-findings.md)
 6. [Direct Display driving](06-direct-display-driving.md)
 7. [Audio Control Findings and Next-Step Plan](07-audio-control-findings-and-plan.md)
+8. [ESP32 Display-Driver Specification](08-esp-display-driver-specification.md)
+9. [Music Note Bitmap](09-music-note-bitmap.md)
+10. [Display Bitmap Catalogue](10-display-bitmap-catalogue.md)
+11. [Live ESP32 Display Driver and Validation](11-live-display-driver-and-validation.md)
 
 Images used by the chapters are stored in [`media/`](media/).
 
