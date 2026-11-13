@@ -1,0 +1,15 @@
+{
+  "source": "sony-td-satellite-lnc-off.bin",
+  "source_sha256": "cdfa239ee317388f4723bbce9937eec8742392679b9af0f891367ca968aba192",
+  "sample_rate_hz": 8000000,
+  "start_sample": 32982,
+  "end_sample_exclusive": 8048503,
+  "samples": 8015521,
+  "duration_seconds": 1.001940125,
+  "frames": 128,
+  "initial_segment_word": "0000000000",
+  "initial_grid_word": "0000000001",
+  "payload_sha256": "0ee5e520c59095e7f59354c0b89e912c8c2640726f3acbcf734b1338b4b479ca",
+  "text": "Frequency",
+  "status": "Captured replay; physical output unverified"
+}

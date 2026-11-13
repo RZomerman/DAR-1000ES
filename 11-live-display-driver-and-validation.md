@@ -8,10 +8,17 @@ It complements the capture and optical mapping evidence in
 
 ## Current status: 2026-11-13
 
+Firmware 0.3.25 subsequently produced clean 26-slot text across all 22
+matrices after STB was connected to **both** TD chips. Firmware 0.3.26
+adds radio and authorized, full-width scrolling NOW PLAYING. Use the
+[screen-driver operating guide](13-screen-driver-operating-guide.md)
+for current AHCT v2 wiring, per-grid brightness, operation and the later
+camera/analyser results. Voltage/current certification remains outstanding.
+
 The later firmware 0.3.23 held-grid tests used GPIO preload and CLEAR-only
 DMA to map all functional elements in the FL701 reference. Individual
-controls and matrix orientation are confirmed; clean full 26-slot
-multiplexing is still unresolved. Use the
+controls and matrix orientation were confirmed; full-scan corruption was
+still unresolved at that stage. Use the
 [fixed-element](08-esp-display-driver-specification.md#6-fixed-element-control-guide)
 and [matrix](08-esp-display-driver-specification.md#7-generic-5x7-matrix-guide)
 guides for current assignments, not tentative interpretations of the early

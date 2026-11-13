@@ -7,6 +7,13 @@ the 24 MS/s capture of the experimental 250 Hz MEMORY scan. This chapter
 separates datasheet limits from measured digital timing; it is not an
 analogue signal-integrity certification.
 
+**Later operating baseline:** Firmware 0.3.25/0.3.26 uses AHCT v2 wiring,
+shared STB on both TD chips and guarded timings. Clean full-width text and
+scrolling were subsequently observed, with independent sampled TD checks.
+See the [screen-driver operating guide](13-screen-driver-operating-guide.md)
+for those results and the remaining electrical/current limitations. The
+historical failed 250 Hz capture below is retained unchanged.
+
 **Scope after the 2026-11-13 inventory:** The 250 Hz results below describe
 the historical firmware 0.3.14 capture, not the later 0.3.23 held-grid
 configuration. The [current control guide](08-esp-display-driver-specification.md)

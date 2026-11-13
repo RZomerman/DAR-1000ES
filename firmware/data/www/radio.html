@@ -1,0 +1,466 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Internet Radio &amp; AirPlay</title>
+<script>
+(() => {
+  const param = new URLSearchParams(window.location.search).get("scoutTheme");
+  const theme = param === "light" || param === "dark" ? param :
+    (window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light");
+  document.documentElement.setAttribute("data-theme", theme);
+})();
+</script>
+<style>
+:root {
+  color-scheme: light;
+  --cp-bg: #f7f4ef;
+  --cp-bg-elevated: #fcfbf8;
+  --cp-surface: #ffffff;
+  --cp-surface-soft: #f5f5f5;
+  --cp-border: #dedede;
+  --cp-border-strong: #919191;
+  --cp-text: #242424;
+  --cp-text-muted: #5c5c5c;
+  --cp-text-soft: #6f6f6f;
+  --cp-accent: #b11f4b;
+  --cp-accent-hover: #9a1a41;
+  --cp-accent-soft: rgba(177, 31, 75, 0.08);
+  --cp-accent-fg: #ffffff;
+  --cp-success: #16a34a;
+  --cp-danger: #dc2626;
+  --cp-warning: #f59e0b;
+  --cp-link: #0078d4;
+  --cp-shadow: 0 18px 48px rgba(0, 0, 0, 0.12);
+  --cp-overlay: rgba(255, 255, 255, 0.8);
+  --cp-panel: rgba(255, 255, 255, 0.86);
+  --cp-panel-strong: rgba(255, 255, 255, 0.96);
+  --cp-sheen: rgba(255, 255, 255, 0.55);
+  --cp-highlight: rgba(177, 31, 75, 0.12);
+}
+html[data-theme="dark"] {
+  color-scheme: dark;
+  --cp-bg: #3d3b3a;
+  --cp-bg-elevated: #343231;
+  --cp-surface: #292929;
+  --cp-surface-soft: #2e2e2e;
+  --cp-border: #474747;
+  --cp-border-strong: #5f5f5f;
+  --cp-text: #dedede;
+  --cp-text-muted: #919191;
+  --cp-text-soft: #b0b0b0;
+  --cp-accent: #fd8ea1;
+  --cp-accent-hover: #fb7b91;
+  --cp-accent-soft: rgba(253, 142, 161, 0.14);
+  --cp-accent-fg: #1a1a1a;
+  --cp-success: #4ade80;
+  --cp-danger: #f87171;
+  --cp-warning: #fbbf24;
+  --cp-link: #4da6ff;
+  --cp-shadow: 0 18px 48px rgba(0, 0, 0, 0.32);
+  --cp-overlay: rgba(41, 41, 41, 0.88);
+  --cp-panel: rgba(41, 41, 41, 0.72);
+  --cp-panel-strong: rgba(41, 41, 41, 0.96);
+  --cp-sheen: rgba(255, 255, 255, 0.04);
+  --cp-highlight: rgba(253, 142, 161, 0.12);
+}
+* { box-sizing: border-box; }
+body { margin: 0; background: var(--cp-bg); color: var(--cp-text);
+  font: 16px/1.5 "Segoe UI", Aptos, Calibri, -apple-system, BlinkMacSystemFont, sans-serif; }
+main { max-width: 760px; margin: 40px auto; padding: 0 20px; }
+h1 { font-size: 28px; margin-bottom: 4px; }
+h2 { font-size: 20px; margin: 0 0 16px; }
+p { margin: 8px 0; }
+.muted { color: var(--cp-text-muted); }
+.card { background: var(--cp-surface); border: 1px solid var(--cp-border);
+  border-radius: 16px; padding: 24px; margin-top: 24px; }
+.stations { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; }
+button, input { font: inherit; border-radius: 0.625rem; border: 1px solid var(--cp-border-strong); }
+button { background: var(--cp-surface-soft); color: var(--cp-text); padding: 16px; cursor: pointer; }
+button:hover { background: var(--cp-accent-soft); border-color: var(--cp-accent); }
+button[aria-pressed="true"], button.primary { background: var(--cp-accent);
+  color: var(--cp-accent-fg); border-color: var(--cp-accent); }
+button.primary:hover { background: var(--cp-accent-hover); }
+button:disabled { opacity: .55; cursor: wait; }
+input { width: 100%; background: var(--cp-bg-elevated); color: var(--cp-text); padding: 12px; margin: 8px 0 12px; }
+:focus-visible { outline: 3px solid var(--cp-accent); outline-offset: 3px; }
+.status { font-weight: 600; font-size: 20px; }
+#error { color: var(--cp-danger); white-space: pre-wrap; overflow-wrap: anywhere; }
+a { color: var(--cp-link); }
+small { color: var(--cp-text-soft); }
+.track { font-size: 24px; font-weight: 600; overflow-wrap: anywhere; }
+dl { display: grid; grid-template-columns: 140px 1fr; gap: 8px 16px; margin-bottom: 0; }
+dt { color: var(--cp-text-muted); }
+dd { margin: 0; overflow-wrap: anywhere; }
+@media (max-width: 480px) { main { margin-top: 20px; } .card { padding: 20px; } }
+</style>
+</head>
+<body>
+<main>
+<h1 id="page-title">Internet Radio &amp; AirPlay</h1>
+<p><a href="/screen">Sony display editor / timing laboratory</a></p>
+<p class="muted" id="output-pin">Optical S/PDIF &middot; 48 kHz stereo</p>
+<p class="muted" id="i2s-output" hidden></p>
+<section class="card" aria-label="Playback status" aria-live="polite">
+  <div class="status" id="source">Connecting to the streamer...</div>
+  <p id="detail" class="muted">NPO Radio 2 is the default on every boot.</p>
+  <p id="error" role="alert" hidden></p>
+</section>
+<section class="card" id="sony-controls" hidden>
+  <h2>Sony manual controls</h2>
+  <p class="muted">Levels are ESP output commands, not measured Sony voltages.
+    Mutes start LOW on reboot. Relay starts high-impedance; its polarity is unknown.
+    Isolate the original drivers before connecting these outputs.</p>
+  <p>D.Mute (GPIO10): <strong id="d_mute-state">Unknown</strong></p>
+  <div class="stations">
+    <button type="button" data-control="d_mute" data-level="0">Mute (LOW)</button>
+    <button type="button" data-control="d_mute" data-level="1">Unmute (HIGH)</button>
+  </div>
+  <p>A.Mute (GPIO11): <strong id="a_mute-state">Unknown</strong></p>
+  <div class="stations">
+    <button type="button" data-control="a_mute" data-level="0">Mute (LOW)</button>
+    <button type="button" data-control="a_mute" data-level="1">Unmute request (HIGH)</button>
+  </div>
+  <p>Relay (GPIO12): <strong id="relay-state">Unknown</strong></p>
+  <div class="stations">
+    <button type="button" data-control="relay" data-level="0">Relay LOW</button>
+    <button type="button" data-control="relay" data-level="1">Relay HIGH</button>
+  </div>
+  <h2>Captured startup signals</h2>
+  <p class="muted">INIT GPIO2 and ATT GPIO4, SHIFT GPIO5, LATCH GPIO6
+    start high-impedance. Their meanings and safe electrical states are
+    unverified. These controls are for an isolated, powered bench setup.</p>
+  <p>INIT (GPIO2): <strong id="init-state">Unknown</strong></p>
+  <div class="stations">
+    <button type="button" data-control="init" data-level="0">INIT LOW</button>
+    <button type="button" data-control="init" data-level="1">INIT HIGH</button>
+  </div>
+  <p>ATT (GPIO4): <strong id="att-state">Unknown</strong></p>
+  <div class="stations">
+    <button type="button" data-control="att" data-level="0">ATT LOW</button>
+    <button type="button" data-control="att" data-level="1">ATT HIGH</button>
+  </div>
+  <p>SHIFT (GPIO5): <strong id="shift-state">Unknown</strong></p>
+  <div class="stations">
+    <button type="button" data-control="shift" data-level="0">SHIFT LOW</button>
+    <button type="button" data-control="shift" data-level="1">SHIFT HIGH</button>
+  </div>
+  <p>LATCH (GPIO6): <strong id="latch-state">Unknown</strong></p>
+  <div class="stations">
+    <button type="button" data-control="latch" data-level="0">LATCH LOW</button>
+    <button type="button" data-control="latch" data-level="1">LATCH HIGH</button>
+  </div>
+  <p class="muted">Replay sends the captured LATCH pulse, unknown 96-clock
+    burst, two latched 16-bit words and first 24-clock burst. It does not
+    repeat the later 24-clock traffic; timing is approximate and measured
+    from the button, not the INIT transition. Command meanings are unknown.
+    Set INIT HIGH and both mutes LOW first.</p>
+  <button type="button" id="replay-startup">Replay captured startup once</button>
+  <p id="control-error" role="alert" hidden></p>
+</section>
+<section class="card" aria-label="Now playing" aria-live="polite">
+  <h2>Now playing</h2>
+  <p class="track" id="track-title">Waiting for stream information...</p>
+  <p id="track-artist" hidden></p>
+  <p id="track-album" class="muted" hidden></p>
+  <p id="metadata-note" class="muted"></p>
+  <dl>
+    <dt>Stream / source</dt><dd id="stream-name">&mdash;</dd>
+    <dt>Audio format</dt><dd id="stream-format">&mdash;</dd>
+    <dt>Bitrate</dt><dd id="stream-bitrate">&mdash;</dd>
+    <dt>Optical output</dt><dd>48 kHz &middot; stereo &middot; 16-bit PCM</dd>
+    <dt>Stream URL</dt><dd id="stream-url">&mdash;</dd>
+  </dl>
+</section>
+<section class="card" id="vfd-controls" hidden>
+  <h2>Sony NOW PLAYING display</h2>
+  <p>Uses all 22 matrices; titles longer than 22 characters scroll on the ESP.
+    No browser is needed once enabled. Output never starts automatically after reboot.</p>
+  <p id="vfd-status" class="muted">Checking display...</p>
+  <label for="grid-duty">Brightness per grid</label>
+  <select id="grid-duty">
+    <option value="0.25">Low dim: 0.25% per grid / 6.5% total</option>
+    <option value="0.5" selected>Working dim: 0.5% per grid / 13% total</option>
+    <option value="1">Brighter: 1% per grid / 26% total</option>
+  </select>
+  <p>All 26 slots stay scanned, even with one character. Do not divide brightness
+    by the number of lit characters. Current limits are not measured.</p>
+  <p><label><input id="vfd-confirm" type="checkbox" style="width:auto">
+    Correct AHCT v2 wiring, STB to BOTH TD chips, original controller isolated,
+    Sony powered and outputs ready. I authorize display output.</label></p>
+  <div class="stations">
+    <button id="vfd-start" type="button" disabled>Start / apply NOW PLAYING</button>
+    <button id="vfd-stop" type="button">Stop display / CLEAR LOW</button>
+  </div>
+  <p id="vfd-error" role="alert" hidden></p>
+</section>
+<section class="card">
+  <h2>Radio stations</h2>
+  <div class="stations">
+    <button type="button" data-station="0" aria-pressed="false">NPO Radio 2</button>
+    <button type="button" data-station="2" aria-pressed="false">Radio 538</button>
+    <button type="button" data-station="1" aria-pressed="false">BNR Radio</button>
+    <button type="button" data-station="3" aria-pressed="false">SLAM! FM</button>
+  </div>
+  <p class="muted" id="airplay-selection">While AirPlay is connected, your selection is queued for when you disconnect.</p>
+</section>
+<section class="card">
+  <h2>Your own stream</h2>
+  <form id="custom">
+    <label for="url">Direct MP3 or AAC stream URL</label>
+    <input id="url" name="url" type="url" maxlength="511" required
+      placeholder="https://example.com/live.mp3" autocomplete="url">
+    <button type="submit" class="primary" id="custom-play">Save &amp; play stream</button>
+  </form>
+  <p><small>HTTP/HTTPS MP3 or AAC (ADTS), 32 / 44.1 / 48 kHz. Not a website, playlist, HLS or Spotify link. The URL is saved; boot still starts NPO Radio 2.</small></p>
+</section>
+<section class="card" id="airplay-help">
+  <h2>Stream from your phone or Mac</h2>
+  <p>Select this receiver in your app's AirPlay audio menu on the same Wi-Fi network.
+    Radio stops while AirPlay is connected and resumes when you disconnect.
+    Pausing AirPlay keeps the connection.</p>
+  <p class="muted">Bluetooth audio is not supported by the ESP32-S3.</p>
+  <a href="/settings">Wi-Fi &amp; receiver settings</a>
+</section>
+</main>
+<script>
+const source = document.getElementById("source");
+const detail = document.getElementById("detail");
+const error = document.getElementById("error");
+const urlInput = document.getElementById("url");
+const buttons = [...document.querySelectorAll("[data-station], #custom-play")];
+const controlButtons = [...document.querySelectorAll("[data-control]")];
+const replayButton = document.getElementById("replay-startup");
+let busy = false;
+let urlLoaded = false;
+function showError(message) {
+  error.textContent = message;
+  error.hidden = !message;
+}
+function render(state) {
+  const airplayAvailable = state.airplay_available !== false;
+  document.getElementById("airplay-help").hidden = !airplayAvailable;
+  document.getElementById("airplay-selection").hidden = !airplayAvailable;
+  document.getElementById("page-title").textContent =
+    airplayAvailable ? "Internet Radio & AirPlay" : "DAR-1000ES Internet Radio";
+  document.getElementById("output-pin").textContent =
+    "Optical S/PDIF on GPIO" + state.spdif_gpio + " \u00b7 48 kHz stereo";
+  const i2s = state.i2s_output;
+  const i2sOutput = document.getElementById("i2s-output");
+  i2sOutput.hidden = !i2s;
+  if (i2s) i2sOutput.textContent =
+    i2s.format + " (Sony compatibility unverified): LRCK GPIO" + i2s.lrck_gpio +
+    ", DATA GPIO" + i2s.data_gpio + ", BCK GPIO" + i2s.bck_gpio +
+    " \u00b7 " + (i2s.sample_rate / 1000) + " kHz / " + i2s.bits +
+    "-bit stereo \u00b7 write errors: " + i2s.write_errors;
+  const controls = state.sony_controls;
+  document.getElementById("sony-controls").hidden = !controls;
+  if (controls) {
+    for (const name of ["d_mute", "a_mute", "relay", "init", "att", "shift", "latch"]) {
+      const level = controls[name].level;
+      document.getElementById(name + "-state").textContent =
+        level === null ? "High-impedance" : level === 0 ? "LOW" : "HIGH";
+    }
+    for (const button of controlButtons)
+      button.setAttribute("aria-pressed", String(
+        controls[button.dataset.control].level === Number(button.dataset.level)));
+  }
+  source.textContent = state.source === "AirPlay" ? "AirPlay connected" :
+    (state.radio_playing ? state.station : "Connecting to " + state.station + "...");
+  detail.textContent = state.source === "AirPlay" ?
+    (state.airplay?.playing ? "Playing" : "Paused / waiting for audio") +
+      " \u00b7 After disconnect: " + state.station : "Radio \u00b7 NPO Radio 2 on boot";
+  const track = state.now_playing || {};
+  document.getElementById("track-title").textContent = track.title || "Song information unavailable";
+  for (const field of ["artist", "album"]) {
+    const element = document.getElementById("track-" + field);
+    element.textContent = track[field] || "";
+    element.hidden = !track[field];
+  }
+  document.getElementById("metadata-note").textContent = track.title ?
+    (state.source === "AirPlay" ? "Track information supplied by your AirPlay app." :
+      "Live station metadata; titles may lead the buffered audio by a few seconds.") :
+    (state.source === "AirPlay" ? "Waiting for your AirPlay app to send track information." :
+      track.metadata_supported ? "Waiting for the station to send a song title." :
+        "This station does not supply live song titles.");
+  document.getElementById("stream-name").textContent =
+    track.stream_name || (state.source === "AirPlay" ? "AirPlay" : state.station);
+  document.getElementById("stream-format").textContent = [
+    track.codec, track.sample_rate ? (track.sample_rate / 1000) + " kHz" : "",
+    track.channels === 2 ? "Stereo" : track.channels === 1 ? "Mono" : ""
+  ].filter(Boolean).join(" \u00b7 ") || "\u2014";
+  document.getElementById("stream-bitrate").textContent =
+    track.bitrate_kbps ? track.bitrate_kbps + " kbps (station reported)" : "Not reported";
+  document.getElementById("stream-url").textContent = track.url ||
+    (state.source === "AirPlay" ? "AirPlay audio from your phone / computer" : "\u2014");
+  for (const button of buttons) {
+    const station = button.dataset.station === undefined ? 4 : Number(button.dataset.station);
+    button.setAttribute("aria-pressed", String(station === state.selected));
+  }
+  if (!urlLoaded) { urlInput.value = state.custom_url || ""; urlLoaded = true; }
+  showError(state.source === "AirPlay" ? "" : state.error);
+}
+async function request(options) {
+  const response = await fetch("/api/radio", {cache: "no-store", ...options,
+    signal: AbortSignal.timeout(8000)});
+  if (!response.ok) throw new Error(await response.text() || "Request failed (" + response.status + ")");
+  return response.json();
+}
+async function select(station, url) {
+  if (busy) return;
+  busy = true;
+  buttons.forEach(button => button.disabled = true);
+  try {
+    render(await request({method: "POST", headers: {"Content-Type": "application/json"},
+      body: JSON.stringify({station, url})}));
+  } catch (err) { showError(err.message); }
+  finally { busy = false; buttons.forEach(button => button.disabled = false); }
+}
+document.querySelectorAll("[data-station]").forEach(button =>
+  button.addEventListener("click", () => select(Number(button.dataset.station))));
+controlButtons.forEach(button => button.addEventListener("click", async () => {
+  if (busy) return;
+  busy = true;
+  buttons.concat(controlButtons).forEach(item => item.disabled = true);
+  const controlError = document.getElementById("control-error");
+  controlError.hidden = true;
+  try {
+    const response = await fetch("/api/sony-control", {
+      method: "POST", headers: {"Content-Type": "application/json"},
+      body: JSON.stringify({signal: button.dataset.control, level: Number(button.dataset.level)}),
+      signal: AbortSignal.timeout(8000)
+    });
+    if (!response.ok) throw new Error(await response.text() || "Control failed");
+    render(await response.json());
+  } catch (err) {
+    controlError.textContent = err.message;
+    controlError.hidden = false;
+  } finally {
+    busy = false;
+    buttons.concat(controlButtons).forEach(item => item.disabled = false);
+  }
+}));
+replayButton.addEventListener("click", async () => {
+  if (busy || !window.confirm(
+      "Replay unverified captured signals, including the unknown 96-clock burst? " +
+      "Confirm Sony drivers are isolated and the receiver is powered. " +
+      "INIT must be HIGH and both mutes LOW.")) return;
+  busy = true;
+  buttons.concat(controlButtons, [replayButton]).forEach(item => item.disabled = true);
+  const controlError = document.getElementById("control-error");
+  controlError.hidden = true;
+  try {
+    const response = await fetch("/api/sony-control", {
+      method: "POST", headers: {"Content-Type": "application/json"},
+      body: JSON.stringify({action: "replay_captured_startup"}),
+      signal: AbortSignal.timeout(8000)
+    });
+    if (!response.ok) throw new Error(await response.text() || "Startup replay failed");
+    render(await response.json());
+  } catch (err) {
+    controlError.textContent = err.message;
+    controlError.hidden = false;
+  } finally {
+    busy = false;
+    buttons.concat(controlButtons, [replayButton]).forEach(item => item.disabled = false);
+  }
+});
+document.getElementById("custom").addEventListener("submit", event => {
+  event.preventDefault();
+  select(4, urlInput.value.trim());
+});
+function screenTiming(percent) {
+  if (![0.25, 0.5, 1].includes(percent))
+    throw new Error("Choose a tested per-grid brightness");
+  const on = Math.round(26 * 300000 * percent / 100);
+  return {setup_ns:500, clock_low_ns:1000, clock_high_ns:1000,
+    strobe_ns:5000, latch_guard_ns:10000, blank_before_ns:10000,
+    blank_after_ns:10000, on_ns:on, off_ns:162500-on,
+    pulses:1, hold:0, slot:0, pair:0, alternate_ms:0, alternate_blank_steps:0};
+}
+let screenState;
+let screenBusy = false;
+let screenStopPending = false;
+const vfdStart = document.getElementById("vfd-start");
+const vfdStop = document.getElementById("vfd-stop");
+const vfdConfirm = document.getElementById("vfd-confirm");
+function renderScreen(state) {
+  if (screenState && screenState.pin_profile !== state.pin_profile)
+    vfdConfirm.checked = false;
+  screenState = state;
+  document.getElementById("vfd-controls").hidden = false;
+  document.getElementById("vfd-status").textContent =
+    state.pin_profile_name + " \u00b7 " +
+    (state.running ? (state.now_playing ? "Following radio metadata" : "Manual display scan") :
+      "Stopped") +
+    (state.running ? " \u00b7 " + (state.timing_grid_duty * 100).toFixed(3) + "% per grid" : "") +
+    (state.pin_profile !== "ahct-v2" ?
+      ". Select AHCT v2 in the timing laboratory while all six signals are disconnected." : "");
+  vfdStart.disabled = screenBusy || !vfdConfirm.checked || state.pin_profile !== "ahct-v2";
+}
+async function screenRequest(body) {
+  const response = await fetch("/api/screen", {cache:"no-store",
+    ...(body ? {method:"POST", headers:{"Content-Type":"application/json"},
+      body:JSON.stringify(body)} : {}), signal:AbortSignal.timeout(8000)});
+  if (!response.ok) throw new Error(await response.text() || "Display request failed");
+  return response.json();
+}
+async function screenCommand(stop) {
+  if (screenBusy) {
+    if (stop) screenStopPending = true;
+    return;
+  }
+  if (!stop && (!vfdConfirm.checked || screenState?.pin_profile !== "ahct-v2"))
+    return;
+  screenBusy = true;
+  vfdStart.disabled = true;
+  const err = document.getElementById("vfd-error");
+  err.hidden = true;
+  try {
+    const body = stop ? {sample:"stop"} : {sample:"Timing", live_confirmed:true,
+      bench_confirmed:false, now_playing:true, words:Array(26).fill("0000000000"),
+      timing:screenTiming(Number(document.getElementById("grid-duty").value))};
+    renderScreen(await screenRequest(body));
+  } catch (error) {
+    err.textContent = error.message;
+    err.hidden = false;
+  } finally {
+    screenBusy = false;
+    if (screenStopPending) {
+      screenStopPending = false;
+      await screenCommand(true);
+    } else if (screenState) renderScreen(screenState);
+  }
+}
+vfdConfirm.addEventListener("change", () => { if (screenState) renderScreen(screenState); });
+vfdStart.addEventListener("click", () => screenCommand(false));
+vfdStop.addEventListener("click", () => screenCommand(true));
+async function pollScreen() {
+  if (!screenBusy) {
+    try { renderScreen(await screenRequest()); }
+    catch {
+      screenState = undefined;
+      vfdConfirm.checked = false;
+      vfdStart.disabled = true;
+      document.getElementById("vfd-status").textContent = "Display unavailable; output state unknown.";
+    }
+  }
+  setTimeout(pollScreen, 2500);
+}
+async function poll() {
+  if (!busy) {
+    try { render(await request()); }
+    catch (err) {
+      source.textContent = "Streamer unavailable";
+      document.getElementById("metadata-note").textContent = "Connection lost; displayed track information may be out of date.";
+      showError(err.message);
+    }
+  }
+  setTimeout(poll, 2500);
+}
+poll();
+pollScreen();
+</script>
+</body>
+</html>

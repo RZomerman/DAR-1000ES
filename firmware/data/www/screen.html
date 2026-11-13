@@ -1,0 +1,600 @@
+<!doctype html>
+<html lang="en">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Sony screen bench</title>
+<style>
+body { font: 16px/1.5 sans-serif; max-width: 1500px; margin: 20px auto; padding: 16px; }
+button { font: inherit; padding: 12px; margin: 6px; }
+pre { white-space: pre-wrap; }
+.display-preview { background: #101b19; color: #9cf7c5; padding: 16px; overflow-x: auto; }
+.character-strip { display: flex; gap: 8px; width: max-content; }
+.character { width: 74px; text-align: center; font-size: 12px; }
+.character input { width: 40px; text-align: center; }
+.pixels { display: grid; grid-template-columns: repeat(5, 12px); gap: 2px; margin: 8px auto; width: max-content; }
+.pixels button { width: 12px; height: 12px; padding: 0; margin: 0; background: #263d32; border: 1px solid #527562; }
+.pixels button.on { background: #9cf7c5; }
+.unmapped { opacity: .5; }
+.indicator { font-size: 13px; padding: 6px; }
+.indicator.on { background: #9cf7c5; color: #101b19; }
+.meter { display: flex; gap: 3px; align-items: end; height: 80px; }
+.meter span { display: inline-block; width: 8px; background: #294336; }
+.meter.full span { background: #9cf7c5; }
+.editor-row { margin: 12px 0; }
+.glass { width: 2540px; min-width: 2540px; height: 250px; position: relative; border: 2px solid #4b6b60; border-radius: 4px; padding: 18px;
+  background: linear-gradient(135deg,#102c25,#070d12); box-shadow: inset 0 0 30px #000; }
+.glass-top,.glass-bottom { display: flex; justify-content: space-between; gap: 12px; align-items: center; }
+.glass-main { display: flex; align-items: center; gap: 16px; margin: 20px 0; }
+.glass-group { display: flex; flex-wrap: wrap; gap: 4px; align-items: center; }
+.glass .indicator { background: transparent; border: 1px solid #406452; color: #70a68c; margin: 0; }
+.glass .indicator.on { color: #baffd9; background: #184936; text-shadow: 0 0 8px #4dffa4; }
+.glass .indicator.unknown { color: #dfac68; border: 1px dashed #83653b; }
+.glass .indicator.candidate { border-color: #d3b264; }
+.red-panel { width: 145px; flex-shrink: 0; color: #ff766b; text-align: center; }
+.red-panel svg { width: 90px; height: 145px; }
+.red-panel svg text { fill: #ff766b; font-family: monospace; }
+.red-panel svg .glyph { filter: drop-shadow(0 0 4px #f44); }
+.red-bits { display: flex; flex-wrap: wrap; gap: 3px; }
+.red-bits button { padding: 3px; margin: 0; font-size: 11px; color: #b86b62;
+  background: #251213; border: 1px solid #753a35; }
+.red-bits button.on { color: #fff; background: #a52d25; }
+.meter-panel { width: 160px; flex-shrink: 0; }
+.glass .meter { height: 110px; }
+.glass .meter button { width: 8px; padding: 0; margin: 0; background: #2c4b39; border: 1px dashed #846940; }
+.glass .meter.full button { background: #a6ffd2; box-shadow: 0 0 4px #4aff9a; }
+.meter-dots { display: flex; gap: 3px; margin-top: 6px; }
+.meter-dots button { width: 8px; height: 8px; padding: 0; margin: 0; background: #284637; border: 1px dashed #846940; }
+.meter-dots.lit button { background: #a6ffd2; }
+.glass .character { width: 68px; color: #79a08c; }
+.glass .character input { background: #10231c; color: #bcffdb; border: 1px solid #406452; }
+.glass .pixels button.on { box-shadow: 0 0 3px #45fa9b; }
+.inspect { background: #172731; color: #c9e6f3; padding: 12px; border-left: 3px solid #63bddc; min-height: 48px; }
+.legend { font-size: 13px; color: #bfddce; }
+.glass-top,.glass-bottom { position: absolute; inset: 0; display: block; pointer-events: none; }
+.glass-group { position: absolute; pointer-events: auto; white-space: nowrap; flex-wrap: nowrap; }
+.glass-main { position: absolute; top: 80px; left: 20px; margin: 0; gap: 16px; align-items: start; }
+.glass .character { position: relative; width: 88px; }
+.glass .pixels { margin: 0 auto; grid-template-columns: repeat(5,14px); gap: 3px; }
+.glass .pixels button { width: 14px; height: 14px; }
+.glass .character > div:first-child { position: absolute; top: 164px; width: 100%; font-size: 11px; }
+.glass .character input { position: absolute; top: 130px; left: 23px; width: 40px; }
+.glass .character { font-size: 0; }
+.glass .character-strip { gap: 12px; }
+.glass .indicator { font-size: 17px; padding: 2px 5px; border-color: transparent; }
+.glass .indicator.unknown { border-color: #83653b; }
+.red-panel { width: 125px; }
+.red-shapes { display: flex; gap: 7px; align-items: center; height: 116px; }
+.letter-matrix { display: grid; grid-template-columns: repeat(5,5px); gap: 2px; width: 33px; }
+.letter-matrix button { width: 5px; height: 9px; padding: 0; margin: 0; border: 0; background: #47201e; }
+.letter-matrix button.on { background: #ff766b; box-shadow: 0 0 4px #ff493b; }
+.seven-digit { position: relative; width: 32px; height: 100px; }
+.seven-digit button { position: absolute; padding: 0; margin: 0; background: #47201e; border: 1px dashed #a46549; }
+.seven-digit .a,.seven-digit .g,.seven-digit .d { width: 22px; height: 5px; left: 5px; }
+.seven-digit .a { top: 0; } .seven-digit .g { top: 47px; } .seven-digit .d { bottom: 0; }
+.seven-digit .b,.seven-digit .c,.seven-digit .e,.seven-digit .f { width: 5px; height: 40px; }
+.seven-digit .b { top: 6px; right: 0; } .seven-digit .c { bottom: 6px; right: 0; }
+.seven-digit .f { top: 6px; left: 0; } .seven-digit .e { bottom: 6px; left: 0; }
+.red-panel > button,.red-panel > div:not(.red-shapes),.red-panel > small { display: none; }
+.meter-panel { width: 145px; }
+.glass .meter { height: 113px; }
+.meter-panel > small,.meter-panel > .editor-row { display: none; }
+#red-controls { color: #d6685f; }
+.glass { width: 2294px; min-width: 2294px; height: 326px; padding: 0;
+  background: #0a211a; border: 0; box-shadow: none; }
+.reference-image { position: absolute; inset: 0; width: 100%; height: 100%;
+  filter: invert(1) sepia(1) saturate(2) hue-rotate(85deg); opacity: .55; pointer-events: none; }
+.glass-main { top: 154px; left: 340px; gap: 14px; }
+.red-panel { width: 78px; }
+.red-shapes { width: 78px; height: 76px; gap: 3px; }
+.letter-matrix { grid-template-columns: repeat(5,3px); gap: 1px; width: 19px; }
+.letter-matrix button { width: 3px; height: 9px; background: transparent; }
+.seven-digit { width: 26px; height: 74px; }
+.seven-digit .a,.seven-digit .g,.seven-digit .d { width: 18px; left: 4px; }
+.seven-digit .g { top: 35px; }
+.seven-digit .b,.seven-digit .c,.seven-digit .e,.seven-digit .f { height: 29px; }
+.glass .character-strip { gap: 22px; }
+.glass .character { width: 50px; }
+.glass .pixels { grid-template-columns: repeat(5,7px); gap: 2px; }
+.glass .pixels button { width: 7px; height: 9px; background: transparent; border-color: transparent; }
+.glass .pixels button.unknown { border: 1px dashed #cf984f; }
+.glass .character input { top: 164px; left: 4px; }
+.glass .character > div:first-child { top: 145px; font-size: 10px; }
+.glass-group { position: static; }
+.glass .indicator { position: absolute; height: 24px; font-size: 0; padding: 0;
+  border: 1px solid transparent; background: transparent; }
+.glass .indicator:hover { background: #27884b88; outline: 1px solid #a5ffcf; }
+.glass .indicator.on { background: #27db7570; box-shadow: 0 0 6px #67ff98; }
+.glass .indicator.candidate { border: 1px solid #d3b264; }
+.glass .indicator.unknown { border: 1px dashed #9c7845; }
+.meter-panel { width: 94px; }
+.glass .meter { height: 76px; gap: 2px; }
+.glass .meter button { width: 4px; background: transparent; }
+.meter-dots { gap: 2px; margin-top: 3px; }
+.meter-dots button { width: 4px; height: 5px; background: transparent; }
+.display-preview { overflow: hidden; padding: 12px; }
+.glass { width: 2220px; min-width: 2220px; height: 350px;
+  background: linear-gradient(135deg,#122b25,#060e12);
+  border: 2px solid #55796a; border-radius: 8px; box-sizing: border-box;
+  box-shadow: inset 0 0 30px #000; }
+.glass .indicator { font-size: 18px; color: #638c78; height: 28px;
+  white-space: nowrap; border-radius: 3px; }
+.glass .indicator.on { color: #c5ffdf; text-shadow: 0 0 5px #50ff9b; }
+.glass .indicator.unknown { color: #b39b72; }
+.glass .pixels button { background: #233c30; border: 1px solid #385545; }
+.glass .pixels button.on { background: #a7ffd0; }
+.glass .character input { top: 135px; font-size: 15px; }
+.glass .character > div:first-child { top: 163px; font-size: 11px; }
+.glass .meter button { background: #233c30; }
+.meter-dots button { background: #233c30; }
+.letter-matrix button { background: #45231f; }
+.glass .seven-digit button { background: #45231f; }
+</style>
+<h1>Sony screen control - logic bench</h1>
+<p><a href="/">Internet radio / NOW PLAYING</a></p>
+<h2>Hardware / GPIO profile</h2>
+<label>Pin profile <select id="pin-profile" disabled>
+ <option value="original">V1 original / TXS0108E</option>
+ <option value="ahct-v2">V2 / SN74AHCT</option>
+</select></label>
+<button id="pin-profile-apply" disabled>Apply pin profile (stopped, isolated only)</button>
+<p id="pin-profile-active" class="inspect" aria-live="polite">Reading active GPIO profile...</p>
+<p>Changing this selector alone does not change outputs. Stop output, physically
+disconnect all six Sony signal wires, then tick the disconnected-bench confirmation
+below before applying. Old pins become inputs; the selected pins take the usual
+idle levels. No scan starts. Reboot always selects V1; the selection is not saved.
+Keep unused interfaces disconnected or hardware-disabled. SN74AHCT125 /OE is
+active LOW; the original TXS0108E OE is active HIGH. Firmware controls neither.</p>
+<h2>Runtime timing laboratory</h2>
+<p><strong>0.3.26: radio and 22-character NOW PLAYING added.</strong>
+The AHCT v2 scan rendered clean text across all 22 matrices after STB was
+connected to BOTH TD chips. The working dim setting is 0.5% per grid:
+39 us ON in each 300 us slot, 13% total CLEAR duty, about 128 Hz refresh.
+Count all 26 scanned slots, not just lit glyphs. Actual chip-side analogue
+levels and current remain unmeasured. Stop does not disable the translator.</p>
+<p>New generated driver: blank, shift data with STB LOW, latch while blanked,
+then pulse CLEAR. No capture resampling. All settings apply with the current
+26 editor words; no reflash is needed. Stop before switching between the
+legacy driver and this driver. Timing changes on the generated driver are
+queued atomically at DMA block boundaries (up to two blocks ahead).</p>
+<label>Driver <select id="timing-mode">
+ <option value="scan">Generated 26-slot scan</option>
+ <option value="hold">One latched grid + CLEAR PWM only</option>
+ <option value="alternate">Local alternation using held mode + CLEAR DMA</option>
+ <option value="pair">GPIO two-grid diagnostic, full grid reload</option>
+ <option value="legacy">Legacy resampled DIM scan</option>
+</select></label>
+<label>Held slot / first pair slot <input id="timing-slot" type="number" min="0" max="25" step="1" value="25"></label>
+<label>Local held dwell (ms) <input id="alternate-ms" type="number" min="5" max="1000" step="1" value="50"></label>
+<label>Full blank steps after both digits <input id="alternate-blank-steps" type="number" min="0" max="20" step="1" value="0"></label>
+<p>Local held alternation switches the selected slot and slot minus one using
+the existing GPIO preload / CLEAR-only DMA path. Dwell is a scheduling target,
+not guaranteed physical timing. Each reload blanks and drains PWM first.
+Optional blank steps hold CLEAR LOW throughout; three steps give
+[first grid / second grid / blank / blank / blank], then repeat.
+Each step uses the selected dwell. Blank steps reduce average brightness
+and repetition rate; they do not increase the permitted ON duty.
+The displayed PWM duty applies while a grid is selected, not to its total
+time-averaged duty across alternation.</p>
+<p>Pair mode alternates the selected slot and slot minus one. It reloads all
+40 grid bits before every latch while blanked. This diagnostic is not yet
+verified on connected hardware; it is not the normal 26-slot scan.
+All six pins use GPIO, not DMA. Edge/ON/OFF times must be whole microseconds,
+and ON is limited to 50 us. Actual refresh is slower than the nominal estimate
+because of GPIO overhead and blanked task-yield gaps.</p>
+<p>Scan: [blank / send / latch / ON / OFF] for each of 26 slots.
+Increase pulses per slot for [send once / ON / OFF / ON / OFF ...].
+Held-grid: preload the selected grid and its word once, then only pulse
+CLEAR. DATA stays LOW, clocks HIGH and STB LOW as static GPIO, not DMA outputs.
+Only changing the selected slot or its word causes another preload; changing
+brightness does not resend data. Stop/start explicitly reloads the word.
+This tests ONE field, not a stored full screen. Other grids remain off.</p>
+<div id="timing-fields" class="editor-row"></div>
+<button id="timing-baseline">301 us slot preset</button>
+<button id="timing-fast">154 us slot preset</button>
+<button id="timing-repeat">Four CLEAR pulses / slot preset</button>
+<button id="timing-hold">Held-grid PWM preset</button>
+<button id="timing-pair">GPIO pair 22/21 preset</button>
+<button id="timing-alternate">Held alternation 22/21, 50 ms preset</button>
+<button id="timing-memory">Set editor to MEMORY only (slot 25)</button>
+<button id="timing-apply">Apply timings + current editor / start</button>
+<button data-sample="stop">Stop / CLEAR LOW</button>
+<p id="timing-estimate" class="inspect" aria-live="polite"></p>
+<p>Scan waveforms and CLEAR PWM have 125 ns resolution at 8 MHz.
+Held-mode preload uses GPIO delays rounded UP to whole 1 us, plus GPIO
+overhead; interrupts may extend them. Edge changes take effect at the next
+preload, not while holding a word. Stop/start to retest shift timings.
+Edge inputs: 250..20000 ns,
+in 125 ns steps. CK/STB minimum here is 250 ns (datasheet 70 ns);
+DATA setup/hold and CK-to-STB margins are at least 250 ns (datasheet
+20/20/50 ns). Blank guards and CLEAR OFF are at least 2 us for output
+propagation. ON is capped at 280 us; pulses per slot 1..16.
+The datasheet's recommended operating limits are stricter: CK <= 8 MHz,
+CK width >= 75 ns, DATA setup/hold >= 50 ns; these software margins exceed them.
+Held-grid duty is capped at 1/26 (OFF >= 25 x ON), a conservative software
+guard, not a manufacturer glass rating. Frame duration is limited by the
+65 ms DMA buffer. No setting is a guarantee of safe VFD drive.</p>
+<p>Presets only change form values, never start output. Settings may be saved
+in this browser; firmware does not restore or start output on reboot.
+Analogue edge times (maximum 1 us), 5 V thresholds, translator glitches and
+visual flicker still require measurement at the TD62 inputs.
+Isolate the Sony signal wires for USB reset/reflash or when its logic supply
+is off: inputs must never exceed VDD + 0.5 V (absolute maximum).
+Idle clocks are HIGH even after Stop. Never probe VFD high voltage.</p>
+<button id="timing-save">Save form in this browser</button>
+<button id="timing-load">Load saved form (no output)</button>
+<h2>Full display editor</h2>
+<p>Character positions P01-P22 run left to right; each block also shows its
+decoder slot. Physical positions of the five unassigned slots remain unverified.
+Click any mapped 5x7 pixel or enter a character. Edits are local until Apply.
+Captured Sony glyphs are used where available; missing characters use the
+generated fallback font. Case matters: a captured lowercase letter does not
+establish its uppercase form.</p>
+<p class="legend">Green: mapped elements. Red: segmented field. Gold dashed:
+unmapped physical element. Gold solid: candidate mapping. Every part can be
+selected; unknown selections show details only. This is a newly rendered
+whole-display schematic based on the original reference, not a screenshot.
+All 22 character blocks, both indicator groups, the red field and the signal
+meter are shown together. Physical mappings remain partly unverified.</p>
+<div class="display-preview">
+ <div class="glass">
+  <div class="glass-top" id="glass-top"></div>
+  <div class="glass-main">
+   <div class="red-panel">
+    <button class="indicator" id="red-inspect">Red field / slot 25</button>
+    <div class="red-shapes">
+      <div id="red-matrix" class="letter-matrix" aria-label="Small red letter matrix"></div>
+      <div id="red-tens" class="seven-digit" aria-label="Red tens digit"></div>
+      <div id="red-units" class="seven-digit" aria-label="Red units digit"></div>
+    </div>
+   </div>
+   <div id="characters" class="character-strip"></div>
+   <div class="meter-panel">
+    <div id="meter-preview" class="meter"></div>
+    <div id="meter-dots" class="meter-dots"></div>
+    <small>Individual positions unmapped</small>
+    <div class="editor-row" id="meter-controls"></div>
+   </div>
+  </div>
+  <div class="glass-bottom" id="glass-bottom"></div>
+ </div>
+</div>
+<p id="element-info" class="inspect" aria-live="polite">Select a display element to inspect its slot and code.</p>
+<div id="red-controls">
+ <label>Red letter <select id="red-letter">
+  <option value="">Blank</option><option>A</option><option>B</option><option>C</option><option>D</option>
+ </select></label>
+ <span id="red-preview" hidden></span><small id="red-code"></small>
+ <div id="red-bits" class="red-bits"></div>
+ <small>The small letter matrix and two numeric digits follow your hardware description.
+ Matrix pixels and digit segments are inspect-only until their physical bit mapping
+ is validated. Numbered bit tests and captured letter presets remain functional.</small>
+</div>
+<div id="signal-controls"></div>
+<h3>Individual-item validation</h3>
+<p>Each test blanks all other fields and lights one known mask or pixel using
+the selected driver and timing form. In held mode select the tested slot.
+The indicated physical result is a hypothesis to check visually,
+not a measurement. Original Sony controller must be isolated. All tests
+require the bench/live confirmation below.</p>
+<label>Test group <select id="test-group">
+ <option value="indicators">Standard indicators (including labelled candidates)</option>
+ <option value="red">Red field: one segment bit at a time</option>
+ <option value="pixels">Selected character: one of 35 pixels at a time</option>
+ <option value="letters">Red letter presets A / B / C / D</option>
+ <option value="meter">Captured signal states: off / startup-dots / full</option>
+</select></label>
+<label>Character slot <select id="test-slot"></select></label>
+<button id="test-next">Test next item</button>
+<button id="test-cycle">Cycle group (1 second per item, once)</button>
+<button id="test-stop">Stop test and blank</button>
+<p id="test-status" class="inspect" aria-live="polite">No test running.</p>
+<div id="display-indicators" hidden></div>
+<div class="editor-row">
+  <label>Message (9 characters) <input id="message" maxlength="9" value="Frequency"></label>
+  <button id="set-message">Set message</button>
+  <label>Frequency (5 characters) <input id="frequency" maxlength="5" value="118.0"></label>
+  <button id="set-frequency">Set frequency + MHz</button>
+</div>
+<button id="apply-display">Apply editor / start selected driver</button>
+<button data-sample="blank">Stop and retain grid blanking</button>
+<button id="clear-editor">Clear local editor</button>
+<details><summary>26 slot codes and unmapped controls</summary>
+  <pre id="display-codes"></pre>
+  <p>Unavailable mappings from the drawings: STEREO, MUSIC/SPEECH groups,
+  TUNED and arrows, lower numeric markers 1-16, individual meter bars/dots,
+  and general red digits. They can be inspected but do not transmit guessed codes.</p>
+</details>
+<p>The legacy continuous mode scales captured slot timing for an approximately 250 Hz
+refresh, scaling dim blanking proportionally. This deliberately differs from
+the captured Sony timing and needs analyser validation. The first eight-frame DMA
+chunk preloads registers while blanked; later chunks continue without repeating
+the blank/preload sequence. A DMA alignment hold of under 8 us remains. Stop waits
+for the current chunk (about 32 ms plus overhead), then holds CLEAR LOW.
+This is not a hardware fail-safe against CPU/power failure. No output starts on boot
+or merely by loading this page.</p>
+<p>V1: FLGDATA GPIO4 / FLGCLK GPIO5 / FLCLEAR GPIO6 / FLSTB GPIO15 /
+FLSDATA GPIO16 / FLSCLK GPIO7.
+V2: FLGDATA GPIO2 / FLGCLK GPIO1 / FLCLEAR GPIO40 / FLSTB GPIO38 /
+FLSDATA GPIO21 / FLSCLK GPIO39. Level-shifter OE is external,
+not controlled or measured by firmware. Firmware initializes the selected outputs to
+DATA LOW, CLEAR LOW, STB LOW, clocks HIGH and holds those levels when idle.</p>
+<p>All previous audio and control assignments are disabled. No scan runs on boot.
+An enabled translator can expose floating inputs during reset or while its GPIO
+profile is inactive. Hardware-disable unused interfaces and provide external
+biasing where required; software does not guarantee reset-time levels.</p>
+<p><strong>Disconnected analyser verification is recommended first.</strong> Driver clear/latch
+behavior and safe grid blanking are not verified. Floating level-shifter inputs
+are not a safe reset state. Hardware blanking is required before
+live VFD use as a reliable display driver. The live replay below is an
+explicitly risk-accepted experiment, not verified display control.</p>
+<label><input type="checkbox" id="confirmed"> Sony disconnected; analyser on logic signals only</label>
+<h2>Individual voltage tests</h2>
+<p>HIGH/LOW stays driven until changed or a sample scan runs. OE cannot be
+disabled by firmware. Measure ESP outputs near 3.3 V and enabled translator outputs near their 5 V supply,
+relative to common GND. These are commanded levels, not voltage measurements.</p>
+<div id="pin-controls"></div>
+<button data-sample="stop">Stop / hold safe idle levels</button>
+<h2>Hardware-timed captured blink</h2>
+<p>GPIO12 is an unused DMA data line, GPIO13 is the 8 MHz clock,
+GPIO14 is D/C: leave GPIO12-14 disconnected from Sony.</p>
+<p>Captured replay initializes both registers with grid CLEAR LOW, then sends
+one 1.017-second blink cycle by DMA, including the recorded blank intervals.
+Afterwards it holds CLEAR LOW, STB LOW and both clocks HIGH. Stop waits
+for the DMA cycle to complete; it is not an emergency cutoff.
+Initialization, scan words and clock handover have been checked at the
+buffered outputs with an analyser. Correct live display operation is still
+unverified. Stop returns to CLEAR LOW, STB LOW and both clocks HIGH.</p>
+<p><label><input type="checkbox" id="live-confirmed"> Live experiment:
+original drivers isolated, common ground, GPIO12–14 disconnected from Sony,
+power switch within reach; I accept the remaining hardware risk.</label></p>
+<button data-sample="Captured blink">Replay captured blink once</button>
+<p>Frequency replays a separate original Sony capture: 128 frames, about
+one second, with all six recorded signals and original indicators preserved.
+It does not use the approximate text generator. The same stop limitations apply.</p>
+<button data-sample="Captured Frequency">Replay captured Frequency once</button>
+<p>MONO-only test uses captured scan timing but replaces all segment words:
+left MONO 1 for about half a second, then left MONO 2 for half a second.
+All other segment bits are zero. This is generated test data, not a captured
+Sony command; it uses the same initialization and CLEAR LOW stopping.</p>
+<button data-sample="MONO 1/2 test">Test MONO 1 then MONO 2 once</button>
+<button data-sample="stop">Stop</button>
+<pre id="status" aria-live="polite">Connecting...</pre>
+<a href="/settings">Wi-Fi settings</a>
+<script>
+const status = document.getElementById("status");
+const names = ["FLGDATA", "FLGCLK", "FLCLEAR", "FLSTB", "FLSDATA", "FLSCLK"];
+let pinLayout = "";
+let activePinProfile = null;
+function renderPinControls(state) {
+  const layout = JSON.stringify((state.pins || []).map(pin => pin.gpio));
+  if (layout !== pinLayout) {
+    const container = document.getElementById("pin-controls");
+    container.textContent = "";
+    (state.pins || []).forEach((pin, index) => {
+      const row = document.createElement("p");
+      row.innerHTML = names[index] + " GPIO" + pin.gpio +
+        ': <strong id="pin-' + pin.gpio + '">Unknown</strong>' +
+        ' <button data-gpio="' + pin.gpio + '" data-level="0">LOW</button>' +
+        ' <button data-gpio="' + pin.gpio + '" data-level="1">HIGH</button>';
+      container.appendChild(row);
+    });
+    container.querySelectorAll("[data-gpio]").forEach(button => {
+      button.addEventListener("click", async () => {
+        try {
+          await request({method: "POST", headers: {"Content-Type": "application/json"},
+            body: JSON.stringify({gpio: Number(button.dataset.gpio),
+              level: Number(button.dataset.level),
+              bench_confirmed: document.getElementById("confirmed").checked})});
+        } catch (err) { status.textContent = err.message; }
+      });
+    });
+    pinLayout = layout;
+  }
+  const selector = document.getElementById("pin-profile");
+  const supported = typeof state.pin_profile === "string";
+  selector.disabled = state.running || !supported;
+  document.getElementById("pin-profile-apply").disabled = selector.disabled;
+  if (supported && activePinProfile !== state.pin_profile) {
+    selector.value = state.pin_profile;
+    if (activePinProfile !== null) {
+      document.getElementById("confirmed").checked = false;
+      document.getElementById("live-confirmed").checked = false;
+    }
+    activePinProfile = state.pin_profile;
+  }
+  document.getElementById("pin-profile-active").textContent =
+    (supported ? "Active: " + state.pin_profile_name : "Firmware has no profile selector") +
+    "\n" + (state.pins || []).map((pin, index) =>
+      names[index] + "=GPIO" + pin.gpio).join(" / ");
+}
+window.screenRequest = request;
+async function request(options) {
+  const response = await fetch("/api/screen", {cache: "no-store", ...options,
+    signal: AbortSignal.timeout(5000)});
+  if (!response.ok) throw new Error(await response.text());
+  const state = await response.json();
+  renderPinControls(state);
+  status.textContent = (state.running ? "Scanning" : "Idle / outputs held safe") +
+    "\nPin profile: " + (state.pin_profile_name || "Original") +
+    "\nTranslator OE: external; not controlled or measured" +
+    "\nFrames: " + state.completed_frames + "\nGPIO error: " + state.last_error;
+  if (!state.running) status.textContent = "Scan stopped; outputs held at idle levels" +
+    "\nPin profile: " + (state.pin_profile_name || "Original") +
+    "\nTranslator OE: external; not controlled or measured" +
+    "\nFrames: " + state.completed_frames + "\nGPIO error: " + state.last_error;
+  if (state.timing_running) status.textContent +=
+    "\nGenerated " + (state.timing.hold ? "held-grid PWM" :
+      state.timing.pair ? "explicit two-grid scan" : "26-slot scan") +
+    "\nNominal " + (state.timing.hold ? "PWM" : "frame") + ": " +
+    state.timing_cycle_hz.toFixed(2) + " Hz; grid duty " +
+    (state.timing_grid_duty * 100).toFixed(3) + "%" +
+    "\nBackend: " + state.timing_backend +
+    (state.timing.alternate_ms ? "\nLocal held dwell: " +
+      state.timing.alternate_ms + " ms; selected slot: " + state.active_held_slot +
+      " (-1 = blank); trailing blank steps: " + state.timing.alternate_blank_steps +
+      "\nCompleted switch submissions: " + state.held_switches +
+      "; last interval: " + (state.held_last_interval_us / 1000).toFixed(2) +
+      " ms (software timing, not measured voltage)" : "") +
+    "\nTiming revision desired / submitted: " + state.timing_revision + " / " +
+    state.submitted_timing_revision +
+    "\nCounts are completed cycles (PWM cycles in held mode)." +
+    "\nNominal timing excludes GPIO overhead, yields and DMA gaps.";
+  for (const pin of state.pins || []) {
+    document.getElementById("pin-" + pin.gpio).textContent =
+      state.levels_dynamic ? (state.timing_running && state.timing.pair ?
+        "GPIO waveform" : "DMA waveform") :
+      pin.level < 0 ? "Unknown" : pin.level ? "HIGH" : "LOW";
+  }
+  document.querySelectorAll("[data-gpio]").forEach(button => button.disabled = state.running);
+}
+document.getElementById("pin-profile-apply").addEventListener("click", async () => {
+  try {
+    await request({method: "POST", headers: {"Content-Type": "application/json"},
+      body: JSON.stringify({pin_profile: document.getElementById("pin-profile").value,
+        bench_confirmed: document.getElementById("confirmed").checked})});
+  } catch (err) { status.textContent = err.message; }
+});
+document.querySelectorAll("[data-sample]").forEach(button => {
+  button.addEventListener("click", async () => {
+    try {
+      await request({method: "POST", headers: {"Content-Type": "application/json"},
+        body: JSON.stringify({sample: button.dataset.sample,
+          live_confirmed: document.getElementById("live-confirmed").checked,
+          bench_confirmed: document.getElementById("confirmed").checked})});
+    } catch (err) { status.textContent = err.message; }
+  });
+});
+async function poll() {
+  try { await request(); } catch (err) { status.textContent = err.message; }
+  setTimeout(poll, 1000);
+}
+poll();
+
+const timingFields = [
+  ["setup_ns", "DATA setup before CK LOW (ns)", 250, 1],
+  ["clock_low_ns", "CK LOW (ns)", 500, 1],
+  ["clock_high_ns", "CK HIGH / DATA hold (ns)", 500, 1],
+  ["strobe_ns", "STB HIGH (ns)", 3000, 1],
+  ["latch_guard_ns", "CK-to-latch guard (ns)", 2000, 1],
+  ["blank_before_ns", "Blank before shifting (ns)", 2000, 1],
+  ["blank_after_ns", "Blank after latch (ns)", 2000, 1],
+  ["on_ns", "CLEAR HIGH / lit (us)", 50, 1000],
+  ["off_ns", "CLEAR LOW / dark (us)", 190.75, 1000],
+  ["pulses", "CLEAR pulses per scan slot", 1, 0]
+];
+const timingInputs = {};
+for (const [key, name, value, scale] of timingFields) {
+  const label = document.createElement("label");
+  label.style.display = "inline-block";
+  label.style.margin = "8px";
+  label.textContent = name + " ";
+  const input = document.createElement("input");
+  input.type = "number";
+  input.value = value;
+  input.step = scale === 0 ? 1 : 125 / scale;
+  input.style.width = "100px";
+  input.addEventListener("input", timingEstimate);
+  timingInputs[key] = input;
+  label.appendChild(input);
+  document.getElementById("timing-fields").appendChild(label);
+}
+function timingValues() {
+  const timing = Object.fromEntries(timingFields.map(([key, , , scale]) =>
+    [key, Number(timingInputs[key].value) * (scale || 1)]));
+  const mode = document.getElementById("timing-mode").value;
+  timing.hold = mode === "hold" || mode === "alternate" ? 1 : 0;
+  timing.pair = document.getElementById("timing-mode").value === "pair" ? 1 : 0;
+  timing.alternate_ms = mode === "alternate" ?
+    Number(document.getElementById("alternate-ms").value) : 0;
+  timing.alternate_blank_steps = mode === "alternate" ?
+    Number(document.getElementById("alternate-blank-steps").value) : 0;
+  timing.slot = Number(document.getElementById("timing-slot").value);
+  if (Object.values(timing).some(value => !Number.isSafeInteger(value)))
+    throw new Error("Timing values must be whole nanoseconds; use the stated steps.");
+  return timing;
+}
+window.screenTimingRequest = () => document.getElementById("timing-mode").value === "legacy"
+  ? {} : {sample:"Timing", timing:timingValues()};
+function timingEstimate() {
+  const target = document.getElementById("timing-estimate");
+  try {
+    const t = timingValues();
+    const transfer = t.blank_before_ns + (t.pair ? 80 : 41) * (t.setup_ns + t.clock_low_ns +
+      t.clock_high_ns) + t.latch_guard_ns + t.strobe_ns + t.blank_after_ns;
+    const slot = transfer + t.pulses * (t.on_ns + t.off_ns);
+    const cycle = t.hold ? t.on_ns + t.off_ns : (t.pair ? 2 : 26) * slot;
+    const duty = 100 * (t.hold ? t.on_ns : t.pulses * t.on_ns) / cycle;
+    target.textContent = document.getElementById("timing-mode").value === "legacy"
+      ? "Legacy: fixed resampled timing; these inputs do not apply."
+      : "Form estimate: " + (slot / 1000).toFixed(3) + " us/scan slot, " +
+        (1e9 / cycle).toFixed(2) + (t.hold ? " Hz PWM" : " Hz full frame") +
+        ", selected-grid duty " + duty.toFixed(3) +
+        "%." + (t.alternate_ms ? " Local sequence: " +
+          (1000 / ((2 + t.alternate_blank_steps) * t.alternate_ms)).toFixed(2) +
+          " Hz; " + t.alternate_blank_steps + " full blank steps." : "") +
+        " Excludes DMA padding/gaps. Server validates limits when applied.";
+  } catch (error) { target.textContent = error.message; }
+}
+function timingPreset(hold, on, off, pulses) {
+  document.getElementById("timing-mode").value = hold ? "hold" : "scan";
+  for (const [key, , value] of timingFields) timingInputs[key].value = value;
+  timingInputs.on_ns.value = on;
+  timingInputs.off_ns.value = off;
+  timingInputs.pulses.value = pulses;
+  timingEstimate();
+}
+document.getElementById("timing-baseline").onclick = () => timingPreset(false, 50, 190.75, 1);
+document.getElementById("timing-fast").onclick = () => timingPreset(false, 50, 43.75, 1);
+document.getElementById("timing-repeat").onclick = () => timingPreset(false, 20, 20, 4);
+document.getElementById("timing-hold").onclick = () => timingPreset(true, 50, 1450, 1);
+document.getElementById("timing-pair").onclick = () => {
+  timingPreset(false, 20, 2060, 1);
+  document.getElementById("timing-mode").value = "pair";
+  document.getElementById("timing-slot").value = 22;
+  for (const [key, value] of Object.entries({setup_ns:1, clock_low_ns:2,
+      clock_high_ns:2, strobe_ns:5, latch_guard_ns:5,
+      blank_before_ns:5, blank_after_ns:5})) timingInputs[key].value = value;
+  timingEstimate();
+};
+document.getElementById("timing-alternate").onclick = () => {
+  document.getElementById("timing-pair").click();
+  document.getElementById("timing-mode").value = "alternate";
+  document.getElementById("alternate-ms").value = 50;
+  document.getElementById("alternate-blank-steps").value = 0;
+  timingInputs.off_ns.value = 1980;
+  timingEstimate();
+};
+document.getElementById("timing-mode").onchange = timingEstimate;
+document.getElementById("timing-slot").oninput = timingEstimate;
+document.getElementById("alternate-ms").oninput = timingEstimate;
+document.getElementById("alternate-blank-steps").oninput = timingEstimate;
+document.getElementById("timing-apply").onclick = () =>
+  document.getElementById("apply-display").click();
+document.getElementById("timing-save").onclick = () => {
+  try {
+    localStorage.setItem("sony-timing-form", JSON.stringify({
+      mode:document.getElementById("timing-mode").value, timing:timingValues()}));
+    status.textContent = "Form saved in this browser; no output changed.";
+  } catch (error) { status.textContent = error.message; }
+};
+document.getElementById("timing-load").onclick = () => {
+  try {
+    const saved = JSON.parse(localStorage.getItem("sony-timing-form"));
+    if (!saved || !["scan","hold","pair","alternate","legacy"].includes(saved.mode) ||
+        !saved.timing || timingFields.some(([key]) =>
+          !Number.isSafeInteger(saved.timing[key])) ||
+        !Number.isSafeInteger(saved.timing.slot)) throw new Error("No valid saved form.");
+    document.getElementById("timing-mode").value = saved.mode;
+    document.getElementById("timing-slot").value = saved.timing.slot;
+    document.getElementById("alternate-ms").value = saved.timing.alternate_ms || 50;
+    document.getElementById("alternate-blank-steps").value =
+      saved.timing.alternate_blank_steps || 0;
+    for (const [key, , , scale] of timingFields)
+      timingInputs[key].value = saved.timing[key] / (scale || 1);
+    timingEstimate();
+  } catch (error) { status.textContent = error.message; }
+};
+timingEstimate();
+</script>
+<script src="/display-editor.js"></script>
+</html>

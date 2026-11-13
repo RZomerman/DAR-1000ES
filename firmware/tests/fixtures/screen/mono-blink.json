@@ -1,0 +1,32 @@
+{
+  "source": "sony-td-mono-blink.bin",
+  "source_sha256": "39260c21825ac5b0e0c4f61d7da5c6ca23ab0e3f0cd768d1db96558b17ed972f",
+  "sample_rate_hz": 8000000,
+  "start_sample": 3285249,
+  "end_sample_exclusive": 11424710,
+  "samples": 8139461,
+  "duration_seconds": 1.017432625,
+  "frames": 130,
+  "initial_segment_word": "0000000000",
+  "initial_grid_word": "0000000001",
+  "visible_samples": 4069730,
+  "hidden_samples": 4069731,
+  "payload_sha256": "e118071ad37925a0740a27bda75f2980927e8e33dde3ceabd27bfaa9323eb0fe",
+  "bit_to_gpio": {
+    "0": 48,
+    "1": 47,
+    "2": 41,
+    "3": 42,
+    "4": 39,
+    "5": 40
+  },
+  "bit_to_signal": {
+    "0": "FLSCLK",
+    "1": "FLSDATA",
+    "2": "FLCLEAR",
+    "3": "FLSTB",
+    "4": "FLGDATA",
+    "5": "FLGCLK"
+  },
+  "status": "Preparation only; no firmware replay or safe stop validated"
+}
