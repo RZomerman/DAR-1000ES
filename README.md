@@ -4,6 +4,14 @@ This repository contains the project documentation converted from the original W
 
 ## Chapters
 
+For current display control, start with the
+[fixed-element guide](08-esp-display-driver-specification.md#6-fixed-element-control-guide)
+and [generic 5x7 matrix guide](08-esp-display-driver-specification.md#7-generic-5x7-matrix-guide).
+The [annotated reference comparison](media/display-reference-coverage.svg)
+matches every functional symbol in the FL701 drawing to an observed command.
+Element mapping is complete at that level; stable full-screen multiplexing
+and electrical validation are still separate, unresolved driver work.
+
 The [complete display bitmap catalogue](10-display-bitmap-catalogue.md)
 includes 5x7 pixel patterns and HEX values for uppercase/lowercase letters,
 digits, punctuation, a music note and seven level bars.
@@ -26,4 +34,4 @@ Images used by the chapters are stored in [`media/`](media/).
 ## Control Integration Options
 
 1. **Reuse the original controls (partially characterized):** Investigate the parallel bus between the system controller and display/front-panel controller IC701 before bypassing the original control firmware. See the [internal bus protocol specification](SONY_DAR1000ES_Protocol_Spec.md) and [2026-11-02 capture findings](05-bus-capture-findings.md). Passive captures establish repeatable framing and key/display correlations, but masked bits, driver ownership and electrical assumptions still block reliable emulation.
-2. **Direct display-driver control (fallback, passively decoded):** Captures at IC702/IC703 establish a 26-slot scan, 40 segment clocks and one grid clock per slot, readable text and isolated annunciator bits. See [Direct Display driving](06-direct-display-driving.md) for measured timing, wiring, glyphs and mappings. Active driving and the electrical interface remain unverified; [DAR-1000ES Display Control](02-display-control.md) retains the original hardware proposal.
+2. **Direct display-driver control (optically mapped, driver experimental):** Captures at IC702/IC703 establish a 26-slot scan, 40 segment clocks and one grid clock per slot. Controlled one-hot tests now map all 770 matrix dots and all fixed functional elements shown in the reference. See the [current control guide](08-esp-display-driver-specification.md) and [capture/validation history](06-direct-display-driving.md). Held-grid operation is usable for controlled tests, but clean full-screen multiplexing and electrical margins are not yet certified. [DAR-1000ES Display Control](02-display-control.md) retains the original hardware proposal, not current wiring instructions.

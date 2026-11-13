@@ -1,18 +1,20 @@
 # Direct Display driving
 
-Bench findings: 2026-11-04; datasheet/replay comparison: 2026-11-08.
+Bench findings: 2026-11-04; datasheet/replay comparison: 2026-11-08;
+complete optical inventory and reference comparison: 2026-11-13.
 
-For consolidated driver requirements, slot masks, captured outcomes and explicit
-unknowns, see the [ESP32 display-driver specification](08-esp-display-driver-specification.md).
+For current controls, use the
+[fixed-element guide](08-esp-display-driver-specification.md#6-fixed-element-control-guide)
+and [generic matrix guide](08-esp-display-driver-specification.md#7-generic-5x7-matrix-guide).
+This chapter retains the dated capture and validation evidence behind them.
 
-**Status: passively decoded; experimental replay is not working correctly
-on the live display.** Captures at the inputs
-of the two TD62C950RF display drivers reveal a repeating 26-slot scan, readable
-character matrices, red-display patterns and several isolated annunciator bits.
-This is the measured basis for Option 2: replacing IC701's display output with
-an ESP32. The earlier replay had extra startup/shutdown clock edges and
-showed malformed characters on Sony. Version 0.3.5 fixes those boundaries
-on the analyser; its live display result is not yet verified.
+**Current status: every functional reference element has an observed command
+match; stable full-screen multiplexing remains unresolved.** All 1,040
+one-hot commands were tested: 846 resolved and 194 did not. The latter are
+not proven unused. Held GPIO preload with CLEAR-only DMA enabled the
+controlled optical inventory; it is not a finished replacement for the
+original scan. Earlier firmware defects, partial inventories and tentative
+interpretations below describe their dated experiments, not current mapping gaps.
 
 This document supersedes the **40 segment clocks + 40 grid clocks per latch**
 hypothesis in [the original display chapter](02-display-control.md). The measured
@@ -714,8 +716,9 @@ reported the MEMORY indicator appeared or blinked; pressing 1 produced no
 visible change. Around 4.020 seconds slot 25 changed from `0000478C00` to
 `0000000002`, then alternated between `0000478C02` and `0000000002` at
 roughly 509 ms intervals. At 9.107 seconds it returned to `0000478C00`.
-No other slot changed during this sequence. Slot 25 **bit `0x02` is therefore
-a strong MEMORY indicator candidate**, but it remained set through both
+No other slot changed during this sequence. At that stage, slot 25
+**bit `0x02` was a strong MEMORY candidate**; it is now optically confirmed.
+It remained set through both
 captured red-character blink phases; the report does not establish that the
 MEMORY indicator itself blinked. Later red-word changes in this capture lack
 independently timestamped button annotations and are not mapped here.
@@ -821,24 +824,22 @@ Times are relative to the beginning of the recording, not power-on:
 The slot-0 transition occurs about 0.986 s after the Frequency frame and
 adds bits `0x3FFF`; bit `0x4000` was already set. The user reports that the
 indicator's lower dots are visible at startup before the bar becomes full.
-This strongly supports slot 0 as the indicator's control word, but the
-capture does not independently identify the physical segment controlled by
-each bit, whether `0x4000` is a label/dot or another element, or whether the
-full word contains non-bar elements. The all-zero decoded frame must not be
+This supported slot 0 as the indicator's control word, but the passive
+capture alone did not identify each physical segment. The later one-hot
+inventory resolved bits 0-13 as bars and bit 14 (`0x4000`) as all bottom
+dots together. That mapping is no longer an outstanding question.
+The all-zero decoded frame must not be
 assumed to prove that the whole VFD was visibly dark during power-up, since
 the other driver control pins and startup power conditions were not measured.
-Correlate intermediate levels with visual observations or use a safe
-individual-bit walk after the electrical interface is validated.
 
 Evidence: session artifacts `sony-original-restored-poweron.bin` and
 `sony-original-restored-poweron-analysis.json`.
 
-## 9. What remains before direct driving
+## 9. What remains before a reliable replacement driver
 
-The measured model suggests preparing 26 segment words, shifting 40 segment
-bits and one grid bit per slot, and reproducing the measured latch/blanking
-sequence. The datasheet establishes the input semantics and version 0.3.5
-passes buffered boundary checks, but its live display result is unverified.
+The confirmed control map supplies all 26 slot words. Remaining work concerns
+clean full-screen multiplexing, electrical margins and fault behavior, not
+re-identifying the fixed elements or matrix orientation.
 
 Before any active experiment:
 
@@ -852,10 +853,11 @@ Before any active experiment:
 4. Establish safe blanking and grid sequencing so a stalled scan cannot leave
    a grid continuously energized. Preserve the existing VFD supply/filament
    arrangements and keep probes off high-voltage outputs.
-5. Confirm the MEMORY candidate and isolate the left MONO label, LNC label, antenna bars and remaining
-   indicators; expand red character and text font coverage.
+5. Validate stable full-screen output and coherent updates independently of
+   the successful held-grid tests. Review generated red/text glyph designs
+   as needed; their segment and pixel controls are already known.
 6. Extend the measured two-mode brightness behavior to other operating
    states and complete startup/shutdown mapping for a full replacement.
 
-The current result is a reproducible passive display map with specific
-confirmed transitions, not a finished ESP32 driver.
+The current result is a complete reference-level optical command map and
+controlled held-grid operation, not a finished full-screen ESP32 driver.

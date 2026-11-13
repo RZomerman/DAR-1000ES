@@ -1,10 +1,31 @@
 # Live ESP32 Display Driver and Validation
 
-Status as of 2026-11-09. This chapter records the current direct-display
-prototype and its first live validation on a Sony DAR-1000ES. It complements
-the passively decoded signal and segment mapping in
+This chapter records the historical 2026-11-09 prototype and its first live
+validation on a Sony DAR-1000ES, followed by the current status below.
+It complements the capture and optical mapping evidence in
 [Chapter 6](06-direct-display-driving.md) and the consolidated design notes in
 [Chapter 8](08-esp-display-driver-specification.md).
+
+## Current status: 2026-11-13
+
+The later firmware 0.3.23 held-grid tests used GPIO preload and CLEAR-only
+DMA to map all functional elements in the FL701 reference. Individual
+controls and matrix orientation are confirmed; clean full 26-slot
+multiplexing is still unresolved. Use the
+[fixed-element](08-esp-display-driver-specification.md#6-fixed-element-control-guide)
+and [matrix](08-esp-display-driver-specification.md#7-generic-5x7-matrix-guide)
+guides for current assignments, not tentative interpretations of the early
+MEMORY scan below.
+
+The camera inventory used 3.75% held-grid duty (37.5 us ON / 962.5 us OFF);
+the existing guard was not raised. This is controlled optical evidence,
+not electrical/current-rating certification. The GPIO table and 250 Hz
+measurements below belong specifically to the older 0.3.14 experiment,
+not current wiring or a validated production scan.
+
+The installed translator is kept enabled. Before any USB reset or reflash,
+confirm all six Sony display signal wires are physically disconnected.
+Switching Sony off alone is not electrical isolation.
 
 ## What is being driven
 
@@ -15,11 +36,11 @@ controller bus documented in [Chapter 5](05-bus-capture-findings.md).
 
 The captured Sony scan has 26 slots per frame. Each slot shifts 40 segment
 bits and one grid bit. The original scan is approximately 301 us per slot,
-or 127.8 Hz per frame. The current experimental firmware preserves that
-slot structure but deliberately shortens the timing to test whether a faster
+or 127.8 Hz per frame. The 0.3.14 experimental firmware preserved that
+slot structure but deliberately shortened the timing to test whether a faster
 refresh reduces visible flicker.
 
-## Current hardware and signal map
+## Historical 0.3.14 hardware and signal map
 
 The tested controller is an ESP32-S3, firmware 0.3.14, using a TXS0108E
 translator between 3.3 V ESP GPIO and the 5 V display logic. The grounds are
@@ -40,8 +61,8 @@ specification.
 | Translator OE | TXS0108E output enable | 4 | D6 |
 | Unassigned | — | — | D7 |
 
-This GPIO map is specific to firmware 0.3.14 and supersedes the older ESP pin
-assignments recorded in earlier captures and Chapter 8. Keep GPIO12-14
+This GPIO map is specific to firmware 0.3.14; it must not be treated as the
+current live wiring. Keep GPIO12-14
 disconnected from the Sony; they serve as unused/control lanes for the i80
 peripheral.
 
@@ -52,7 +73,7 @@ six display signals to DATA LOW, CLEAR LOW, STB LOW, and both clocks HIGH
 after a scan. These are commanded logic levels, not a hardware blanking
 fail-safe.
 
-## Driver implementation
+## Historical 0.3.14 driver implementation
 
 The screen-only firmware builds each scan from captured signal timing and
 streams it with the ESP-IDF LCD i80 peripheral at an 8 MHz sample clock using
@@ -99,7 +120,7 @@ reliably diagnose flicker at a 250 Hz refresh rate or identify that point.
 Visual stability and the identity of the faint element therefore remain
 unconfirmed.
 
-## Current limits and safe next steps
+## Limits of the 2026-11-09 tests
 
 - The 250 Hz scan is intentionally faster than the captured Sony baseline;
   success at this timing does not establish protocol-faithful operation.
@@ -112,6 +133,6 @@ unconfirmed.
 - A higher-frame-rate, short-exposure recording or a photodiode measurement
   would be needed to distinguish real scan flicker from camera aliasing.
 
-The present result is a working, analyser-verified experimental scan that
+Those tests established an analyser-verified experimental scan that
 lights the selected MEMORY indicator, but it is not yet a verified stable
 replacement for the original Sony display driver.

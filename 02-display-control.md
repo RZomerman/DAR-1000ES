@@ -2,11 +2,16 @@
 
 Internet-radio user interface, display drivers and logic 
 
-> **Measured update, 2026-11-04:** See [Direct Display driving](06-direct-display-driving.md)
-> for passive captures, timing and decoded text/indicator mappings. The observed
+> **Current guide, 2026-11-13:** Use the
+> [fixed-element controls](08-esp-display-driver-specification.md#6-fixed-element-control-guide)
+> and [generic matrix guide](08-esp-display-driver-specification.md#7-generic-5x7-matrix-guide).
+> This chapter retains the original hardware proposal, not current wiring
+> instructions. See [Direct Display driving](06-direct-display-driving.md)
+> for the capture and optical-validation history. The observed
 > scan uses **40 segment clocks and one grid clock per latch, across 26 slots**,
-> not 40 grid clocks per latch as hypothesized below. Active driving, electrical
-> compatibility and the proposed ESP32 connections remain unverified.
+> not 40 grid clocks per latch as hypothesized below. Element mapping and
+> controlled held-grid operation are established; stable full-screen
+> multiplexing and electrical margins remain unresolved.
 
 ## Approach Selection
 
@@ -43,13 +48,17 @@ Given the spec sheet on the drivers, we should be able to control the inputs (se
 
 3.  STB Strobe/Latch (SONY: FLSTB)
 
-4.  CLEAR Clear all stored bits (SONY: FLCLEAR)
+4.  CLEAR Blank grid outputs while LOW, without resetting the shift register (SONY: FLCLEAR)
 
 The way that data is loaded is by the combination of the DATA input and the clock input. On clock 0 we can send a 1 on the data port, resulting in: 1000000000000000000000000000000000000000
 
 If we can tick the clock again, everything shifts to the right, if we send another 0 now, we get 0100000000000000000000000000000000000000
 
-Once we have all 40 sections loaded (or even partially), we can activate the outputs (and thus the display fields). Only when the STB (strobe) signal is pulsed does the chip copy the stored data to its output pins. In the above, only pin 2 will become active. Clear effectively sets the entire register to 0.
+STB HIGH makes the output latch transparent to the shift register; STB LOW
+holds the latched pattern. It is not a rising-edge-only copy operation.
+Grid CLEAR LOW overrides the outputs to blank the selected grid, but
+does not erase the shifted data. The ESP must respect latch and blanking
+timing while changing the pattern; see the current specification.
 
 So, the idea is simple, check what control signals are sent from IC701 to the display (for example at startup). Capture those, revert the engineering and replace IC701 with something we can program ourselves, an ESP32.
 

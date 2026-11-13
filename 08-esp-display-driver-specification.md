@@ -28,8 +28,9 @@ comparison entries linked to those 846 commands. Whole legends count once;
 coupled meter dots, digit strokes and right MONO/index 2 count separately.
 All 770 reference matrix cells have unique optical matches.
 
-This update supersedes the earlier candidate/unknown physical assignments
-in the capture-era tables below. It does not supersede electrical constraints.
+Sections 5-7 below are the current element-control guide, replacing the
+earlier candidate/unknown physical assignments. The optical inventory
+does not supersede electrical constraints.
 The inventory used conservative held-grid CLEAR PWM, with 560 commands
 revalidated at 3.75% duty and the remaining 480 captured at that duty.
 The reference comparison used existing sequential evidence, not simultaneous
@@ -43,49 +44,57 @@ This specifies direct control of the IC702 grid driver and IC703 segment
 driver, both Toshiba TD62C950RF. It is **not** the parallel command protocol
 between the original controllers.
 
-The display has no measured high-level "show MEMORY" command. The ESP must
-continuously scan 26 slots, sending a 40-bit segment word for each slot.
-For example, the MEMORY candidate is **slot 25 mask `0x02`**, not a standalone
-bus command. The same mask in another slot has a different meaning.
+The display has no high-level "show MEMORY" bus command. A complete screen
+is represented by 26 slot words, each 40 bits wide, refreshed through grid
+multiplexing. For example, the confirmed MEMORY control is **slot 25 mask
+`0x02`**, not a standalone bus command. The same mask in another slot has a
+different meaning. Held-grid tests isolate one slot under limited CLEAR
+duty; they do not establish reliable full-screen multiplexing.
 
 | Status | Meaning |
 |--------|---------|
-| Confirmed | Datasheet-defined behavior or isolated, repeatable capture correlation |
+| Optically confirmed | An isolated command produced the identified visible response in controlled camera tests |
+| Datasheet-defined | Specified chip behavior; actual interface compliance still requires measurement |
 | Captured | A complete observed pattern; individual physical elements may not be isolated |
-| Candidate | Strong correlation, but independent confirmation is missing |
-| Unknown | Not mapped; do not assign a meaning or actively test without precautions |
+| Derived | Composed from known pixels/segments; not necessarily an original Sony glyph or a visually checked combination |
+| Unresolved | No resolved optical response, or a separately identified outstanding electrical/behavioral question |
 
-Distinguish **field control** from **individual physical-bit verification**.
-The PROGRAM and MONO groups, full signal indicator, source/LNC selections
-and programmable text layout are usable even where a label's individual bit
-has not been isolated. A missing original Sony glyph does not prevent generating
-that character from our own 5x7 font.
+Individual fixed-element controls and all 770 matrix-dot positions are now
+optically confirmed. Distinguish that mapping from **electrical verification
+and reliable multiplexing**, which are not established by knowing the bits.
+A missing original Sony glyph does not prevent constructing a character
+from the confirmed 5x7 pixel layout; its design/readability can still need review.
 
 ### Capability inventory
 
 | Screen element | What we have | What is still unresolved |
 |----------------|--------------|--------------------------|
-| Text letters and digits | Addressable 5x7 layout, message/frequency slot order and captured glyph examples; arbitrary letters/digits can be generated | Complete original Sony font is not catalogued; generated orientation needs live verification |
-| PROGRAM label with small 1/2/3 | Complete visible/hidden words and isolated small-digit selection masks | Separate label bit is not independently isolated |
-| Left MONO label with small 1/2 | Complete words and isolated index masks | Label `0x10` is a candidate individual assignment |
-| Separate right-hand MONO | Independently isolated `0x800` | No additional mapping needed for the captured indicator |
-| MEMORY | Repeated independent activation/exit correlation for slot 25 `0x02` | Physical drive verification |
-| Red A/B/C/D | Direct words for all four letters are now captured, including C `0xC08400` | General red segment geometry remains incomplete |
-| Other red letters | Can potentially be composed from the red segment geometry | Requested E/F/G/H/I/L/K/M/N/O/P/Q/R/S/T/U/V/W/X/Y/Z are derived targets, not verified captured words |
-| Red numbers | Captured composite A2, A9, A16 and other reported numeric states | General digit/segment mapping is incomplete |
-| Signal indicator full | Captured slot 0 `0x7FFF`, with startup transition | Individual bar order and intermediate levels |
-| Lower dotted signal scale | User-observed at startup and in older D/No DSR captures associated with `0x4000` | Whether dots share an enable, and exact individual physical-bit assignments |
-| LNC OFF/A/B | Complete composite states and isolated selection masks | Separate LNC-label bit verification |
-| CABLE/SATELLITE | Independently isolated source masks | No additional mapping needed for the captured selections |
-| Bright/dim, hide, blink | Captured electrical timing and data sequences | Dim edge placement and live generated-output verification |
+| All 22 text matrices | Every 5x7 dot and its orientation confirmed, including slots formerly called unassigned | Complete original Sony font and readability of every generated glyph are not established |
+| PROGRAM and indices 1/2/3 | Four separate controls: bits 8, 7, 6, 5 of slot 24 | No mapping gap |
+| Left audio legends and MONO indices | SPEECH, MUSIC, MONO, 1 and 2 independently mapped | No mapping gap |
+| Right audio legends | SPEECH and MUSIC independent; MONO plus its 2 share one bit | MONO and its 2 cannot be separated by the mapped command |
+| STEREO and MEMORY | Separate slot-25 bits 0 and 1, optically confirmed | No mapping gap |
+| Left red glyph | All 14 stroke controls mapped, including faint bit 16 | New letter combinations are derived designs until visually reviewed |
+| Red numeric field | Seven independent right-digit segments and a separate adjacent 1-shaped control | Adjacent 1 has two strokes driven together; it is not another full seven-segment digit |
+| Signal meter | 14 bars in increasing order; 14 bottom dots share bit 14 | Bottom dots cannot be independently selected by the mapped command |
+| Source/LNC and lower markers | All six legends and all 16 numbered pads mapped | No mapping gap |
+| Brightness, hide and blink | Original timing/data captures and controlled held-grid PWM evidence | Reliable full-screen scanning and electrical margins remain separate validation work |
+| Upper/unresolved bits | All 194 were tested without a resolved response | Not proven unused; keep zero in normal compositions |
 
-Firmware 0.3.7 can replay captured waveforms. Readable live Frequency output
-has been observed, but reliable live operation remains unresolved. Simultaneous
+Historical firmware 0.3.7 tests replayed captured waveforms. Readable live
+Frequency output was observed, but reliable live operation was unresolved. Simultaneous
 STB measurements showed a clean ESP input to the buffer and extra short pulses
 at its output. Buffer, wiring and analyser/probe causes are not fully separated.
-An arbitrary-screen driver is not yet implemented or electrically validated.
+The later inventory used firmware 0.3.23 held GPIO preload with CLEAR-only
+DMA. A timing-adjustable experimental driver exists, but clean, stable full
+26-slot multiplexing is still unresolved; confirmed mapping does not resolve it.
 
 ## 2. Electrical interface and signal assignments
+
+The following GPIO/analyser table documents the earlier replay captures,
+not the current live test wiring. Verify the selected firmware profile and
+physical connections before driving. Slot/bit identities do not depend on
+which ESP GPIOs carry the serial signals.
 
 | Signal | Purpose | ESP GPIO | Current analyser channel | Screen connector pin |
 |--------|---------|----------|--------------------------|----------------------|
@@ -180,152 +189,222 @@ has 125 ns resolution and cannot certify analogue margins or threshold crossings
 
 ## 5. Screen slot map
 
-| Slot | Intended field | Status / limits |
-|------|----------------|-----------------|
-| 0 | Signal-strength indicator and lower dotted scale | Captured off, reported dots/startup and full words; individual elements unknown |
-| 1-2 | Unassigned | Zero in documented captures |
-| 3-5 | MHz suffix | Captured; slots read `z`, `H`, `M` |
-| 6-10 | Frequency | Captured right-to-left digits and decimal point |
-| 11-13 | Unassigned | Zero in documented captures |
-| 14-22 | Nine-character message | Captured right-to-left text |
-| 23 | CABLE/SATELLITE and LNC | Isolated masks plus label candidate |
-| 24 | PROGRAM label and small 1/2/3, left MONO label and small 1/2, separate right MONO | Complete groups and isolated selections; individual label bits partly unresolved |
-| 25 | Red letters/digits and other indicators | Composite patterns; MEMORY candidate |
+All assignments below are **optically confirmed**. Slot numbers are
+zero-based and decoder-relative, not physical TD62 grid-pin numbers.
 
-Do not assume the unassigned slots or unused word bits are safe general-purpose
-pixels. Physical connectivity has not been fully traced.
+| Slot | Physical field | Resolved bits | Bits with no resolved response |
+|------|----------------|---------------|--------------------------------|
+| 0 | Signal bars and bottom dots | 0-14 | 15-39 |
+| 1-22 | 22 generic 5x7 matrices | 0-34 in each slot | 35-39 in each slot |
+| 23 | Source/LNC labels and lower markers 1-16 | 0-21 | 22-39 |
+| 24 | Audio, PROGRAM and tuning symbols | 0-14 | 15-39 |
+| 25 | STEREO, MEMORY and red segments | 0-23 | 24-39 |
 
-## 6. Indicator masks and their outcomes
+Slots 1-2 and 11-13 are matrices too; they were merely blank in earlier
+captures. The 194 unresolved bits are not established spare pixels or
+control flags. Leave them zero in normal compositions.
 
-Masks below are hexadecimal within the named 40-bit slot word.
-Set/clear operations must preserve the other fields in the same slot.
+## 6. Fixed-element control guide
+
+Every listed bit-to-element assignment is optically confirmed, rather than
+a candidate inferred from composite words. Masks are hexadecimal within the
+named slot. OR independent masks to combine elements; clear a mask to hide
+that element. To replace one field while preserving the others:
+
+```c
+word = (word & ~field_mask) | (new_bits & field_mask);
+```
+
+Use unsigned 64-bit storage for each 40-bit word. Initialize a new frame's
+26 words to zero; changing data must not itself authorize or start output.
+For raw API words, pad hexadecimal values to ten characters:
+`0x180` becomes `"0000000180"`.
 
 ### Slot 0: signal strength
 
-| Word / mask | Captured outcome | Status |
-|-------------|------------------|--------|
-| `0x00` | No signal indicator commanded in the Frequency 118.0 setup baseline | Captured |
-| `0x4000` | Reported dotted signal scale in older D/No DSR states; initial Frequency startup state before full bar | Captured/user-correlated; exact physical elements unknown |
-| `0x7FFF` | Reported full signal bars | Captured |
-| `0x3FFF` | Bits added when startup changes to full scale about 0.986 s later | Confirmed data delta; individual dot/bar positions unknown |
-| Individual bits 0-13 | Which dot/bar, direction and level progression | Unknown |
-| Bit 14 (`0x4000`) | Label, baseline dot or other element | Unknown |
+| Bit(s) | Mask / formula | Visible element |
+|--------|----------------|-----------------|
+| 0-13, individually | `1ULL << (n - 1)`, bar `n = 1..14` | One bar, from the smallest/leftmost to largest/rightmost |
+| 14 | `0x4000` | All 14 bottom dots together |
 
-The startup observation alone does not establish a 15-step meter or one
-physical bar per bit. A synchronized visual comparison or safe bit walk is needed.
+For a cumulative level of `n = 0..14` bars, use `(1ULL << n) - 1`.
+Examples: one bar `0x01`, two `0x03`, three `0x07`, all fourteen
+`0x3FFF`. OR `0x4000` to add the dots; bars plus dots are `0x7FFF`.
+The bar field mask is `0x3FFF`; dots are independent of that field,
+but individual bottom dots cannot be selected separately.
 
-### Slot 23: source and LNC
+### Slot 23: source/LNC and lower numbered markers
 
-| Mask | Visible outcome | Status |
-|------|-----------------|--------|
-| `0x01` | CABLE | Confirmed |
-| `0x02` | SATELLITE | Confirmed |
-| `0x04` | LNC label | Candidate |
-| `0x08` | LNC OFF | Confirmed |
-| `0x10` | LNC A | Confirmed |
-| `0x20` | LNC B | Confirmed |
-| Other bits | Unassigned | Unknown |
+| Bit | Mask | Visible element |
+|-----|------|-----------------|
+| 0 | `0x01` | CABLE |
+| 1 | `0x02` | SATELLITE |
+| 2 | `0x04` | LNC |
+| 3 | `0x08` | OFF |
+| 4 | `0x10` | A |
+| 5 | `0x20` | B |
 
-Captured composite words: CABLE `0x01`; CABLE/LNC OFF `0x0D`;
-SATELLITE/LNC OFF `0x0E`; SATELLITE/LNC A `0x16`;
-SATELLITE/LNC B `0x26`.
+LNC is its own label, separate from OFF, A and B. For example,
+CABLE + LNC + OFF is `0x0D`; SATELLITE + LNC + A is `0x16`.
+These six labels occupy mask `0x3F`.
 
-### Slot 24: PROGRAM and MONO
+Each lower marker is an illuminated pad containing its dark numeral:
 
-| Mask | Visible outcome | Status |
-|------|-----------------|--------|
-| `0x80` | PROGRAM 1 | Confirmed |
-| `0x40` | PROGRAM 2 | Confirmed |
-| `0x20` | PROGRAM 3 | Confirmed |
-| `0x08` | Left MONO index 1 | Confirmed |
-| `0x04` | Left MONO index 2 | Confirmed |
-| `0x10` | Left MONO label | Candidate |
-| `0x800` | Separate right-hand MONO indicator | Confirmed; not the left index 2 |
-| `0x100` | Element retained with PROGRAM selections during setup blink; possible PROGRAM label | Candidate interpretation, not isolated; do not label MEMORY |
-| Other bits | Unassigned | Unknown |
+| Marker | Bit | Mask | Marker | Bit | Mask |
+|--------|-----|------|--------|-----|------|
+| 1 | 6 | `0x40` | 9 | 14 | `0x4000` |
+| 2 | 7 | `0x80` | 10 | 15 | `0x8000` |
+| 3 | 8 | `0x100` | 11 | 16 | `0x10000` |
+| 4 | 9 | `0x200` | 12 | 17 | `0x20000` |
+| 5 | 10 | `0x400` | 13 | 18 | `0x40000` |
+| 6 | 11 | `0x800` | 14 | 19 | `0x80000` |
+| 7 | 12 | `0x1000` | 15 | 20 | `0x100000` |
+| 8 | 13 | `0x2000` | 16 | 21 | `0x200000` |
 
-| Captured state | Visible word | Hidden word |
-|----------------|--------------|-------------|
-| PROGRAM 1, left MONO 1, right MONO | `0x998` | `0x180` |
-| PROGRAM 2, same MONO state | `0x958` | `0x140` |
-| PROGRAM 3, same MONO state | `0x938` | `0x120` |
-| PROGRAM 3, left MONO 1 only | `0x138` | `0x120` |
-| PROGRAM 3, left MONO 2 only | `0x134` | `0x120` |
-| Primary No DSR | `0x00` | Steady |
+For marker `n = 1..16`, use `1ULL << (n + 5)`. The marker field mask
+is `0x3FFFC0`; preserve the source/LNC bits when replacing it.
+For example, CABLE + LNC + OFF + marker 1 is `0x4D`.
 
-The same `0x998` word was also captured steady in the Frequency 118.0
-baseline. Blinking is a sequence of words, not a property of that word alone.
-The `0x80/0x40/0x20` selections correspond to the **small 1/2/3 behind
-PROGRAM**, not three separately established PROGRAM labels. Complete captured
-group words let us reproduce the label and digit together without first
-isolating the label bit.
+### Slot 24: audio, PROGRAM and tuning
 
-### Slot 25: MEMORY and red display
+| Bit | Mask | Visible element |
+|-----|------|-----------------|
+| 0 | `0x01` | Left SPEECH |
+| 1 | `0x02` | Left MUSIC |
+| 2 | `0x04` | Left MONO index 2 only |
+| 3 | `0x08` | Left MONO index 1 only |
+| 4 | `0x10` | Left MONO label only |
+| 5 | `0x20` | PROGRAM index 3 only |
+| 6 | `0x40` | PROGRAM index 2 only |
+| 7 | `0x80` | PROGRAM index 1 only |
+| 8 | `0x100` | PROGRAM label only |
+| 9 | `0x200` | Right SPEECH |
+| 10 | `0x400` | Right MUSIC |
+| 11 | `0x800` | Right MONO and its index 2 together |
+| 12 | `0x1000` | Right-pointing tuning triangle |
+| 13 | `0x2000` | TUNED |
+| 14 | `0x4000` | Left-pointing tuning triangle |
 
-| Mask / field | Outcome | Status |
-|--------------|---------|--------|
-| `0x02` | Steady MEMORY indicator | Confirmed by earlier explicit visual report and isolated B-context transition; physical bit-drive test pending |
-| Red letter bits | Arbitrary A/B/D and other letters | Complete examples captured; individual segment map unknown |
-| Red numeric bits | Arbitrary one/two-digit values | Complete examples captured; digit separation incomplete |
-| Other indicator bits | Unassigned | Unknown |
+**PROGRAM, 1, 2 and 3 are four separate controls.** PROGRAM + 1 is
+`0x180`; PROGRAM + 2 is `0x140`; PROGRAM + 3 is `0x120`.
+Replace those four controls with field mask `0x1E0` without touching audio
+or tuning symbols. PROGRAM is not MEMORY; MEMORY is in slot 25.
 
-During the isolated MEMORY sequence, slot 25 alternated `0x478C02` /
-`0x02`, then returned to `0x478C00`. The `0x02` bit remained HIGH in
-both red-character blink phases. It does not prove MEMORY itself blinked.
-No other slot changed during that first sequence.
-The earlier user report explicitly described MEMORY as a fixed element with
-only B blinking. Thus the observed behavior is **steady MEMORY, blinking red
-character**, rather than an unknown MEMORY blink state.
+Left MONO + 1 is `0x18`; left MONO + 2 is `0x14`.
+The separate right MONO/index-2 group is `0x800`; its two symbols are
+not independently controllable by the mapped command.
+Both tuning triangles plus TUNED are `0x7000`.
 
-This is also supported by earlier scans, not only the latest activation:
+### Slot 25: status labels and individual red segments
 
-| Earlier capture | Valid frames / slot-25 evidence | Interpretation |
-|-----------------|--------------------------------|----------------|
-| `sony-td-mono-blink` | 634 frames; `0x800022` / `0x02` | MEMORY was reported; bit `0x02` persists in both phases |
-| `sony-td-primary-b-memory-transition` | 3,802 frames; `0xA61C00`, `0xA61C02`, `0x02` | B-context activation adds `0x02`; exit restores `0xA61C00` |
-| `sony-td-primary-b-memory` | 633 frames; steady `0xA61C00` | No active MEMORY bit in the sampled frames despite the filename |
-| `sony-td-primary-b-memory-active` | 634 frames; steady `0xA61C00` | No active MEMORY bit in the sampled frames despite the filename |
+| Bit | Mask | Visible element |
+|-----|------|-----------------|
+| 0 | `0x01` | STEREO |
+| 1 | `0x02` | MEMORY |
+| 2 | `0x04` | Right digit a: top |
+| 3 | `0x08` | Right digit b: upper-right |
+| 4 | `0x10` | Right digit c: lower-right |
+| 5 | `0x20` | Right digit d: bottom |
+| 6 | `0x40` | Right digit e: lower-left |
+| 7 | `0x80` | Right digit f: upper-left |
+| 8 | `0x100` | Right digit g: centre |
+| 9 | `0x200` | Adjacent larger 1: both vertical strokes together |
+| 10 | `0x400` | Left glyph top horizontal |
+| 11 | `0x800` | Left glyph upper-right outer vertical |
+| 12 | `0x1000` | Left glyph upper-centre vertical |
+| 13 | `0x2000` | Left glyph upper-left diagonal |
+| 14 | `0x4000` | Left glyph upper-right diagonal |
+| 15 | `0x8000` | Left glyph upper-left outer vertical |
+| 16 | `0x10000` | Left glyph centre-left short element |
+| 17 | `0x20000` | Left glyph centre-right short element |
+| 18 | `0x40000` | Left glyph lower-right outer vertical |
+| 19 | `0x80000` | Left glyph lower-right diagonal |
+| 20 | `0x100000` | Left glyph lower-left diagonal |
+| 21 | `0x200000` | Left glyph lower-centre vertical |
+| 22 | `0x400000` | Left glyph lower-left outer vertical |
+| 23 | `0x800000` | Left glyph bottom horizontal |
 
-In the earlier transition capture, the first activation appears at 12.560 s
-and exits at 17.664 s; another activation starts at 27.286 s. Slot 24 remains
-zero throughout its decoded frames. The repeatable bit addition across red
-A and B contexts establishes a stronger MEMORY mapping than a single snapshot.
-The two steady captures must not be treated as positive evidence merely because
-their filenames contain "memory".
+Standard seven-segment positions, with slot-25 bit numbers:
 
-| Reported red field / context | Complete slot-25 word |
-|------------------------------|-----------------------|
-| Dashes `--`, setup visible | `0x800022` |
-| A, setup visible | `0x478C22` |
-| A2, setup visible | `0x478D6E` |
-| A9, setup visible | `0x478DBE` |
-| A16, setup visible | `0x478FF6` |
-| D9, setup visible | `0xA41DBE` |
-| Setup hidden phase | `0x02` |
-| A alone, MEMORY inactive baseline | `0x478C00` |
-| D alone, primary No DSR | `0xA41C00` |
-| B alone, primary No DSR | `0xA61C00` |
-| C alone, primary No DSR (2026-11-08) | `0xC08400` |
-| User reported two `1` indications, Frequency 118.0 setup | `0x18`; individual assignments unknown |
+```text
+       2 (a)
+ 7 (f)       3 (b)
+       8 (g)
+ 6 (e)       4 (c)
+       5 (d)
+```
 
-These words include coexisting indicators. They are not isolated glyph masks.
-Measured XOR deltas: A to A2 `0x14C`; A2 to A9 `0xD0`;
-A9 to A16 `0x248`; primary D to B `0x20000`.
+The right digit has seven independent segments. The adjacent position is
+only a 1-shaped element, not a second full digit; its upper and lower
+strokes share bit 9. The 14 left-glyph controls are separate from both.
+Bit 16 was confirmed using the controlled, more sensitive camera follow-up.
 
-## 7. Text and frequency encoding
+The following standard digit words are **derived combinations of confirmed
+segments**, not a claim that each combination received a separate live test:
 
-Observed text occupies the low 35 bits of each 40-bit word. To render a
-captured glyph, reverse those 35 bits and split into seven rows of five pixels:
+| Digit | Segments | Slot-25 numeric word |
+|-------|----------|----------------------|
+| 0 | abcdef | `0x0FC` |
+| 1 | bc | `0x018` |
+| 2 | abdeg | `0x16C` |
+| 3 | abcdg | `0x13C` |
+| 4 | bcfg | `0x198` |
+| 5 | acdfg | `0x1B4` |
+| 6 | acdefg | `0x1F4` |
+| 7 | abc | `0x01C` |
+| 8 | abcdefg | `0x1FC` |
+| 9 | abcdfg | `0x1BC` |
+
+OR `0x200` for the adjacent 1; for example, the numeric field for 16 is
+`0x3F4`. Use field mask `0x3FC` when replacing the whole numeric field,
+`0x1FC` for only the right digit, and `0xFFFC00` for the left glyph.
+Preserve STEREO/MEMORY when changing either red field.
+Additional red letters can be constructed from the stroke guide; original
+Sony composite words and capture history remain in
+[chapter 6](06-direct-display-driving.md#7-red-display-slot-25).
+
+## 7. Generic 5x7 matrix guide
+
+All slots **1-22** have the same optically confirmed 35-dot layout.
+Rows run top to bottom and columns left to right, both zero-based:
+
+```text
+ 0  1  2  3  4
+ 5  6  7  8  9
+10 11 12 13 14
+15 16 17 18 19
+20 21 22 23 24
+25 26 27 28 29
+30 31 32 33 34
+```
+
+Set a dot with `1ULL << (row * 5 + column)` for `row = 0..6`,
+`column = 0..4`. OR dot masks to form any bitmap. The complete matrix
+mask is `0x07FFFFFFFF`; bits 35-39 remain zero.
+Examples: top-left `0x0000000001`, top-right `0x0000000010`,
+bottom-left `0x0040000000`, bottom-right `0x0400000000`.
+Transmit all 40 bits, bit 39 first; pixel numbering is not wire order.
+
+The 22 physical cells run **slot 22 at the left to slot 1 at the right**.
+For zero-based full-width screen column `i = 0..21`, use slot `22 - i`.
+The legacy Sony layout assigns slots 22 down to 14 to the nine-character
+message, slots 10 down to 6 to frequency, and slots 5 down to 3 to the MHz
+suffix. The other cells remain usable matrices. A message-only API must
+still preserve the other fields rather than overwrite all 22 slots.
+
+For a row-major bitmap, set each `#` at its corresponding bit. To decode
+an existing captured word for display:
 
 ```python
 pixels = f"{word:040b}"[5:][::-1]
 rows = [pixels[i:i + 5] for i in range(0, 35, 5)]
 ```
 
-This is an observed rendering convention. A generated font needs live
-orientation verification. Do not apply this convention to red or indicator slots.
-Message slot order is right-to-left: slots 14 through 22 are the reverse
-of the nine-character screen reading order.
+The physical orientation and slot order are confirmed; they no longer
+require inference from whole-character captures. This convention does not
+apply to fixed annunciators or slot-25 red segments.
+
+### Original Sony glyph examples
 
 | Field | Captured words in increasing slot order |
 |-------|-----------------------------------------|
@@ -339,8 +418,9 @@ of the nine-character screen reading order.
 The 5x7 layout supports constructing all text letters and digits using an
 application font; we do not need another capture for every desired character.
 The captured examples are not an exhaustive catalogue of the **original Sony
-font**. Its remaining glyph words, punctuation, reserved upper five bits and
-physical orientation of arbitrary generated glyphs are not fully validated.
+font**. Remaining original glyph words and the readability of generated
+designs can still need review; the pixel orientation is known. The upper
+five bits produced no resolved response and must not be treated as flags.
 
 ### Music note and extended song-title character requirements
 
@@ -450,7 +530,7 @@ Visual observations must not be silently replaced by guessed bit labels.
 | Area | Required behavior |
 |------|-------------------|
 | Frame representation | 26 unsigned 40-bit segment words plus brightness/blink state |
-| Mapping | Keep slot-specific masks separate; unknown fields remain explicitly unassigned |
+| Mapping | Use the confirmed guides in sections 5-7; keep unresolved bits zero and slot-specific masks separate |
 | Composition | Modify only intended bits; preserve coexisting indicators in known composite words |
 | Scanning | Continuous 40 segment shifts / one grid shift per slot, with captured latch/blanking order |
 | Initialization | Hold grid CL LOW; explicitly initialize 40-bit registers before enabling grids |
@@ -469,15 +549,14 @@ the Sony segment-clock frequency.
 
 ## 11. Outstanding work
 
-| Missing information | How to resolve |
-|---------------------|----------------|
-| Individual bar/dot positions | Correlate intermediate levels with images or perform a safe bit walk |
-| MEMORY physical verification | Capture correlation is established; verify the visible element with video or controlled bit drive |
-| Slot 24 `0x100`, possible PROGRAM label | Isolated visual transition or safe bit walk |
-| MONO/LNC label candidates | Independently switch or map each label |
-| Red glyph segments and digit separation | Use captured A/B/C/D words; derive additional letters only after establishing segment geometry |
-| Full generated text/font orientation | Render known asymmetric glyphs on the validated interface |
-| Unassigned slots/bits | Schematic tracing and controlled mapping; no guessed assignments |
+Fixed-element assignments and matrix orientation are complete at the
+reference's functional level; they are not outstanding work.
+
+| Remaining question | How to resolve |
+|--------------------|----------------|
+| Stable full 26-slot multiplexing | Review driver-side grid alignment, latch/blank sequencing and peripheral transitions; confirm clean live output |
+| Generated glyph readability and original Sony font coverage | Review composed glyph designs on the known pixel layout; do not confuse font coverage with missing dot mapping |
+| 194 unresolved command bits | Further tracing or focused controlled investigation if needed; no missing reference symbol currently requires them |
 | Dim edge placement | Decode CL edges relative to STB from the existing DISPLAY capture |
 | Segment CL / both CHG levels | Verify wiring and logic levels at the actual driver pins |
 | Power-up flash behavior | Correlate power/control pins with video; zero serial words alone do not explain it |
@@ -493,7 +572,7 @@ Recent raw/analysis artifacts are retained in the session, not committed:
 | Capture prefix | Evidence |
 |----------------|----------|
 | `sony-original-display-20261108-2000` | Bright/dim timing and indicator hiding |
-| `sony-original-memory-1-20261108-2027` | MEMORY candidate and red blinking |
+| `sony-original-memory-1-20261108-2027` | Original MEMORY correlation and red blinking; the bit is now optically confirmed |
 | `sony-td-mono-blink` | Earlier reported MEMORY with `0x02` retained in both blink phases |
 | `sony-td-primary-b-memory-transition` | Earlier independent MEMORY activation/exit in the B context |
 | `sony-td-primary-b-memory`, `sony-td-primary-b-memory-active` | Steady B snapshots; no active `0x02` in their decoded frames |
@@ -558,7 +637,8 @@ window is not universal across all original-controller states.
 
 Evidence: `sony-original-red-c-20261108-2120.bin` and
 `sony-original-red-c-20261108-2120-analysis.json`. This is a captured C
-pattern, not proof of an independently mapped physical segment geometry.
+pattern. It did not independently establish segment geometry at that time;
+the later one-hot inventory did, as listed in section 6.
 
 ## Native VFD text API and scrolling
 

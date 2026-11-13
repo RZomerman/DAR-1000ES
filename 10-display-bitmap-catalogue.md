@@ -28,9 +28,13 @@ The output latch holds the previous pattern during normal shifting; STB
 and grid CLEAR timing expose the completed glyph under the selected grid.
 Continuous 26-slot scanning is still required.
 
-Mapped text slots are message 14-22, frequency 6-10 and suffix 3-5.
-Message positions left to right correspond to slots 22 down to 14.
-Individual live pixel orientation remains to be validated.
+All slots 1-22 are optically confirmed 5x7 matrices, including previously
+blank slots 1-2 and 11-13. Physical cells run left to right from slot 22
+down to slot 1. The legacy layout uses message 14-22, frequency 6-10 and
+suffix 3-5; message positions left to right are slots 22 down to 14.
+Pixel orientation is confirmed; readability of every generated glyph is
+not implied. See the [generic matrix guide](08-esp-display-driver-specification.md#7-generic-5x7-matrix-guide)
+and the separate [fixed-element controls](08-esp-display-driver-specification.md#6-fixed-element-control-guide).
 
 Case matters. Missing captured characters use the generated shapes listed
 here. Identical generated shapes, such as O and 0, are font-design choices.
