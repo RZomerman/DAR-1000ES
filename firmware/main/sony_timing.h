@@ -42,6 +42,11 @@ unsigned sony_timing_held_slot(const sony_timing_t *timing,
 size_t sony_timing_generate(uint8_t *wave, size_t capacity,
                             const sony_timing_t *timing,
                             const uint64_t words[26], bool initialize);
+/* Patch only changed SDATA spans in a completed, same-timing scan buffer. */
+bool sony_timing_patch_data(uint8_t *wave, size_t bytes,
+                            const sony_timing_t *timing,
+                            const uint64_t before[26],
+                            const uint64_t after[26], bool initialize);
 /* DMA lane image for held mode: only bit 2 (CLEAR) may change. */
 size_t sony_timing_generate_clear(uint8_t *wave, size_t capacity,
                                   const sony_timing_t *timing);

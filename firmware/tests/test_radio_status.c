@@ -59,5 +59,19 @@ int main(void) {
   sony_radio_status_apply(words, &status);
   assert((words[0] & 0x7FFF) == 0x4000);
   assert(!(words[24] & 0x2013) && !(words[25] & 1));
+  for (unsigned source = 0; source < 3; ++source) {
+    status = sony_radio_status(source != 2, source == 1 ? 1 : 2, "192", "Pop");
+    memcpy(words, before, sizeof(words));
+    sony_radio_status_apply_view(words, &status, true);
+    assert((words[24] & 0x81C) == 0x818);
+    assert((words[25] & 1) == status.stereo);
+    assert((words[24] & ~0x281FULL) == (before[24] & ~0x281FULL));
+    for (unsigned i = 1; i < 24; ++i)
+      assert(words[i] == before[i]);
+    sony_radio_status_apply_view(words, &status, false);
+    assert(!(words[24] & 0x80C));
+    assert((words[24] & 0x2013) == status.audio);
+    assert((words[25] & 1) == status.stereo);
+  }
   return 0;
 }

@@ -582,19 +582,27 @@ esp_err_t sony_scan_submit_timed(sony_scan_engine_t *engine,
   uint8_t *wave = engine->buffers[index];
   sony_scan_cache_t *cache = &engine->timed_cache[index];
   size_t bytes = cache->bytes;
-  /* Regenerate changed frames, not identical 62 kB waves at every refresh. */
+  /* Reuse completed waves; content-only updates patch SDATA, not scan timing. */
   if (engine->held || !cache->valid || cache->initialize != initialize ||
       memcmp(&cache->timing, timing, sizeof(*timing)) ||
       memcmp(cache->words, words, sizeof(cache->words))) {
-    bytes = engine->held
-                ? sony_timing_generate_clear(wave, engine->bytes, timing)
-                : sony_timing_generate(wave, engine->bytes, timing, words,
-                                       initialize);
-    if (!bytes)
-      return ESP_ERR_INVALID_SIZE;
+    bool patched = !engine->held && cache->valid &&
+                   cache->initialize == initialize &&
+                   !memcmp(&cache->timing, timing, sizeof(*timing)) &&
+                   sony_timing_patch_data(wave, bytes, timing, cache->words,
+                                          words, initialize);
+    if (!patched) {
+      bytes = engine->held
+                  ? sony_timing_generate_clear(wave, engine->bytes, timing)
+                  : sony_timing_generate(wave, engine->bytes, timing, words,
+                                         initialize);
+      if (!bytes)
+        return ESP_ERR_INVALID_SIZE;
+      if (!engine->held)
+        for (size_t i = 0; i < bytes; ++i)
+          wave[i] ^= 0x21;
+    }
     if (!engine->held) {
-      for (size_t i = 0; i < bytes; ++i)
-        wave[i] ^= 0x21;
       cache->timing = *timing;
       memcpy(cache->words, words, sizeof(cache->words));
       cache->bytes = bytes;

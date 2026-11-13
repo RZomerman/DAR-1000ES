@@ -11,7 +11,9 @@ Firmware 0.3.26 integrates internet radio and opt-in, full-width NOW PLAYING.
 Firmware 0.3.28 adds channel, bitrate, playback and station-genre indicators.
 Firmware 0.3.29 adds selectable stereo spectrum visualization, installed and
 verified with isolated digital captures and decoded tone fixtures. Optical
-appearance of the new bars on the connected Sony remains to be confirmed.
+appearance was subsequently confirmed by the user at 0.75% per-grid duty.
+Firmware 0.3.30 adds MONO 1/2 spectrum-bank labels and longer DMA buffering
+after music exposed visible scan jitter; its connected optical recheck is pending.
 Electrical/current certification is still outstanding.
 
 ## 1. Hardware and signal ownership
@@ -121,6 +123,15 @@ See the [bitmap catalogue](10-display-bitmap-catalogue.md) and
 words and indicator combinations. No word-array rotation is required
 after the shared-STB correction.
 
+Full timed scans now batch up to eight identical refreshes in each DMA
+transfer. At the guarded 300 us slot settings this is 62.4 ms per block,
+not a slower display refresh: all 26 slots still repeat every 7.8 ms.
+This gives software time to refill the DMA queue during audio/resampler
+bursts. Content-only changes patch SDATA in completed buffers rather than
+rebuilding the clock/CLEAR waveform. Held and GPIO-pair batching is unchanged.
+Queued blocks add visual-update/Stop latency; measured Stop was 0.28 seconds.
+Keep the physical output-disable available.
+
 ### Modes
 
 | Mode | Purpose |
@@ -170,13 +181,15 @@ measurements, not a dot-count-derived claim of electrical safety.
 
 ### Tested working presets
 
-All three use 300 us slots and a nominal 128.205 Hz full scan. Actual
-measured refresh was approximately 127.8 Hz.
+All four use 300 us slots and a nominal 128.205 Hz full scan. Earlier images
+measured approximately 127.8 Hz; 0.3.30's batched scan measured 128.20 Hz
+at 0.75% per-grid duty.
 
 | Level | Per-grid duty | Total CLEAR duty | ON | OFF |
 |---|---:|---:|---:|---:|
 | Low dim | 0.25% | 6.5% | 19,500 ns | 143,000 ns |
 | Working dim | **0.5%** | **13%** | **39,000 ns** | **123,500 ns** |
+| Medium, connected visual check | 0.75% | 19.5% | 58,500 ns | 104,000 ns |
 | Brighter comparison | 1% | 26% | 78,000 ns | 84,500 ns |
 
 Common settings, in ns:
@@ -273,6 +286,14 @@ LEFT uses slots22..12; RIGHT uses slots11..1. Band edges, in Hz:
 20 | 37 | 70 | 132 | 247 | 462 | 866 | 1622 | 3040 | 5696 | 10673 | 20000
 ```
 
+In 0.3.30, the fixed **left MONO + 1** legend marks the LEFT bank and the
+separate **right MONO + 2** legend marks the RIGHT bank. These are bank labels,
+not claims that the audio is mono. The left index 2 is kept off. They clear
+when returning to NOW PLAYING or taking over with manual text. **STEREO still
+follows actual decoded two-channel playback** and clears for mono/buffering;
+it is never forced on by the spectrum. In text mode, the left MONO legend
+continues to indicate an actual mono source.
+
 The source is actual decoded stereo PCM **after resampling to 48 kHz**, not
 ICY bitrate or an invented animation. Mono sources have already been duplicated
 to both channels and therefore show matching bars. This is a visualization,
@@ -314,7 +335,8 @@ scan duty.
 | Indicator | Meaning |
 |---|---|
 | STEREO | Decoded source has two channels |
-| Left MONO label | Decoded source has one channel; MONO indices remain separate |
+| Left MONO label | In text mode: actual mono source; in spectrum: MONO 1 labels LEFT |
+| Right MONO + 2 | Spectrum mode only: labels RIGHT, not a mono-source claim |
 | 14 signal bars | Station-reported ICY bitrate, scaled to 320 kbps |
 | Bottom dots | Buffering, reconnecting, or bitrate unavailable; bars are off |
 | TUNED | Decoding is active with valid source channels and no reported stream error |
@@ -339,8 +361,12 @@ music-and-talk tags, Mixed and missing tags select neither. This is station
 format metadata, not per-programme audio analysis or a guess from song titles.
 In the checks, NPO Radio 2 reported Mixed, BNR Talk and 538/SLAM Top 40.
 
-The bridge owns only slot-0 mask `0x7FFF`, slot-24 mask `0x2013`
+The source-status composer owns slot-0 mask `0x7FFF`, slot-24 mask `0x2013`
 (left SPEECH/MUSIC/MONO and TUNED), and slot-25 STEREO bit `0x01`.
+The radio display view additionally owns slot-24 mask `0x80C` for left indices
+1/2 and the separate right MONO/2; combined slot-24 ownership is `0x281F`.
+Spectrum sets left MONO/1 and right MONO/2 (`0x818`); text mode clears the
+bank indices/right legend and restores source-based left MONO.
 Other fixed fields, PROGRAM, MEMORY and red segments are preserved.
 Manual control and Stop still take ownership away from the radio.
 
@@ -535,6 +561,37 @@ fixture interval and a separate 15-second music interval had no new decoder,
 buffer, S/PDIF write or DMA-underrun errors; source changes still are not
 guaranteed gapless. Host DSP/ownership/driver and webpage regressions also pass.
 Sony optics, audible playback and physical voltage/current remain separate checks.
+
+### Spectrum bank labels and scan-jitter correction: 0.3.30
+
+The user confirmed the original spectrum looked good at 0.75% per grid,
+then reported flicker on music. The earlier capture had 23 steady intervals
+over 9 ms out of 399, with a 17.36 ms maximum instead of the usual 7.9 ms.
+On Radio 538, content-only waveform patching alone still left a 38.79 ms
+maximum. Frozen bars with FFT disabled also showed 20.23 ms gaps, ruling
+out the animation alone as the explanation. The gaps were blanked intervals;
+sampled active CLEAR pulses were not stretched.
+
+The retained fix keeps the existing core assignments/priorities and batches
+up to eight full scans per DMA block, with content-only SDATA patching. A
+core-migration trial produced an audio underrun and was rejected. Three
+complete five-second, 12 MS/s captures on NPO (48 kHz), Radio 538 and BNR
+(44.1 kHz) passed the independent TD timing/one-hot/latch model, including
+the new bank legends and source STEREO. After a 250 ms startup exclusion,
+the worst frame intervals were 8.014, 8.021 and 8.016 ms respectively, with
+**zero intervals over 9 ms**. Median refresh measured 128.20 Hz.
+
+There were no new decoder, compressed-buffer, S/PDIF write or DMA-underrun
+errors in those captures or a further 20-second steady Radio 538 interval;
+FFT input drops remained zero. Sampled FFT cost was 11.6-27.8 ms, median
+15.2 ms. Cold-start DMA count also stayed unchanged in the retained build.
+Stop completed in 0.28 seconds and remained stopped. Bank-label cleanup on
+text/manual takeover passed on-device; stereo, mono and buffering behavior
+also have host coverage. The 28 host regressions and both browser checks pass.
+The installed image is 3,131,408 bytes; the original settings and 0.3.29
+recovery image are retained. The matching webpage offers the 0.75% preset.
+This removes the measured software scan holes; a connected camera/user
+recheck is still needed before claiming all perceived flicker is resolved.
 Firmware 0.3.28 retains the same GPIO allocation and boot-stopped safety policy.
 
 ## 8. Troubleshooting

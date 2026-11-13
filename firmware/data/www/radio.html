@@ -186,12 +186,15 @@ dd { margin: 0; overflow-wrap: anywhere; }
   </select>
   <p class="muted">Spectrum uses actual decoded audio: left 11 matrices are LEFT,
     right 11 are RIGHT, each bass to treble (20 Hz&ndash;20 kHz).
+    On the Sony, MONO 1 labels LEFT and MONO 2 labels RIGHT;
+    STEREO still indicates an actual two-channel source.
     Seven-row bars attack quickly and decay smoothly. It replaces the title
     on the Sony, not the sound: this is a visualization, not an audio equalizer.</p>
   <label for="grid-duty">Brightness per grid</label>
   <select id="grid-duty">
     <option value="0.25">Low dim: 0.25% per grid / 6.5% total</option>
     <option value="0.5" selected>Working dim: 0.5% per grid / 13% total</option>
+    <option value="0.75">Medium: 0.75% per grid / 19.5% total</option>
     <option value="1">Brighter: 1% per grid / 26% total</option>
   </select>
   <p>All 26 slots stay scanned, even with one character. Do not divide brightness
@@ -385,7 +388,7 @@ document.getElementById("custom").addEventListener("submit", event => {
   select(4, urlInput.value.trim());
 });
 function screenTiming(percent) {
-  if (![0.25, 0.5, 1].includes(percent))
+  if (![0.25, 0.5, 0.75, 1].includes(percent))
     throw new Error("Choose a tested per-grid brightness");
   const on = Math.round(26 * 300000 * percent / 100);
   return {setup_ns:500, clock_low_ns:1000, clock_high_ns:1000,

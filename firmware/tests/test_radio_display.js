@@ -42,7 +42,7 @@ vm.runInContext(scripts.at(-1)[1], context);
   assert.equal(requests.filter(r => r.options?.method === "POST").length, 0,
     "Loading the webpage must never start outputs");
   assert.equal(elements["airplay-help"].hidden, true);
-  for (const percent of [0.25, 0.5, 1]) {
+  for (const percent of [0.25, 0.5, 0.75, 1]) {
     const timing = vm.runInContext(`screenTiming(${percent})`, context);
     const transfer = timing.blank_before_ns + 41 * (
       timing.setup_ns + timing.clock_low_ns + timing.clock_high_ns) +

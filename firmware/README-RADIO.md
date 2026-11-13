@@ -11,7 +11,7 @@ remains **STR-E200ES**.
 Hobby/non-commercial adaptation of [rbouteiller/airplay-esp32](https://github.com/rbouteiller/airplay-esp32).
 The upstream license and third-party notices remain applicable.
 
-## DAR-1000ES profile (0.3.29)
+## DAR-1000ES profile (0.3.30)
 
 The checked-in `radio-s3` profile now combines radio with the Sony timing
 laboratory and explicitly authorized 22-character NOW PLAYING display.
@@ -29,6 +29,10 @@ The application and page are installed. Isolated decoder fixtures and the
 independent TD timing/model capture pass, with no dropped PCM frames or new
 steady-playback errors. Connected Sony optics and electrical/current checks
 remain separate.
+Version 0.3.30 adds MONO 1/2 spectrum bank labels without forcing STEREO,
+the 0.75% brightness preset, and longer full-scan DMA buffering to avoid
+measured music-related scan gaps. Independent captures now show approximately
+128.20 Hz refresh and 8.02 ms worst steady intervals; Stop measured 0.28 s.
 
 This profile does **not** start AirPlay or Sony mute/relay/PCM-I2S controls.
 AirPlay behavior below describes the inherited standalone implementation,

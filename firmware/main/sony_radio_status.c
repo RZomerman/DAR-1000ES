@@ -93,3 +93,12 @@ void sony_radio_status_apply(uint64_t words[26],
   words[24] = (words[24] & ~0x2013ULL) | (status->audio & 0x2013);
   words[25] = (words[25] & ~1ULL) | (status->stereo & 1);
 }
+
+void sony_radio_status_apply_view(uint64_t words[26],
+                                  const sony_radio_status_t *status,
+                                  bool spectrum) {
+  sony_radio_status_apply(words, status);
+  words[24] &= ~0x80CULL;
+  if (spectrum)
+    words[24] |= 0x818;
+}

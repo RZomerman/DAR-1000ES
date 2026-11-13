@@ -284,6 +284,39 @@ static size_t counted_generate(uint8_t *wave, size_t capacity,
 """
         harness += submit + r"""
 #undef sony_timing_generate
+static void check_patches(void) {
+    uint8_t *wave = malloc(SONY_TIMING_CAPACITY);
+    uint8_t *expected = malloc(SONY_TIMING_CAPACITY);
+    assert(wave && expected);
+    uint64_t before[26] = {0}, after[26];
+    for (unsigned i = 0; i < 26; ++i) after[i] = 0xFFFFFFFFFFULL ^ (1ULL << i);
+    for (unsigned pair = 0; pair < 2; ++pair) {
+        sony_timing_t timing = sony_timing_defaults();
+        if (pair) {
+            timing.pair = 1; timing.slot = 22;
+            timing.setup_ns = timing.clock_low_ns = timing.clock_high_ns = 1000;
+            timing.on_ns = 30000; timing.off_ns = 130000;
+        }
+        for (unsigned initialize = 0; initialize < 2; ++initialize) {
+            size_t bytes = sony_timing_generate(wave, SONY_TIMING_CAPACITY,
+                                                &timing, before, initialize);
+            assert(bytes);
+            assert(sony_timing_generate(expected, SONY_TIMING_CAPACITY,
+                                        &timing, after, initialize) == bytes);
+            assert(!sony_timing_patch_data(wave, bytes - 1, &timing,
+                                           before, after, initialize));
+            assert(sony_timing_patch_data(wave, bytes, &timing,
+                                          before, after, initialize));
+            assert(!memcmp(wave, expected, bytes));
+            assert(sony_timing_patch_data(wave, bytes, &timing,
+                                          after, before, initialize));
+            assert(sony_timing_generate(expected, SONY_TIMING_CAPACITY,
+                                        &timing, before, initialize) == bytes);
+            assert(!memcmp(wave, expected, bytes));
+        }
+    }
+    free(wave); free(expected);
+}
 static void check(sony_scan_engine_t *engine, uint64_t words[26],
                    sony_timing_t *timing, bool initialize) {
     assert(sony_scan_submit_timed(engine, words, timing) == ESP_OK);
@@ -298,6 +331,7 @@ static void check(sony_scan_engine_t *engine, uint64_t words[26],
     free(expected);
 }
 int main(void) {
+    check_patches();
     sony_scan_engine_t engine = {.timed = true, .bytes = SONY_TIMING_CAPACITY};
     for (unsigned i = 0; i < 2; ++i) {
         engine.buffers[i] = malloc(engine.bytes);
@@ -313,7 +347,14 @@ int main(void) {
     check(&engine, words, &timing, false);
     check(&engine, words, &timing, false);
     check(&engine, words, &timing, false);
-    assert(generated == 5);
+    assert(generated == 3);
+    for (unsigned frame = 0; frame < 32; ++frame) {
+        for (unsigned slot = 0; slot < 26; ++slot)
+            words[slot] = (0x123456789AULL * (frame + 1)) ^ (1ULL << slot);
+        check(&engine, words, &timing, false);
+        check(&engine, words, &timing, false);
+    }
+    assert(generated == 3);
     timing.on_ns += 125;
     timing.off_ns -= 125;
     check(&engine, words, &timing, true);
@@ -386,6 +427,7 @@ enum { ESP_OK, ESP_ERR_INVALID_STATE, ESP_ERR_NO_MEM, ESP_ERR_INVALID_ARG };
 static atomic_bool running, display_requested, stop_requested, timing_requested;
 static struct { bool hold, pair; } display_timing;
 static bool follow_radio, follow_spectrum, display_dim, analyzer_enabled;
+static sony_radio_status_t last_radio_status;
 static void sony_spectrum_enable(bool on) { analyzer_enabled = on; }
 static unsigned scrolling_width = 9;
 static sony_text_t scrolling_text;
@@ -424,9 +466,18 @@ int main(void) {
     uint64_t spectrum_words[26];
     memcpy(spectrum_words, words, sizeof(words));
     assert(sony_vfd_show_radio("New title", &status) == ESP_OK);
-    assert(!memcmp(spectrum_words, words, sizeof(words)));
+    for (unsigned i = 1; i <= 22; ++i)
+        assert(spectrum_words[i] == words[i]);
+    assert(words[24] == 0x2819 && words[25] == 0);
+    status = sony_radio_status(true, 2, "192", "Mixed");
+    assert(sony_vfd_show_radio("New title", &status) == ESP_OK);
+    assert(words[24] == 0x2818 && words[25] == 1);
+    status = sony_radio_status(false, 2, "192", "Mixed");
+    assert(sony_vfd_show_radio("New title", &status) == ESP_OK);
+    assert(words[24] == 0x818 && words[25] == 0);
     assert(show_text("New title", true, true, 22, NULL) == ESP_OK);
     assert(!follow_spectrum && !analyzer_enabled);
+    assert(words[24] == 0 && words[25] == 0);
     assert(memcmp(spectrum_words, words, sizeof(words)));
     assert(sony_vfd_show("Manual", true, true) == ESP_OK);
     assert(!follow_radio && !follow_spectrum && !analyzer_enabled &&
@@ -650,6 +701,29 @@ class ScreenTimingTests(unittest.TestCase):
                 rises = sum(bool(b & 1 and not a & 1)
                             for a, b in zip(wave, wave[1:]))
                 self.assertEqual(rises, 40 + 40 * len(visible) // pulses)
+
+    def test_full_scan_batches_cover_audio_bursts_without_changing_pulses(self):
+        timing = self.library.sony_timing_defaults()
+        timing.setup_ns = 500
+        timing.clock_low_ns = timing.clock_high_ns = 1000
+        timing.strobe_ns = 5000
+        timing.latch_guard_ns = timing.blank_before_ns = timing.blank_after_ns = 10000
+        timing.on_ns, timing.off_ns = 58500, 104000
+        words = [0x7FFFFFFFF] * 26
+        wave = self.generate(timing, words)
+        self.assertGreater(len(wave) * 125, 50000000)
+        self.assertLessEqual(len(wave), 524288)
+        visible = self.visible_words(wave)
+        self.assertEqual(len(visible), 8 * 26)
+        for index, (grid, word) in enumerate(visible):
+            self.assertEqual(grid & ((1 << 26) - 1), 1 << (index % 26))
+            self.assertEqual(word, words[index % 26])
+        clear = bytes((sample >> 2) & 1 for sample in wave)
+        highs = list(re.finditer(b"\x01+", clear))
+        self.assertEqual(len(highs), 8 * 26)
+        self.assertTrue(all(len(high.group()) * 125 == 58500 for high in highs))
+        starts = [high.start() for high in highs]
+        self.assertEqual({b - a for a, b in zip(starts, starts[1:])}, {2400})
 
     def test_local_held_alternation_boundaries_and_clear_only_blocks(self):
         timing = self.library.sony_timing_defaults()

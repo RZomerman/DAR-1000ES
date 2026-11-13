@@ -78,6 +78,7 @@ static atomic_uint submitted_timing_revision;
 static portMUX_TYPE frame_lock = portMUX_INITIALIZER_UNLOCKED;
 static bool follow_radio;
 static bool follow_spectrum;
+static sony_radio_status_t last_radio_status;
 static unsigned scrolling_width = 9;
 
 static esp_err_t show_text(const char *utf8, bool scroll, bool dim,
@@ -113,9 +114,12 @@ static esp_err_t show_text(const char *utf8, bool scroll, bool dim,
   }
   if (err == ESP_OK) {
     display_dim = dim;
-    if (radio)
-      sony_radio_status_apply(words, radio);
-    else {
+    if (radio) {
+      last_radio_status = *radio;
+      sony_radio_status_apply_view(words, radio, follow_spectrum);
+    } else {
+      if (follow_spectrum)
+        sony_radio_status_apply_view(words, &last_radio_status, false);
       follow_radio = false;
       follow_spectrum = false;
     }
@@ -939,11 +943,14 @@ static esp_err_t control_handler(httpd_req_t *req) {
                                   "Stop other driver before changing backend");
       }
       portENTER_CRITICAL(&frame_lock);
+      bool leaving_spectrum = follow_spectrum && !spectrum;
       scrolling_text.active = false;
       follow_radio = cJSON_IsTrue(radio);
       follow_spectrum = spectrum;
       display_dim = true;
       memcpy(words, frame, sizeof(words));
+      if (leaving_spectrum && follow_radio)
+        sony_radio_status_apply_view(words, &last_radio_status, false);
       if (timed) {
         display_timing = timing;
         atomic_fetch_add(&timing_revision, 1);

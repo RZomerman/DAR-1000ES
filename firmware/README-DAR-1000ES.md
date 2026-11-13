@@ -1,6 +1,14 @@
 # DAR-1000ES internet radio baseline
 
-## Current release: 0.3.29
+## Current release: 0.3.30
+
+Spectrum now labels the left bank MONO 1 and the right bank MONO 2; STEREO
+still follows the actual source. The webpage includes the connected 0.75%
+brightness setting. Full scans batch up to eight refreshes per DMA block
+and patch only changing DATA spans. This removes measured 17-39 ms scan
+holes: three station captures had worst steady intervals around 8.02 ms
+at 128.20 Hz, with no new steady audio errors. Extra buffering adds latency
+(Stop measured 0.28 s). The connected optical flicker recheck is pending.
 
 Option 1 adds a real stereo spectrum: 11 logarithmic bands per channel across
 the 22 matrices, seven-row bars with fast attack/smooth decay, selectable on
@@ -10,7 +18,8 @@ indicators, the GPIO map, authorization and selected scan duty are unchanged.
 Installed and checked while isolated: decoded stereo/channel-swap/mono/silence
 fixtures pass; a full analyser capture passes the TD timing/model checks at
 126.57 Hz. No dropped PCM frames or new steady-playback errors were observed.
-The new bars' optical appearance on the Sony remains to be confirmed.
+The original bars' appearance was confirmed by the user; the 0.3.30 changes
+were checked while physically isolated.
 
 Start with the complete [screen-driver operating guide](../13-screen-driver-operating-guide.md).
 Radio is now enabled with MP3/AAC/ICY metadata, S/PDIF on GPIO42 and an

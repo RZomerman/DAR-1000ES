@@ -35,14 +35,16 @@ sony_timing_info_t sony_timing_info(const sony_timing_t *t) {
   info.cycle_samples = t->hold ? pulse : (t->pair ? 2 : 26) * info.slot_samples;
   if (!info.cycle_samples)
     return info;
-  info.cycles = (unsigned)(80000 / info.cycle_samples);
+  size_t prefix = ticks(t->blank_before_ns) + 80 * shift_samples(t) + latch;
+  /* Full scans need enough queued time to survive audio/resampler bursts. */
+  size_t budget = t->hold || t->pair ? 80000 : SONY_TIMING_CAPACITY - prefix - 63;
+  info.cycles = (unsigned)(budget / info.cycle_samples);
   if (!info.cycles)
     info.cycles = 1;
   if (info.cycles > 8)
     info.cycles = 8;
   if (t->hold && t->alternate_ms)
     info.cycles = 1;
-  size_t prefix = ticks(t->blank_before_ns) + 80 * shift_samples(t) + latch;
   info.bytes = (prefix + info.cycles * info.cycle_samples + 63) & ~(size_t)63;
   return info;
 }
@@ -181,6 +183,35 @@ size_t sony_timing_generate(uint8_t *wave, size_t capacity,
   w.state = SCLK | GCLK;
   emit(&w, bytes - w.pos);
   return bytes;
+}
+
+bool sony_timing_patch_data(uint8_t *wave, size_t bytes,
+                            const sony_timing_t *t,
+                            const uint64_t before[26],
+                            const uint64_t after[26], bool initialize) {
+  if (!wave || !before || !after || sony_timing_validate(t) || t->hold)
+    return false;
+  sony_timing_info_t info = sony_timing_info(t);
+  size_t shift = shift_samples(t);
+  size_t prefix = initialize
+                      ? ticks(t->blank_before_ns + t->latch_guard_ns +
+                              t->strobe_ns + t->blank_after_ns) + 80 * shift
+                      : 0;
+  size_t needed = (prefix + info.cycles * info.cycle_samples + 63) & ~(size_t)63;
+  if (bytes < needed)
+    return false;
+  for (unsigned cycle = 0; cycle < info.cycles; ++cycle)
+    for (unsigned index = 0; index < (t->pair ? 2U : 26U); ++index) {
+      unsigned slot = t->pair ? t->slot - index : index;
+      uint64_t changed = before[slot] ^ after[slot];
+      size_t start = prefix + cycle * info.cycle_samples +
+                     index * info.slot_samples + ticks(t->blank_before_ns);
+      for (unsigned bit = 0; bit < 40; ++bit)
+        if (changed & (1ULL << (39 - bit)))
+          for (size_t sample = 0; sample < shift; ++sample)
+            wave[start + bit * shift + sample] ^= SDATA;
+    }
+  return true;
 }
 
 size_t sony_timing_generate_clear(uint8_t *wave, size_t capacity,
