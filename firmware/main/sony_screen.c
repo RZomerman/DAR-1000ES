@@ -79,7 +79,7 @@ static bool follow_radio;
 static unsigned scrolling_width = 9;
 
 static esp_err_t show_text(const char *utf8, bool scroll, bool dim,
-                          unsigned width, bool radio) {
+                          unsigned width, const sony_radio_status_t *radio) {
   if (!atomic_load(&running) || !atomic_load(&display_requested) ||
       atomic_load(&stop_requested))
     return ESP_ERR_INVALID_STATE;
@@ -109,7 +109,9 @@ static esp_err_t show_text(const char *utf8, bool scroll, bool dim,
   }
   if (err == ESP_OK) {
     display_dim = dim;
-    if (!radio)
+    if (radio)
+      sony_radio_status_apply(words, radio);
+    else
       follow_radio = false;
   }
   portEXIT_CRITICAL(&frame_lock);
@@ -118,11 +120,14 @@ static esp_err_t show_text(const char *utf8, bool scroll, bool dim,
 }
 
 esp_err_t sony_vfd_show(const char *utf8, bool scroll, bool dim) {
-  return show_text(utf8, scroll, dim, 9, false);
+  return show_text(utf8, scroll, dim, 9, NULL);
 }
 
-esp_err_t sony_vfd_show_radio(const char *utf8) {
-  return show_text(utf8, true, true, 22, true);
+esp_err_t sony_vfd_show_radio(const char *utf8,
+                              const sony_radio_status_t *status) {
+  if (!status)
+    return ESP_ERR_INVALID_ARG;
+  return show_text(utf8, true, true, 22, status);
 }
 
 static esp_err_t set(gpio_num_t pin, int level) {
@@ -765,7 +770,7 @@ static esp_err_t control_handler(httpd_req_t *req) {
     }
     esp_err_t err = show_text(text->valuestring, !scroll || cJSON_IsTrue(scroll),
                               !dim || cJSON_IsTrue(dim),
-                              width ? (unsigned)width->valueint : 9, false);
+                              width ? (unsigned)width->valueint : 9, NULL);
     cJSON_Delete(root);
     if (err == ESP_ERR_INVALID_STATE) {
       httpd_resp_set_status(req, "409 Conflict");

@@ -8,6 +8,7 @@ On 2026-11-13, firmware 0.3.25 produced clean held characters, mixed text
 across all 22 matrices and an ESP-local marquee. The decisive wiring
 correction was connecting **STB to both TD62C950RF chips**, not just one.
 Firmware 0.3.26 integrates internet radio and opt-in, full-width NOW PLAYING.
+Firmware 0.3.28 adds channel, bitrate, playback and station-genre indicators.
 Electrical/current certification is still outstanding.
 
 ## 1. Hardware and signal ownership
@@ -253,6 +254,43 @@ song. Unsupported glyphs use the catalogue's fallback. The display bridge
 preserves valid UTF-8, handles Latin-1 metadata and truncates long input
 without splitting UTF-8 sequences.
 
+### Radio status indicators (0.3.28)
+
+These update with NOW PLAYING, without a browser or a change to scan duty.
+
+| Indicator | Meaning |
+|---|---|
+| STEREO | Decoded source has two channels |
+| Left MONO label | Decoded source has one channel; MONO indices remain separate |
+| 14 signal bars | Station-reported ICY bitrate, scaled to 320 kbps |
+| Bottom dots | Buffering, reconnecting, or bitrate unavailable; bars are off |
+| TUNED | Decoding is active with valid source channels and no reported stream error |
+| Left MUSIC / SPEECH | Recognized station genre; unknown/mixed genres leave both off |
+
+For positive bitrate, bar count is `round(14 * kbps / 320)`, clamped to
+1-14: 64 kbps gives 3 bars, 128 gives 6, 192 gives 8, 256 gives 11 and
+320 or more gives 14. Bitrate is an encoding-rate proxy, **not** a
+measurement of sound quality, Wi-Fi strength or network reliability.
+Fixed-rate stations show steady bars; AAC and MP3 cannot be quality-ranked
+solely by bitrate.
+
+During buffering/reconnecting, STEREO, MONO, TUNED and the genre labels
+clear; the bottom dots replace the bars. TUNED is a software playback
+indication, not RF tuning or confirmation of a locked external S/PDIF receiver.
+Channel labels describe the source, not the always-stereo S/PDIF container.
+
+Genre comes from the stream's `icy-genre` header, exposed as
+`now_playing.genre` and shown on the webpage. Pop/rock/Top 40 and recognized
+music genres select MUSIC; talk/news/speech/sports select SPEECH. Conflicting
+music-and-talk tags, Mixed and missing tags select neither. This is station
+format metadata, not per-programme audio analysis or a guess from song titles.
+In the checks, NPO Radio 2 reported Mixed, BNR Talk and 538/SLAM Top 40.
+
+The bridge owns only slot-0 mask `0x7FFF`, slot-24 mask `0x2013`
+(left SPEECH/MUSIC/MONO and TUNED), and slot-25 STEREO bit `0x01`.
+Other fixed fields, PROGRAM, MEMORY and red segments are preserved.
+Manual control and Stop still take ownership away from the radio.
+
 S/PDIF is 48 kHz stereo on GPIO42. This is a **3.3 V logic output**, not an
 analogue speaker/headphone output. Use a compatible optical/transmitter
 stage; audible Sony playback still requires a correctly connected audio
@@ -375,6 +413,32 @@ receiver diagnostics: that inherited status call caused an interrupt
 watchdog reset before being corrected. The display was left stopped,
 AHCT v2 selected, with NPO Radio 2 running. A future reboot still requires
 the disconnected profile-selection procedure.
+
+### Indicator and coexistence checks: 0.3.28
+
+Complete 5-second, 12 MS/s isolated captures verified NPO's 192 kbps/eight
+bars/STEREO/TUNED, BNR's 128 kbps/six bars/SPEECH, 538's MUSIC, and the
+buffering dots with the playback labels cleared. All passed the independent
+TD model and guarded timing checks. Loaded refresh was about 126.7-126.9 Hz.
+Mono behavior, field preservation and unchanged-title indicator updates
+are covered by host tests; these live preset streams were all two-channel.
+
+Longer coexistence tests exposed insufficient network-task stack space
+and core-1 idle starvation. The network stack is now 12 KiB; observed
+minimum reserve after repeated switches was 5,784 bytes. Identical timed
+DMA waves are reused per completed buffer instead of regenerated every
+refresh, retaining separate preload/continuation keys. Decoder bursts yield
+periodically; the network session wake uses a semaphore separate from the
+stream buffer's task notifications. Six station changes with a continuous
+scan then completed without a panic or watchdog warning.
+
+Separate steady 48 kHz and 44.1 kHz playback intervals with scanning showed
+normal frame progress and no new DMA underruns, decoder errors, compressed
+underflows or S/PDIF write errors. The DMA underrun counter can increase
+during source resets; this is not a claim of gapless station switching.
+CMake now declares `version.txt` as a configuration dependency; always
+verify the reported image/runtime version after an incremental build.
+Firmware 0.3.28 retains the same GPIO allocation and boot-stopped safety policy.
 
 ## 8. Troubleshooting
 

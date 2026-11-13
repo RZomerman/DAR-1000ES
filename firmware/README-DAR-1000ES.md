@@ -1,6 +1,6 @@
 # DAR-1000ES internet radio baseline
 
-## Current release: 0.3.26
+## Current release: 0.3.28
 
 Start with the complete [screen-driver operating guide](../13-screen-driver-operating-guide.md).
 Radio is now enabled with MP3/AAC/ICY metadata, S/PDIF on GPIO42 and an
@@ -8,6 +8,13 @@ explicitly authorized 22-character NOW PLAYING display. The homepage is
 the radio; `/screen` retains the editor and timing laboratory. Long titles
 scroll on the ESP. Display output remains stopped on boot and pin-profile
 selection still defaults to original.
+
+Radio-owned fixed indicators now show source STEREO/left MONO, bitrate bars,
+buffering dots, TUNED and explicit station-genre MUSIC/SPEECH. The GPIO map
+and tested brightness are unchanged. NPO's Mixed genre deliberately leaves
+both genre labels off. The network-task stack and decoder/display scheduling
+were corrected after extended station-switch tests; see the operating guide
+for results and limits. Source changes are not guaranteed gapless.
 
 **STB must reach both IC702 and IC703.** After correcting that wiring,
 0.3.25 rendered clean 22-matrix text and the existing nine-character marquee.

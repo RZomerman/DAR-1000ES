@@ -11,10 +11,13 @@ remains **STR-E200ES**.
 Hobby/non-commercial adaptation of [rbouteiller/airplay-esp32](https://github.com/rbouteiller/airplay-esp32).
 The upstream license and third-party notices remain applicable.
 
-## DAR-1000ES profile (0.3.26)
+## DAR-1000ES profile (0.3.28)
 
 The checked-in `radio-s3` profile now combines radio with the Sony timing
 laboratory and explicitly authorized 22-character NOW PLAYING display.
+Fixed indicators follow source channel count, reported bitrate, decoder
+state and explicit station genre. Buffering uses the bottom dots; unknown
+or mixed genre does not imply MUSIC or SPEECH.
 Long titles scroll locally on the ESP. See the
 [screen-driver operating guide](../13-screen-driver-operating-guide.md)
 for final AHCT wiring, brightness and safe connection instructions.
@@ -70,7 +73,8 @@ live metadata and can lead buffered playback by a few seconds. Artwork and
 scraping external station websites are not part of this implementation.
 
 `/api/radio` adds a `now_playing` object with `title`, `artist`, `album`,
-`stream_name`, `content_type`, `bitrate_kbps` (station-reported string), `url`,
+`stream_name`, `content_type`, `bitrate_kbps` (station-reported string), `genre`
+(ICY station format, not a per-song classification), `url`,
 `codec`, `sample_rate`, `channels`, `output_sample_rate` and
 `metadata_supported`. Existing radio/Home Assistant fields remain unchanged.
 

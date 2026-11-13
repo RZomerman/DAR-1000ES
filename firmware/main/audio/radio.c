@@ -47,10 +47,10 @@ static const char *urls[] = {
     "http://playerservices.streamtheworld.com/api/livestream-redirect/SLAM_MP3.mp3"};
 
 static SemaphoreHandle_t lock;
+static SemaphoreHandle_t fetch_start;
 static StreamBufferHandle_t compressed;
 static StaticStreamBuffer_t compressed_control;
 static RingbufHandle_t pcm_queue;
-static TaskHandle_t fetch_task_handle;
 static atomic_bool airplay;
 static atomic_bool fetching;
 static atomic_bool ready;
@@ -67,6 +67,7 @@ static char radio_title[512];
 static char stream_name[160];
 static char stream_content_type[96];
 static char stream_bitrate[32];
+static char stream_genre[128];
 static uint32_t radio_rate;
 static int radio_channels;
 static rtsp_metadata_t airplay_metadata;
@@ -141,6 +142,9 @@ static esp_err_t http_event(esp_http_client_event_t *event) {
                          "", true, false);
     } else if (!strcasecmp(event->header_key, "icy-br")) {
       strlcpy(stream_bitrate, event->header_value, sizeof(stream_bitrate));
+    } else if (!strcasecmp(event->header_key, "icy-genre")) {
+      radio_display_text(stream_genre, sizeof(stream_genre), event->header_value,
+                         "", true, false);
     }
     xSemaphoreGive(lock);
   }
@@ -151,7 +155,7 @@ static void fetch_task(void *unused) {
   (void)unused;
   uint8_t chunk[2048];
   for (;;) {
-    ulTaskNotifyTake(pdTRUE, portMAX_DELAY);
+    xSemaphoreTake(fetch_start, portMAX_DELAY);
     unsigned gen = atomic_load(&stream_generation);
     char url[URL_SIZE];
     xSemaphoreTake(lock, portMAX_DELAY);
@@ -173,7 +177,8 @@ static void fetch_task(void *unused) {
         atomic_store(&codec, ESP_AUDIO_SIMPLE_DEC_TYPE_NONE);
         xSemaphoreTake(lock, portMAX_DELAY);
         metadata_interval = 0;
-        stream_name[0] = stream_content_type[0] = stream_bitrate[0] = 0;
+        stream_name[0] = stream_content_type[0] = stream_bitrate[0] =
+            stream_genre[0] = 0;
         xSemaphoreGive(lock);
         result = esp_http_client_open(http, 0);
         if (result != ESP_OK) break;
@@ -246,6 +251,8 @@ static void fetch_task(void *unused) {
       esp_http_client_close(http);
       esp_http_client_cleanup(http);
     }
+    ESP_LOGI(TAG, "Stream task stack reserve: %u bytes",
+             (unsigned)uxTaskGetStackHighWaterMark(NULL));
     atomic_store(&ready, false);
     atomic_store(&fetching, false);
   }
@@ -271,6 +278,7 @@ static void decode_session(unsigned gen) {
   } else {
     size_t buffered = 0;
     unsigned stalled = 0;
+    int64_t last_yield = esp_timer_get_time();
     while (current(gen)) {
       if (buffered < 4096 || stalled) {
         size_t n = xStreamBufferReceive(compressed, input + buffered,
@@ -338,6 +346,11 @@ static void decode_session(unsigned gen) {
           break;
         }
       } else stalled = 0;
+      /* Bound decoder bursts so the core-1 idle watchdog can run. */
+      if (esp_timer_get_time() - last_yield >= 250000) {
+        vTaskDelay(1);
+        last_yield = esp_timer_get_time();
+      }
     }
   }
   free(input);
@@ -366,10 +379,11 @@ static void decode_task(void *unused) {
     strlcpy(stream_url, selected == 4 ? custom_url : urls[selected], sizeof(stream_url));
     error_text[0] = 0;
     radio_title[0] = 0;
+    stream_genre[0] = stream_bitrate[0] = 0;
     radio_rate = 0;
     radio_channels = 0;
     xSemaphoreGive(lock);
-    xTaskNotifyGive(fetch_task_handle);
+    xSemaphoreGive(fetch_start);
     int64_t start = esp_timer_get_time();
     while (current(gen) && atomic_load(&fetching) &&
            xStreamBufferBytesAvailable(compressed) < PREBUFFER_BYTES &&
@@ -402,8 +416,11 @@ static void display_task(void *unused) {
                           selected == 4 ? "Custom stream" : names[selected];
     radio_display_text(text, sizeof(text), radio_title, station,
                        atomic_load(&ready), error_text[0] != 0);
+    sony_radio_status_t status = sony_radio_status(
+        atomic_load(&decoding) && !atomic_load(&airplay) && !error_text[0],
+        radio_channels, stream_bitrate, stream_genre);
     xSemaphoreGive(lock);
-    sony_vfd_show_radio(text);
+    sony_vfd_show_radio(text, &status);
     vTaskDelay(pdMS_TO_TICKS(500));
   }
 }
@@ -477,6 +494,7 @@ static esp_err_t status_handler(httpd_req_t *req) {
   cJSON_AddStringToObject(now_playing, "stream_name", ap ? "" : stream_name);
   cJSON_AddStringToObject(now_playing, "content_type", ap ? "" : stream_content_type);
   cJSON_AddStringToObject(now_playing, "bitrate_kbps", ap ? "" : stream_bitrate);
+  cJSON_AddStringToObject(now_playing, "genre", ap ? "" : stream_genre);
   cJSON_AddStringToObject(now_playing, "url", ap ? "" : stream_url);
   cJSON_AddNumberToObject(now_playing, "sample_rate", ap ? diagnostics.format.sample_rate : radio_rate);
   cJSON_AddNumberToObject(now_playing, "channels", ap ? diagnostics.format.channels : radio_channels);
@@ -592,7 +610,8 @@ static esp_err_t select_handler(httpd_req_t *req) {
   selected = id->valueint;
   if (selected == 4) strlcpy(custom_url, url->valuestring, sizeof(custom_url));
   error_text[0] = 0;
-  radio_title[0] = stream_name[0] = stream_content_type[0] = stream_bitrate[0] = 0;
+  radio_title[0] = stream_name[0] = stream_content_type[0] = stream_bitrate[0] =
+      stream_genre[0] = 0;
   stream_url[0] = 0;
   metadata_interval = 0;
   radio_rate = 0;
@@ -669,7 +688,9 @@ esp_err_t radio_register_http(httpd_handle_t server) {
 
 esp_err_t radio_init(void) {
   lock = xSemaphoreCreateMutex();
-  if (!lock) return ESP_ERR_NO_MEM;
+  /* Stream buffers use task notification index 0 internally. */
+  fetch_start = xSemaphoreCreateBinary();
+  if (!lock || !fetch_start) return ESP_ERR_NO_MEM;
   uint8_t *storage = heap_caps_malloc(COMPRESSED_BYTES + 1, MALLOC_CAP_SPIRAM | MALLOC_CAP_8BIT);
   if (!storage) return ESP_ERR_NO_MEM;
   compressed = xStreamBufferCreateStatic(COMPRESSED_BYTES + 1, 1, storage, &compressed_control);
@@ -687,8 +708,9 @@ esp_err_t radio_init(void) {
   if (esp_audio_dec_register_default() != ESP_AUDIO_ERR_OK ||
       esp_audio_simple_dec_register_default() != ESP_AUDIO_ERR_OK) return ESP_FAIL;
   if (rtsp_events_register(airplay_event, NULL) != 0) return ESP_FAIL;
-  if (xTaskCreatePinnedToCore(fetch_task, "radio_net", 6144, NULL, 3,
-                             &fetch_task_handle, 0) != pdPASS ||
+  /* HTTP callbacks nest normalization below the stream task's audio buffers. */
+  if (xTaskCreatePinnedToCore(fetch_task, "radio_net", 12288, NULL, 3,
+                             NULL, 0) != pdPASS ||
       xTaskCreatePinnedToCore(decode_task, "radio_dec", 8192, NULL, 4,
                              NULL, 1) != pdPASS) return ESP_ERR_NO_MEM;
 #ifdef CONFIG_SONY_SCREEN_BENCH

@@ -169,6 +169,7 @@ dd { margin: 0; overflow-wrap: anywhere; }
     <dt>Stream / source</dt><dd id="stream-name">&mdash;</dd>
     <dt>Audio format</dt><dd id="stream-format">&mdash;</dd>
     <dt>Bitrate</dt><dd id="stream-bitrate">&mdash;</dd>
+    <dt>Station genre</dt><dd id="stream-genre">&mdash;</dd>
     <dt>Optical output</dt><dd>48 kHz &middot; stereo &middot; 16-bit PCM</dd>
     <dt>Stream URL</dt><dd id="stream-url">&mdash;</dd>
   </dl>
@@ -186,6 +187,9 @@ dd { margin: 0; overflow-wrap: anywhere; }
   </select>
   <p>All 26 slots stay scanned, even with one character. Do not divide brightness
     by the number of lit characters. Current limits are not measured.</p>
+  <p class="muted">STEREO / left MONO follow source channels. Bars show reported
+    bitrate up to 320 kbps; dots mean buffering or unknown bitrate.
+    TUNED means decoded playback. MUSIC / SPEECH use station genre, not song analysis.</p>
   <p><label><input id="vfd-confirm" type="checkbox" style="width:auto">
     Correct AHCT v2 wiring, STB to BOTH TD chips, original controller isolated,
     Sony powered and outputs ready. I authorize display output.</label></p>
@@ -292,6 +296,7 @@ function render(state) {
   ].filter(Boolean).join(" \u00b7 ") || "\u2014";
   document.getElementById("stream-bitrate").textContent =
     track.bitrate_kbps ? track.bitrate_kbps + " kbps (station reported)" : "Not reported";
+  document.getElementById("stream-genre").textContent = track.genre || "Not supplied";
   document.getElementById("stream-url").textContent = track.url ||
     (state.source === "AirPlay" ? "AirPlay audio from your phone / computer" : "\u2014");
   for (const button of buttons) {

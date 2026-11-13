@@ -17,6 +17,14 @@
 #define SCAN_PREFIX   (16 + 40 * 64 + 16)
 #define SCAN_CAPACITY (8 * 26 * 2500 + 4096)
 
+typedef struct {
+  sony_timing_t timing;
+  uint64_t words[26];
+  size_t bytes;
+  bool initialize;
+  bool valid;
+} sony_scan_cache_t;
+
 struct sony_scan_engine {
   esp_lcd_i80_bus_handle_t bus;
   esp_lcd_panel_io_handle_t io;
@@ -32,6 +40,7 @@ struct sony_scan_engine {
   bool held;
   sony_timing_t timing;
   uint64_t words[26];
+  sony_scan_cache_t timed_cache[2];
 };
 
 extern const uint8_t replay_start[] asm("_binary_mono_blink_rle_start");
@@ -569,16 +578,30 @@ esp_err_t sony_scan_submit_timed(sony_scan_engine_t *engine,
   bool initialize =
       !engine->submitted || memcmp(&engine->timing, timing, sizeof(*timing)) ||
       (timing->hold && engine->words[timing->slot] != words[timing->slot]);
-  uint8_t *wave = engine->buffers[engine->submitted % 2];
-  size_t bytes = engine->held
-                     ? sony_timing_generate_clear(wave, engine->bytes, timing)
-                     : sony_timing_generate(wave, engine->bytes, timing, words,
-                                            initialize);
-  if (!bytes)
-    return ESP_ERR_INVALID_SIZE;
-  if (!engine->held)
-    for (size_t i = 0; i < bytes; ++i)
-      wave[i] ^= 0x21;
+  unsigned index = engine->submitted % 2;
+  uint8_t *wave = engine->buffers[index];
+  sony_scan_cache_t *cache = &engine->timed_cache[index];
+  size_t bytes = cache->bytes;
+  /* Regenerate changed frames, not identical 62 kB waves at every refresh. */
+  if (engine->held || !cache->valid || cache->initialize != initialize ||
+      memcmp(&cache->timing, timing, sizeof(*timing)) ||
+      memcmp(cache->words, words, sizeof(cache->words))) {
+    bytes = engine->held
+                ? sony_timing_generate_clear(wave, engine->bytes, timing)
+                : sony_timing_generate(wave, engine->bytes, timing, words,
+                                       initialize);
+    if (!bytes)
+      return ESP_ERR_INVALID_SIZE;
+    if (!engine->held) {
+      for (size_t i = 0; i < bytes; ++i)
+        wave[i] ^= 0x21;
+      cache->timing = *timing;
+      memcpy(cache->words, words, sizeof(cache->words));
+      cache->bytes = bytes;
+      cache->initialize = initialize;
+      cache->valid = true;
+    }
+  }
   esp_err_t err = esp_lcd_panel_io_tx_color(engine->io, -1, wave, bytes);
   if (err == ESP_OK) {
     ++engine->submitted;

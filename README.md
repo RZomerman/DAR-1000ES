@@ -7,8 +7,9 @@ This repository contains the project documentation converted from the original W
 For current AHCT wiring, brightness calculations and radio operation, start
 with the [screen-driver operating guide](13-screen-driver-operating-guide.md).
 Shared STB on **both** TD chips corrected the earlier multiplexing corruption;
-clean 22-matrix text and scrolling were observed. Firmware 0.3.26 adds
-internet radio and explicitly authorized full-width NOW PLAYING.
+clean 22-matrix text and scrolling were observed. Firmware 0.3.28 includes
+internet radio, explicitly authorized full-width NOW PLAYING, and source
+channel/bitrate/playback/genre indicators.
 Physical voltage/current validation remains outstanding.
 
 For current display control, start with the

@@ -241,6 +241,122 @@ class ScreenTextTests(unittest.TestCase):
         self.assertEqual(self.text("a" * 256).length, 256)
 
 
+class ScreenTimedCacheTests(unittest.TestCase):
+    def test_completed_buffers_reuse_only_identical_continuations(self):
+        source = (ROOT / "main/sony_capture_replay.c").read_text()
+        model = source[source.index("typedef struct {"):
+                       source.index("extern const uint8_t replay_start")]
+        submit = source[source.index("esp_err_t sony_scan_submit_timed("):
+                        source.index("esp_err_t sony_scan_submit(")]
+        harness = r"""
+#include <assert.h>
+#include <stdlib.h>
+#include <string.h>
+#include "sony_timing.h"
+typedef int esp_err_t;
+typedef void *esp_lcd_i80_bus_handle_t;
+typedef void *esp_lcd_panel_io_handle_t;
+typedef struct sony_scan_engine sony_scan_engine_t;
+enum { ESP_OK, ESP_ERR_INVALID_ARG, ESP_ERR_INVALID_SIZE };
+"""
+        harness += model + r"""
+static unsigned generated;
+static size_t last_size;
+static uint8_t *last_wave;
+static esp_err_t wait_for_buffer(sony_scan_engine_t *engine) {
+    (void)engine; return ESP_OK;
+}
+static esp_err_t held_preload(sony_scan_engine_t *engine, const uint64_t words[26],
+                              const sony_timing_t *timing) {
+    (void)engine; (void)words; (void)timing; return ESP_OK;
+}
+static esp_err_t esp_lcd_panel_io_tx_color(void *io, int command, uint8_t *wave,
+                                          size_t bytes) {
+    (void)io; (void)command; last_size = bytes; last_wave = wave; return ESP_OK;
+}
+static size_t counted_generate(uint8_t *wave, size_t capacity,
+                               const sony_timing_t *timing,
+                               const uint64_t words[26], bool initialize) {
+    ++generated;
+    return sony_timing_generate(wave, capacity, timing, words, initialize);
+}
+#define sony_timing_generate counted_generate
+"""
+        harness += submit + r"""
+#undef sony_timing_generate
+static void check(sony_scan_engine_t *engine, uint64_t words[26],
+                   sony_timing_t *timing, bool initialize) {
+    assert(sony_scan_submit_timed(engine, words, timing) == ESP_OK);
+    uint8_t *expected = malloc(SONY_TIMING_CAPACITY);
+    size_t size = engine->held ?
+        sony_timing_generate_clear(expected, SONY_TIMING_CAPACITY, timing) :
+        sony_timing_generate(expected, SONY_TIMING_CAPACITY, timing, words, initialize);
+    assert(size && last_size == size);
+    if (!engine->held)
+        for (size_t i = 0; i < size; ++i) expected[i] ^= 0x21;
+    assert(!memcmp(expected, last_wave, size));
+    free(expected);
+}
+int main(void) {
+    sony_scan_engine_t engine = {.timed = true, .bytes = SONY_TIMING_CAPACITY};
+    for (unsigned i = 0; i < 2; ++i) {
+        engine.buffers[i] = malloc(engine.bytes);
+        assert(engine.buffers[i]);
+    }
+    sony_timing_t timing = sony_timing_defaults();
+    uint64_t words[26] = {0};
+    words[22] = 0x010842109F;
+    check(&engine, words, &timing, true);
+    for (unsigned i = 0; i < 4; ++i) check(&engine, words, &timing, false);
+    assert(generated == 3);
+    words[25] = 1;
+    check(&engine, words, &timing, false);
+    check(&engine, words, &timing, false);
+    check(&engine, words, &timing, false);
+    assert(generated == 5);
+    timing.on_ns += 125;
+    timing.off_ns -= 125;
+    check(&engine, words, &timing, true);
+    check(&engine, words, &timing, false);
+    check(&engine, words, &timing, false);
+    unsigned before = generated;
+    check(&engine, words, &timing, false);
+    check(&engine, words, &timing, false);
+    assert(generated == before);
+    engine.held = true;
+    engine.submitted = 0;
+    timing.hold = 1;
+    timing.slot = 22;
+    timing.on_ns = 5000;
+    timing.off_ns = 995000;
+    check(&engine, words, &timing, true);
+    check(&engine, words, &timing, false);
+    for (unsigned i = 0; i < 2; ++i) free(engine.buffers[i]);
+    return 0;
+}
+"""
+        with tempfile.TemporaryDirectory() as temp:
+            path = Path(temp) / "cache.c"
+            path.write_text(harness)
+            binary = Path(temp) / "cache"
+            subprocess.run(["cc", "-Wall", "-Wextra", "-Werror",
+                            "-I", str(ROOT / "main"), str(path),
+                            str(ROOT / "main/sony_timing.c"), "-o", str(binary)],
+                           check=True)
+            subprocess.run([str(binary)], check=True)
+
+
+class ScreenRadioStatusTests(unittest.TestCase):
+    def test_channels_bitrate_genre_and_preserved_fields(self):
+        with tempfile.TemporaryDirectory() as temp:
+            binary = Path(temp) / "radio-status"
+            subprocess.run(["cc", "-Wall", "-Wextra", "-Werror",
+                            str(ROOT / "tests/test_radio_status.c"),
+                            str(ROOT / "main/sony_radio_status.c"),
+                            "-o", str(binary)], check=True)
+            subprocess.run([str(binary)], check=True)
+
+
 class ScreenRadioOwnershipTests(unittest.TestCase):
     def test_metadata_cannot_start_output_or_override_manual_control(self):
         source = (ROOT / "main/sony_screen.c").read_text()
@@ -252,6 +368,7 @@ class ScreenRadioOwnershipTests(unittest.TestCase):
 #include <stdlib.h>
 #include <string.h>
 #include "sony_text.h"
+#include "sony_radio_status.h"
 typedef int esp_err_t;
 enum { ESP_OK, ESP_ERR_INVALID_STATE, ESP_ERR_NO_MEM, ESP_ERR_INVALID_ARG };
 static atomic_bool running, display_requested, stop_requested, timing_requested;
@@ -268,34 +385,38 @@ static int64_t esp_timer_get_time(void) { return now; }
 """
         harness += functions + r"""
 int main(void) {
-    assert(sony_vfd_show_radio("Song") == ESP_ERR_INVALID_STATE);
+    sony_radio_status_t status = sony_radio_status(true, 2, "192", "Pop");
+    assert(sony_vfd_show_radio("Song", &status) == ESP_ERR_INVALID_STATE);
     assert(!atomic_load(&running) && !scrolling_text.active);
     atomic_store(&running, true);
     atomic_store(&display_requested, true);
     atomic_store(&timing_requested, true);
-    assert(sony_vfd_show_radio("Song") == ESP_ERR_INVALID_STATE);
+    assert(sony_vfd_show_radio("Song", &status) == ESP_ERR_INVALID_STATE);
     follow_radio = true;
     now = 1234;
-    assert(sony_vfd_show_radio("A long title that needs to scroll") == ESP_OK);
+    assert(sony_vfd_show_radio("A long title that needs to scroll", &status) == ESP_OK);
     assert(scrolling_width == 22 && scrolling_text.started_us == 1234);
+    assert(words[0] == 0xFF && words[24] == 0x2002 && words[25] == 1);
     now = 2000;
-    assert(sony_vfd_show_radio("A long title that needs to scroll") == ESP_OK);
+    status = sony_radio_status(true, 1, "128", "Talk");
+    assert(sony_vfd_show_radio("A long title that needs to scroll", &status) == ESP_OK);
     assert(scrolling_text.started_us == 1234);
+    assert(words[0] == 0x3F && words[24] == 0x2011 && words[25] == 0);
     assert(sony_vfd_show("Manual", true, true) == ESP_OK);
     assert(!follow_radio && scrolling_width == 9);
     uint64_t before[26];
     memcpy(before, words, sizeof(words));
-    assert(sony_vfd_show_radio("New song") == ESP_ERR_INVALID_STATE);
+    assert(sony_vfd_show_radio("New song", &status) == ESP_ERR_INVALID_STATE);
     assert(!memcmp(before, words, sizeof(words)));
     follow_radio = true;
     display_timing.hold = true;
-    assert(sony_vfd_show_radio("Song") == ESP_ERR_INVALID_STATE);
+    assert(sony_vfd_show_radio("Song", &status) == ESP_ERR_INVALID_STATE);
     display_timing.hold = false;
     display_timing.pair = true;
-    assert(sony_vfd_show_radio("Song") == ESP_ERR_INVALID_STATE);
+    assert(sony_vfd_show_radio("Song", &status) == ESP_ERR_INVALID_STATE);
     display_timing.pair = false;
     atomic_store(&stop_requested, true);
-    assert(sony_vfd_show_radio("Song") == ESP_ERR_INVALID_STATE);
+    assert(sony_vfd_show_radio("Song", &status) == ESP_ERR_INVALID_STATE);
     assert(!memcmp(before, words, sizeof(words)));
     return 0;
 }
@@ -306,7 +427,8 @@ int main(void) {
             binary = Path(temp) / "radio"
             subprocess.run(["cc", "-Wall", "-Wextra", "-Werror",
                             "-I", str(ROOT / "main"), str(path),
-                            str(ROOT / "main/sony_text.c"), "-o", str(binary)],
+                            str(ROOT / "main/sony_text.c"),
+                            str(ROOT / "main/sony_radio_status.c"), "-o", str(binary)],
                            check=True)
             subprocess.run([str(binary)], check=True)
 
