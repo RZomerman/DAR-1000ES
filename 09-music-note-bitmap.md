@@ -21,7 +21,8 @@ validated on the physical display.
 
 ## Encoding
 
-Use the text-matrix convention established from Frequency and No DSR:
+Use the text-matrix convention first inferred from Frequency and No DSR
+and now optically confirmed for every dot in slots 1-22:
 
 ```text
 bit = row * 5 + column
@@ -49,20 +50,23 @@ Latch and blanking timing remain the same as for text characters.
 
 ## Placement and limitations
 
-Place this word in any **mapped text slot**: message slots 14-22,
-frequency slots 6-10 or suffix slots 3-5. Slot 22 is the leftmost message
-character. Continuous scanning is required; setting a word once is not
-enough to sustain the screen.
+Place this word in any matrix slot **1-22**, including the cells previously
+blank in captures. The legacy layout uses message slots 14-22, frequency
+6-10 and suffix 3-5. Slot 22 is the leftmost physical cell and message
+character. Normal full-screen use requires continuous multiplexing; writing
+a word alone does not generate that scan. Controlled held-grid experiments
+use a separate, duty-limited CLEAR pulse mode.
 
 This is a pixel glyph, not the fixed MUSIC annunciator or a red slot-25
-pattern. The photo's full phrase "Network Audio Player" exceeds the currently
-mapped nine-character message field; it does not prove that all character
-positions on our hardware are mapped.
+pattern. The photo's phrase "Network Audio Player" exceeds the legacy
+nine-character message window. All 22 physical matrices are now mapped,
+but using more than the nine-cell application window requires an explicit
+layout change rather than overwriting the frequency and suffix fields.
 
 The local editor now includes this design as U+266A EIGHTH NOTE.
 This Unicode font update has not been deployed to the ESP.
-Verify orientation with a safe live pixel test before claiming the pictured
-appearance on the actual VFD.
+Pixel orientation is confirmed; this particular glyph's pictured appearance
+and readability still need visual review on the actual VFD.
 
 See the [display-driver specification](08-esp-display-driver-specification.md)
 for slot mapping, original Sony glyphs, derived font and scan timing.

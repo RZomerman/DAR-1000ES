@@ -2803,9 +2803,11 @@ not extracted from a Sony bus capture. Text input uses U+266A.
 
 ## Seven vertical bar characters
 
-Each level fills five complete columns from the bottom upward.
-Minimum level 1 always lights the bottom row. The same set works for LEFT
-and RIGHT; physical channel allocation and audio analysis are separate.
+Level `n = 1..7` fills `n` complete rows (five pixels per row) from the
+bottom upward. Minimum level 1 lights only the bottom row. These are
+generated matrix glyphs, not the fixed 14-bar signal meter in slot 0.
+The same set works for LEFT and RIGHT; physical channel allocation and
+audio analysis are separate.
 
 ### Bar level 1
 

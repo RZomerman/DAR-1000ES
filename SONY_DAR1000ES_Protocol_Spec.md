@@ -6,11 +6,23 @@
 > controller ownership, electrical characteristics, arbitration and checksum
 > are unresolved. See [capture findings and key tables](05-bus-capture-findings.md).
 
+This is a different interface from the two TD62 serial display drivers.
+The now-confirmed [fixed-element and matrix controls](08-esp-display-driver-specification.md)
+use 26 slot words, not the byte offsets of this parallel protocol.
+Parallel handshake STB is not the display drivers' FLSTB latch signal.
+Successful direct-driver mapping does not resolve the masked parallel bytes,
+key-code collisions or controller ownership described here.
+
 ## Option 1: Retain the Original Controls
 
 The first approach to investigate is communication over `DBS0-7`, `ACK`, `NCK`, `STB`, and `REQ` between the System Controller MCU and the Display/Front-Panel Key Controller MCU (IC701). The goal is to determine whether we can reuse the original display/front-panel controller and default controls for the internet-radio conversion, rather than going straight to the two separate display-driver chips.
 
-Direct control of IC702 and IC703 is **Option 2, the fallback**, described in [DAR-1000ES Display Control](02-display-control.md). Neither successful bus emulation nor compatibility with the desired internet-radio interface has been demonstrated.
+Direct control of IC702 and IC703 is **Option 2**, now under active
+investigation with confirmed optical mapping; see the
+[current display-control guide](08-esp-display-driver-specification.md).
+The [original hardware proposal](02-display-control.md) is historical.
+Neither successful parallel-bus emulation nor compatibility with the desired
+internet-radio interface has been demonstrated.
 
 ### Validation Required Before Implementation
 
@@ -70,7 +82,7 @@ The proposed model assumes an 8-bit bidirectional data bus and four asynchronous
 
 ### Historical Proposed Signal Definitions (Unvalidated)
 
-| Signal Name | Mnemonic | Hardware Direction | Native Voltage | Protocol Description |
+| Signal Name | Mnemonic | Proposed Direction (Unverified) | Assumed Voltage | Historical Protocol Description |
 | :--- | :--- | :--- | :--- | :--- |
 | **Display Bus Signals 0-7** | `DBS0` to `DBS7` | Dynamic Bidirectional | 5V TTL | 8-bit parallel payload data bus. Handles display character matrices, VFD grid layout streams, and raw button matrices. |
 | **Request** | `REQ` | **Fixed Inbound** (Display &rarr; System) | 5V TTL | Active-Low alert line asserted by the Display Controller to flag that a front-panel button or rotary encoder action occurred and a payload byte is pending retrieval. |
@@ -142,7 +154,11 @@ Display Controller (Transmitter)               System Controller (Receiver)
 
 An ESP32 uses 3.3V GPIO and must not be exposed to incompatible signal levels. The blueprint below assumes a 5V Sony interface and proposes **SN74LVC8T245** (8-bit bus) and **SN74LVC1T45** (1-bit transceivers). Confirm actual bus voltages and the exact parts' supply ranges, input tolerance, direction control, and isolation capabilities before selecting hardware.
 
-The GPIO assignments below reflect the selected wiring, not a validated protocol implementation. IO17 controls ACK/NCK direction, while STB uses the inverse direction. Boot/reset isolation and electrical compatibility still require hardware validation.
+The GPIO assignments below record the parallel-bus wiring proposal, not
+the current direct-display harness or a validated protocol implementation.
+IO17 controls ACK/NCK direction in that proposal, while STB uses the inverse
+direction. Boot/reset isolation and electrical compatibility still require
+hardware validation.
 
 ### ESP32 GPIO Assignments
 

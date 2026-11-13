@@ -2,7 +2,12 @@
 
 Internet-radio user interface, keypad wiring and application logic 
 
-This chapter is the baseline for the ESP32 software. It defines how the original Sony front panel is connected through the TCA8418, how each control behaves, and how internet-radio stations are selected and played. 
+This chapter is the design baseline for the ESP32 software. It specifies
+the proposed TCA8418 connection and intended navigation, filtering and
+preset behavior; it is not evidence that these functions are implemented
+or that the physical key-to-matrix mapping has been verified.
+The confirmed display-element controls are documented separately in
+[chapter 8](08-esp-display-driver-specification.md).
 
  
 
@@ -28,7 +33,9 @@ The converted DAR-1000ES should continue to feel like a radio receiver. The orig
 
 The keypad schematic shows the switch matrix connected to IC701, the original display controller. The relevant controller net names are OUT0 to OUT5 and IN0 to IN7. These fourteen lines are reused for the TCA8418.
 
-**Connection rule  **Disconnect or remove IC701 from the twelve keypad-matrix lines before the TCA8418 drives them. Do not leave both IC701 and the TCA8418 connected as active matrix scanners. 
+**Connection rule:** Disconnect or remove IC701 from all fourteen
+keypad-matrix lines before the TCA8418 drives them. Do not leave both
+IC701 and the TCA8418 connected as active matrix scanners.
 
  
 
@@ -86,7 +93,8 @@ This approach preserves the original DAR-1000ES operating style while providing 
 
 ## Category Selection
 
-The entire programme-type key block is used for station categories.
+The fifteen programme-type keys below select station categories.
+UNDEFINED is reserved for country selection, not another category.
 
 > NEWS
 >
@@ -117,8 +125,6 @@ The entire programme-type key block is used for station categories.
 > CLASSICS
 >
 > OTHER M
->
-> UNDEFINED
 
 Each button represents a top-level station category.
 
@@ -145,8 +151,6 @@ Example:
 > ↓
 >
 > World News
->
-> \`\`
 
 Repeated presses of the same category button cycle through all available subcategories. The list wraps around continuously.
 
@@ -181,10 +185,6 @@ Example:
 > ↓
 >
 > World News
->
-> ↓
->
-> \`\`\`\`\`
 
 ## Country Selection
 
@@ -215,8 +215,6 @@ to browse through the available countries.
 > United Kingdom
 >
 > United States
->
-> \`\`\`\`\`
 
 The selected country remains active as a global filter.
 
@@ -266,7 +264,7 @@ Example:
 >
 > Subcategory = World News
 
-Available stations:
+Illustrative station names, not a verified country/category directory result:
 
 > BBC World Service
 >
@@ -352,8 +350,6 @@ Possible future uses include:
 > DIRECT = Quick navigation
 >
 > LNC = Favourites
->
-> BLOCK +/- = Fast navigation
 >
 > MONO MODE = Playback options
 

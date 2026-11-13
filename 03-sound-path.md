@@ -7,7 +7,11 @@ Internet-radio sound interface, and control logic
 > LATCH windows, not the previously hypothesized 12-clock transfer. The
 > LSB-first interpretations are `0x442C` and `0x0400`; command meanings,
 > voltage compatibility and working audio remain unverified. INIT and the
-> other controls currently reside on different ESP boards.
+> other controls were on different ESP boards in that bench session.
+> The GPIO tables below are design proposals, not the current display
+> harness pinout. Use [chapter 7](07-audio-control-findings-and-plan.md) for
+> audio evidence and [chapter 8](08-esp-display-driver-specification.md) for
+> the independently confirmed display controls.
 
 ## Original audio architecture
 
@@ -30,7 +34,7 @@ For the conversion, the ESP32 replaces the original digital-tuner audio source. 
 
 IC501 receives a conventional serial audio set consisting of data, bit clock, word-select clock and master clock. This is the most attractive injection point because IC501 can continue to perform the original Sony filtering before passing audio to IC601. 
 
-| **Signal**  | **Function**  | **ESP32 assignment**  | **Board connection**  |
+| **Signal**  | **Function**  | **Proposed ESP32 assignment**  | **Board connection**  |
 |:--:|----|----|----|
 | BCK1  | Serial bit clock  | GPIO16  | Reuse the IC501-side path through R501  |
 | LRCK1  | Left/right word-select clock  | GPIO17  | Reuse the IC501-side path through R503  |
@@ -47,9 +51,7 @@ IC501 receives a conventional serial audio set consisting of data, bit clock, wo
 
 IC501 also has ATT, SHIFT, LATCH and INIT control inputs. The related Sony CXD1244S documentation establishes the meaning of the three-wire control style: ATT is attenuator serial data, SHIFT is the shift clock and LATCH transfers the shifted word into the active register. INIT resynchronises the processing and establishes a defined start condition. 
 
-. 
-
-| **ESP32 GPIO**  | **IC501 signal**  | **Purpose**                           |
+| **Proposed ESP32 GPIO**  | **IC501 signal**  | **Purpose**                           |
 |:---------------:|-------------------|---------------------------------------|
 |     GPIO10      | ATT               | Serial attenuation/control data       |
 |     GPIO11      | SHIFT             | Shift-clock input                     |
@@ -114,8 +116,9 @@ rather than a protocol problem.
 **Complete ESP32 allocation **
 
 This is the original single-ESP proposal, not the current verified allocation.
-INIT is currently on a different ESP from ATT/SHIFT/LATCH; reconcile both
-boards' assignments and startup coordination before implementing this table.
+INIT was on a different ESP from ATT/SHIFT/LATCH in the recorded audio bench
+session. Reconcile actual board assignments and startup coordination before
+implementing this table; do not combine it with another profile's GPIO map.
 
 |     **Function**       | **Signal**      | **GPIO**  |
 |:----------------------:|-----------------|-----------|

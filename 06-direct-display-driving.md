@@ -147,6 +147,11 @@ not evidence that a shift-register reset occurred.
 
 ### Timing limits versus analyser measurements
 
+For driver settings, page 5 recommends VDD=4.5-5.5 V, CK <=8 MHz,
+CK pulses >=75 ns and DATA setup/hold >=50 ns over Ta=-40..85 C.
+The page-7 test-condition figures below are not substitutes for those
+recommended operating limits. See the [timing revalidation](12-td62c950rf-timing-revalidation.md#datasheet-limits).
+
 Page 7 specifies the following limits at its stated 25 C, VDD=5 V,
 HVCC=70 V and test-load conditions; page 9 defines the measurement edges.
 Compare them with the original Frequency fixture and the buffered ESP repeat:

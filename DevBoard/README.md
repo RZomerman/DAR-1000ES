@@ -2,6 +2,12 @@
 
 ## Overview
 
+**Design proposal, not a hardware-validation report.** This document describes
+the intended three-ESP development board, not the pinout of the current
+display-test harness. The [current display-control guide](../08-esp-display-driver-specification.md)
+records confirmed element mapping; it does not establish that this board's
+audio, bus, keypad, power or isolation features have been validated.
+
 This development board is designed as the primary hardware platform for the **Sony DAR-1000ES modernization project**. It enables rapid experimentation with multiple integration strategies while preserving the original Sony hardware wherever possible.
 
 The board incorporates **three ESP32-S3 controllers**, although only two are expected to be required for the final solution. The third controller is included specifically as a contingency path for direct display control if communication through the original Sony system controller (IC701) proves impractical.
@@ -67,7 +73,9 @@ Supported outputs include:
 | Power Control |
 | Reset Control |
 
-This approach allows complete control over the audio subsystem even if communication through the original system controller becomes problematic.
+These are intended control outputs, not established safe drive procedures.
+Verify their actual voltage, polarity, ownership and reset behavior before
+using them, even if communication through the original controller fails.
 
 ---
 
@@ -82,7 +90,10 @@ Capabilities:
 - Replace original controller functionality
 - Support future custom user interface options
 
-The keypad matrix is interfaced through a dedicated keypad controller, allowing reliable operation without loading the original circuitry.
+The proposed keypad interface uses a dedicated keypad controller. Isolate
+IC701 from all fourteen matrix nets before enabling another scanner;
+reliable operation and physical key positions still need validation.
+See the [keypad design baseline](../04-program-and-keypad-baseline.md).
 
 ---
 
@@ -190,6 +201,11 @@ Features include:
 
 This allows any controller to be disabled while maintaining operation of the remaining subsystems.
 
+Disabling a controller or its power jumper does not by itself establish
+electrical isolation of its signal pins. Verify buffer enables, power-state
+behavior and original-controller ownership; do not assume an unpowered ESP
+or Sony input is safe to back-drive.
+
 ---
 
 ## PCB Design Philosophy
@@ -235,6 +251,7 @@ The board is intended to validate three possible integration levels:
 
 ## Current Status
 
-This development board serves as the primary validation platform for the DAR-1000ES retrofit effort.
+This development-board design is a proposed validation platform for the
+DAR-1000ES retrofit effort, not proof of a tested complete hardware platform.
 
 The modular three-ESP architecture provides multiple fallback paths, ensuring that all major subsystems can be independently evaluated before a final production design is selected.

@@ -2,6 +2,13 @@
 
 The Sony DAR-1000ES is an old relic that used to be a satellite tuner. Its front panel has a number of buttons that we can reuse, its output is digital and internally it even has its own DAC (Digital Analog Conversion) chip.
 
+**Status, 2026-11-13:** This chapter describes project goals, not a completed
+implementation. All functional elements in the display reference now have
+observed command matches; stable full-screen multiplexing remains unresolved.
+Use the [current display-control guide](08-esp-display-driver-specification.md)
+for confirmed controls. The audio and keypad objectives below still require
+their own validation; display mapping does not establish those interfaces.
+
 <img src="media/image1.jpeg" alt="The image shows a SONY audio equipment with various settings and controls, including a display showing 118.0MHz, a linear converter, and a fine-tuning dial. AI-generated content may be incorrect." />
 
 [Piotr D. on YouTube](https://youtu.be/dSmdoRHq8-w?si=nIIm9IDE0pOxPFWs) for example managed to convert it already. However, for his conversion he replaced the entire display, used his own DA conversion and picked up at the analog stage of the old unit (from what I can see in the pictures). In this conversion I will be attempting to use as much as possible from the original unit, including the DAC, the analog amplifiers, the display, the buttons and powersupply.
@@ -138,7 +145,11 @@ The analogue sound character of the receiver should remain fundamentally unchang
 
 ### 5. Authentic Display Integration
 
-The VFD display is one of the most distinctive features of the DAR-1000ES and we want to preserve it. We will figure out the special elements of the display after we get full text working.
+The VFD display is one of the most distinctive features of the DAR-1000ES
+and we want to preserve it. The fixed indicators, red segments and all
+22 character matrices are now optically mapped. The remaining driver work
+is clean, stable full-screen refresh and electrical validation, not finding
+the special elements after text support.
 
 Project objectives include:
 

@@ -7,7 +7,30 @@ the 24 MS/s capture of the experimental 250 Hz MEMORY scan. This chapter
 separates datasheet limits from measured digital timing; it is not an
 analogue signal-integrity certification.
 
+**Scope after the 2026-11-13 inventory:** The 250 Hz results below describe
+the historical firmware 0.3.14 capture, not the later 0.3.23 held-grid
+configuration. The [current control guide](08-esp-display-driver-specification.md)
+and [optical validation history](06-direct-display-driving.md) establish
+element identities, not timing compliance. Neither the camera map nor the
+3.75% held-grid duty guard resolves the historical STB anomaly or certifies
+driver-input voltages, analogue edges or VFD current limits.
+
 ## Datasheet limits
+
+Use the **recommended operating conditions on page 5** when selecting
+driver settings, not the looser 25 C switching-test figures on page 7:
+
+| Recommended condition, Ta = -40..85 C | Limit |
+|---|---:|
+| Logic supply VDD | 4.5-5.5 V |
+| Applied CK frequency | At most 8 MHz |
+| CK pulse width | At least 75 ns |
+| DATA setup before CK rising | At least 50 ns |
+| DATA hold after CK rising | At least 50 ns |
+
+These are not VFD brightness, grid-duty or current-limit specifications.
+
+### Switching-test characteristics, not replacement operating limits
 
 The switching-characteristics table on datasheet page 7 is specified at
 Ta = 25 C, VDD = 5 V, HVCC = 70 V, VIH = VDD and VIL = GND. The listed output
@@ -16,11 +39,11 @@ Page 9 defines the timing reference edges.
 
 | TD62C950RF parameter | Datasheet value | Meaning for this scan |
 |---|---:|---|
-| Maximum operating clock frequency, f(max) | Minimum guaranteed f(max) 9 MHz; typical 17 MHz | The applied shift-clock frequency must remain below the guaranteed limit |
-| CK minimum pulse width | 70 ns | Applies to both segment and grid shift clocks |
+| Maximum operating clock frequency, f(max) | Minimum f(max) 9 MHz; typical 17 MHz under these test conditions | Does not replace the recommended 8 MHz operating maximum |
+| CK minimum pulse width | 70 ns | Test-condition figure; use the recommended minimum 75 ns |
 | STB minimum pulse width | 70 ns | Both levels must be long enough to constitute valid pulses |
-| DATA setup before CK rising | 20 ns | Must be met at the driver input |
-| DATA hold after CK rising | 20 ns | Must be met at the driver input |
+| DATA setup before CK rising | 20 ns | Test-condition figure; use the recommended minimum 50 ns |
+| DATA hold after CK rising | 20 ns | Test-condition figure; use the recommended minimum 50 ns |
 | CK rising to STB falling setup | 50 ns | Required for the latch/shift sequence |
 | Input rise time maximum | 1.0 us | Digital logic captures cannot measure this analogue edge time |
 | Input fall time maximum | 1.0 us | Digital logic captures cannot measure this analogue edge time |
@@ -46,9 +69,9 @@ in [Chapter 6](06-direct-display-driving.md)) was re-counted:
 | STB HIGH pulse | 2.750-2.875 us |
 
 The original serial-clock pulse widths were approximately 0.375-0.5 us in
-the decoded capture. These are far above the datasheet's 70 ns minimum, but
-the original capture's 125 ns sample period is too coarse to prove 20 ns
-DATA setup/hold requirements or analogue edge quality.
+the decoded capture. These are above the recommended 75 ns CK minimum, but
+the original capture's 125 ns sample period cannot certify near-limit
+50 ns DATA setup/hold timing or analogue edge quality.
 
 ## Experimental 250 Hz timing
 
@@ -73,9 +96,10 @@ That is **not** the TD62C950RF shift-clock frequency. Each slot is resampled to
 
 The measured FLSCLK cadence is about 2 MHz typically and at most about 3 MHz
 from the shortest active-scan rising-edge interval. That is below the
-datasheet's guaranteed 9 MHz maximum operating frequency. The shortest
-sampled FLSCLK LOW pulse, however, is only about 83 ns: 13 ns above the
-70 ns minimum. Given the 41.7 ns sample interval and unmeasured analogue
+recommended 8 MHz operating maximum. The shortest sampled FLSCLK LOW pulse,
+however, is only about 83 ns: approximately 8 ns above the recommended
+75 ns minimum (13 ns above the page-7 test figure). Given the 41.7 ns sample
+interval and unmeasured analogue
 edge shape, this is not enough margin to certify the physical pulse width.
 Most observed clock pulses are around 250 ns.
 
@@ -102,13 +126,14 @@ anomaly:
 If that channel assignment is correct, the captured STB waveform does **not**
 validate compliant operation. The discrepancy could be a probe/channel-map
 error, buffer-side edge artifact, or real signal distortion; the `.sr`
-metadata alone cannot distinguish these. The current waveform unit test
+metadata alone cannot distinguish these. The waveform unit test for that build
 checks the generated in-memory template, not the physical STB pin.
 
-The 24 MS/s capture also cannot certify the datasheet's 20 ns DATA setup and
-hold or 50 ns CK-to-STB setup requirements. One-sample timing resolution is
-41.7 ns, and transitions recorded in the same sample are unresolved. Digital
-captures likewise cannot verify the datasheet's maximum rise/fall times.
+These captures do not establish the recommended 50 ns DATA setup/hold or
+the 50 ns CK-to-STB setup requirement at the driver inputs. One-sample
+timing resolution is 41.7 ns, and transitions recorded in the same sample
+are unresolved; the looser page-7 DATA figures are only 20 ns.
+Digital captures likewise cannot verify maximum analogue rise/fall times.
 
 ## Conclusion and next validation
 
@@ -118,10 +143,13 @@ configured experiment. The FLSCLK frequency is below the TD62C950RF limit,
 but the pulse-width margin is narrow at its shortest observed value.
 
 The complete interface cannot yet be declared timing-compliant: the assumed
-STB channel shows extra, often sub-70 ns pulses, and the 20 ns setup/hold,
+STB channel shows extra, often sub-70 ns pulses, and the recommended 50 ns
+DATA setup/hold,
 50 ns CK-to-STB setup, analogue edge times, and voltage thresholds have not
 been verified at the IC inputs. Before further timing changes, verify the
 analyser channel wiring and probe both sides of the translator. Use a
 high-bandwidth oscilloscope or a substantially faster logic capture at the
 TD62 inputs to check the short STB events and edge timing. Keep translator
-OE HIGH and isolate the powered Sony before any USB reset or reflash.
+OE HIGH in the installed always-enabled arrangement. Before any USB reset
+or reflash, confirm all six Sony display signal wires are physically
+disconnected; switching Sony off alone is not electrical isolation.

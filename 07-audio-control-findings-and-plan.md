@@ -1,25 +1,27 @@
 # Audio control findings and next-step plan
 
-Bench session: 2026-11-04. **Passive captures only; no ESP-driven audio or
-confirmed attenuation response yet.**
+Bench session: 2026-11-04. **This chapter's evidence is passive; it does not
+establish ESP-driven audio or a confirmed attenuation response.** Its wiring
+and analyser descriptions are dated snapshots, not the current display setup.
 
 ## Scope and constraints
 
-The Sony currently displays **No DSR**. There is no working decoded programme
-audio with which to test attenuation changes. This does not prevent observing
-startup control signals, but it prevents confirming command meanings through
-their effect on original programme audio.
+During this session the Sony displayed **No DSR**, with no working decoded
+programme audio for testing attenuation changes. Startup control signals
+could still be observed, but their effect on original programme audio could
+not confirm command meanings.
 
 The audio path is IC501 (CXD2560M digital filter) -> IC601 (CXD2562Q DAC) ->
 original analogue output stage. Feeding the PCM input of IC501 remains the
 preferred conversion route; bypassing IC501 is a fallback, not the next step.
 See [Sound path](03-sound-path.md) for the architecture.
 
-Only one analyser is connected. It has been moved from the display drivers to
-the audio controls, so these captures have **no simultaneous display data**.
-INIT is assigned to a different ESP board from ATT/SHIFT/LATCH in the current
-hardware arrangement. The older single-ESP GPIO table is therefore a proposal,
-not a verified description of the current wiring.
+One analyser had been moved from the display drivers to the audio controls,
+so these captures have **no simultaneous display data**. INIT was assigned
+to a different ESP board from ATT/SHIFT/LATCH in that arrangement.
+The older single-ESP GPIO table is a proposal, not a verified description
+of current wiring. The completed display mapping does not resolve these
+separate audio-command and electrical questions.
 
 ## Capture wiring and method
 
@@ -156,7 +158,8 @@ safe electrical interface, accepted PCM format or a working audio path.
 
 ### 1. Preserve the working hardware; finish the desk work
 
-Keep the original controllers connected; no trace cutting or active ESP drive.
+For this audio investigation, keep the original audio controllers connected;
+no audio trace cutting or active ESP injection before the validation gates.
 Use the schematic and the exact CXD2560M/CXD2562Q datasheets to trace
 R504/R505/R506, INIT and any shared data/clock branches. Establish which sides
 of the resistors are source and receiver, command format, input thresholds,

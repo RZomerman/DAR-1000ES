@@ -3,6 +3,13 @@
 Bench session: 2026-11-02. Passive observations only; no working bus emulator
 or electrically verified driver-ownership model is claimed.
 
+**Interface scope:** These are the IC401/IC701 parallel-bus captures, not
+the TD62 display-driver serial interface. Byte offsets below are not
+display slot numbers, and handshake STB is not the drivers' FLSTB latch
+signal. The later [optical display map](08-esp-display-driver-specification.md)
+does not recover masked bus bits, establish full key codes or prove parallel
+bus ownership. Those uncertainties remain valid.
+
 ## Capture wiring and alignment
 
 Two independent 8-channel fx2lafw/Saleae-compatible analysers sampled at
@@ -125,7 +132,9 @@ Known text matches:
 
 The display baseline included actual text `No DSR`, a red predefined block
 letter, predefined SATELLITE/CABLE and LNC/OFF annunciators, frequency digits
-and right-side dots (possibly signal indication, unverified). Fixed labels
+and right-side dots. The later direct-driver inventory confirmed the signal
+meter's bottom dots as slot 0 bit 14; their parallel-bus encoding is not
+therefore established. Fixed labels
 must not be mistaken for literal ASCII strings transmitted on the bus.
 
 ### MEMORY

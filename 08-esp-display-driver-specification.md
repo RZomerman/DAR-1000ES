@@ -183,9 +183,13 @@ to be extracted before generating that mode; its total LOW duration is measured.
 Indicator hiding is separate: the DISPLAY capture cleared slots 0 and 23
 without changing the text.
 
-Datasheet minima at its stated test conditions: CK/STB pulses 70 ns,
-DATA setup/hold 20 ns, CK rising to STB falling 50 ns. An 8 MHz analyser
-has 125 ns resolution and cannot certify analogue margins or threshold crossings.
+Use page 5's recommended operating limits for driver settings:
+VDD=4.5-5.5 V, CK <=8 MHz, CK pulses >=75 ns and DATA setup/hold >=50 ns.
+Page 7's 25 C switching-test figures (CK/STB 70 ns, DATA 20 ns,
+CK-to-STB 50 ns, f(max) minimum 9 MHz) are separate characterization
+conditions, not permission to relax the recommended limits.
+An 8 MHz analyser has 125 ns resolution and cannot certify analogue
+margins or threshold crossings. See [chapter 12](12-td62c950rf-timing-revalidation.md#datasheet-limits).
 
 ## 5. Screen slot map
 
