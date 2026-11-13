@@ -346,6 +346,17 @@ int main(void) {
             subprocess.run([str(binary)], check=True)
 
 
+class ScreenSpectrumTests(unittest.TestCase):
+    def test_real_stereo_frequencies_levels_decay_and_grid_mapping(self):
+        with tempfile.TemporaryDirectory() as temp:
+            binary = Path(temp) / "spectrum"
+            subprocess.run(["cc", "-Wall", "-Wextra", "-Werror",
+                            str(ROOT / "tests/test_sony_spectrum.c"),
+                            str(ROOT / "main/sony_spectrum_dsp.c"),
+                            "-lm", "-o", str(binary)], check=True)
+            subprocess.run([str(binary)], check=True)
+
+
 class ScreenRadioStatusTests(unittest.TestCase):
     def test_channels_bitrate_genre_and_preserved_fields(self):
         with tempfile.TemporaryDirectory() as temp:
@@ -369,11 +380,13 @@ class ScreenRadioOwnershipTests(unittest.TestCase):
 #include <string.h>
 #include "sony_text.h"
 #include "sony_radio_status.h"
+#include "sony_spectrum_dsp.h"
 typedef int esp_err_t;
 enum { ESP_OK, ESP_ERR_INVALID_STATE, ESP_ERR_NO_MEM, ESP_ERR_INVALID_ARG };
 static atomic_bool running, display_requested, stop_requested, timing_requested;
 static struct { bool hold, pair; } display_timing;
-static bool follow_radio, display_dim;
+static bool follow_radio, follow_spectrum, display_dim, analyzer_enabled;
+static void sony_spectrum_enable(bool on) { analyzer_enabled = on; }
 static unsigned scrolling_width = 9;
 static sony_text_t scrolling_text;
 static uint64_t words[26];
@@ -386,6 +399,9 @@ static int64_t esp_timer_get_time(void) { return now; }
         harness += functions + r"""
 int main(void) {
     sony_radio_status_t status = sony_radio_status(true, 2, "192", "Pop");
+    uint8_t bars[22];
+    memset(bars, 3, sizeof(bars));
+    assert(sony_vfd_show_spectrum(bars) == ESP_ERR_INVALID_STATE);
     assert(sony_vfd_show_radio("Song", &status) == ESP_ERR_INVALID_STATE);
     assert(!atomic_load(&running) && !scrolling_text.active);
     atomic_store(&running, true);
@@ -402,12 +418,25 @@ int main(void) {
     assert(sony_vfd_show_radio("A long title that needs to scroll", &status) == ESP_OK);
     assert(scrolling_text.started_us == 1234);
     assert(words[0] == 0x3F && words[24] == 0x2011 && words[25] == 0);
+    follow_spectrum = true;
+    analyzer_enabled = true;
+    assert(sony_vfd_show_spectrum(bars) == ESP_OK);
+    uint64_t spectrum_words[26];
+    memcpy(spectrum_words, words, sizeof(words));
+    assert(sony_vfd_show_radio("New title", &status) == ESP_OK);
+    assert(!memcmp(spectrum_words, words, sizeof(words)));
+    assert(show_text("New title", true, true, 22, NULL) == ESP_OK);
+    assert(!follow_spectrum && !analyzer_enabled);
+    assert(memcmp(spectrum_words, words, sizeof(words)));
     assert(sony_vfd_show("Manual", true, true) == ESP_OK);
-    assert(!follow_radio && scrolling_width == 9);
+    assert(!follow_radio && !follow_spectrum && !analyzer_enabled &&
+           scrolling_width == 9);
+    assert(sony_vfd_show_spectrum(bars) == ESP_ERR_INVALID_STATE);
     uint64_t before[26];
     memcpy(before, words, sizeof(words));
     assert(sony_vfd_show_radio("New song", &status) == ESP_ERR_INVALID_STATE);
     assert(!memcmp(before, words, sizeof(words)));
+    assert(sony_vfd_show_spectrum(bars) == ESP_ERR_INVALID_STATE);
     follow_radio = true;
     display_timing.hold = true;
     assert(sony_vfd_show_radio("Song", &status) == ESP_ERR_INVALID_STATE);
@@ -428,7 +457,9 @@ int main(void) {
             subprocess.run(["cc", "-Wall", "-Wextra", "-Werror",
                             "-I", str(ROOT / "main"), str(path),
                             str(ROOT / "main/sony_text.c"),
-                            str(ROOT / "main/sony_radio_status.c"), "-o", str(binary)],
+                            str(ROOT / "main/sony_radio_status.c"),
+                            str(ROOT / "main/sony_spectrum_dsp.c"),
+                            "-lm", "-o", str(binary)],
                            check=True)
             subprocess.run([str(binary)], check=True)
 

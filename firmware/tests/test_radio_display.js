@@ -17,7 +17,13 @@ const requests = [];
 const state = {pin_profile:"ahct-v2", pin_profile_name:"AHCT v2",
   running:false, now_playing:false, timing_grid_duty:0.005};
 const document = {
-  getElementById(id) { return elements[id] ||= new Element(); },
+  getElementById(id) {
+    if (!elements[id]) {
+      elements[id] = new Element();
+      if (id === "vfd-mode") elements[id].value = "now_playing";
+    }
+    return elements[id];
+  },
   querySelectorAll() { return []; }
 };
 const context = vm.createContext({document, console, AbortSignal,
@@ -55,12 +61,25 @@ vm.runInContext(scripts.at(-1)[1], context);
   await vm.runInContext("screenCommand(false)", context);
   const command = JSON.parse(requests.at(-1).options.body);
   assert.equal(command.now_playing, true);
+  assert.equal(command.visualization, "now_playing");
   assert.equal(command.live_confirmed, true);
   assert.equal(command.timing.on_ns, 39000);
   assert.equal(command.words.length, 26);
+  elements["vfd-mode"].value = "spectrum";
+  assert.equal(requests.filter(r => r.options?.method === "POST").length, 1,
+    "Selecting a mode must not start output");
+  await vm.runInContext("screenCommand(false)", context);
+  assert.equal(JSON.parse(requests.at(-1).options.body).visualization, "spectrum");
+  vm.runInContext('renderScreen({...screenState,running:true,now_playing:true,visualization:"spectrum"})', context);
+  assert.match(elements["vfd-status"].textContent, /11 LEFT \+ 11 RIGHT/);
+  elements["vfd-mode"].value = "invalid";
+  const beforeInvalid = requests.length;
+  await vm.runInContext("screenCommand(false)", context);
+  assert.equal(requests.length, beforeInvalid);
   elements["vfd-confirm"].checked = false;
   await vm.runInContext("screenCommand(true)", context);
   assert.equal(JSON.parse(requests.at(-1).options.body).sample, "stop");
+  elements["vfd-mode"].value = "spectrum";
   elements["vfd-confirm"].checked = true;
   let releaseStart;
   const normalFetch = context.fetch;

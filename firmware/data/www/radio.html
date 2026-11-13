@@ -175,10 +175,19 @@ dd { margin: 0; overflow-wrap: anywhere; }
   </dl>
 </section>
 <section class="card" id="vfd-controls" hidden>
-  <h2>Sony NOW PLAYING display</h2>
+  <h2>Sony display</h2>
   <p>Uses all 22 matrices; titles longer than 22 characters scroll on the ESP.
     No browser is needed once enabled. Output never starts automatically after reboot.</p>
   <p id="vfd-status" class="muted">Checking display...</p>
+  <label for="vfd-mode">Display mode</label>
+  <select id="vfd-mode">
+    <option value="now_playing" selected>NOW PLAYING &mdash; scrolling title</option>
+    <option value="spectrum">Option 1 &mdash; stereo spectrum, 11 bands per channel</option>
+  </select>
+  <p class="muted">Spectrum uses actual decoded audio: left 11 matrices are LEFT,
+    right 11 are RIGHT, each bass to treble (20 Hz&ndash;20 kHz).
+    Seven-row bars attack quickly and decay smoothly. It replaces the title
+    on the Sony, not the sound: this is a visualization, not an audio equalizer.</p>
   <label for="grid-duty">Brightness per grid</label>
   <select id="grid-duty">
     <option value="0.25">Low dim: 0.25% per grid / 6.5% total</option>
@@ -194,7 +203,7 @@ dd { margin: 0; overflow-wrap: anywhere; }
     Correct AHCT v2 wiring, STB to BOTH TD chips, original controller isolated,
     Sony powered and outputs ready. I authorize display output.</label></p>
   <div class="stations">
-    <button id="vfd-start" type="button" disabled>Start / apply NOW PLAYING</button>
+    <button id="vfd-start" type="button" disabled>Start / apply display</button>
     <button id="vfd-stop" type="button">Stop display / CLEAR LOW</button>
   </div>
   <p id="vfd-error" role="alert" hidden></p>
@@ -397,7 +406,9 @@ function renderScreen(state) {
   document.getElementById("vfd-controls").hidden = false;
   document.getElementById("vfd-status").textContent =
     state.pin_profile_name + " \u00b7 " +
-    (state.running ? (state.now_playing ? "Following radio metadata" : "Manual display scan") :
+    (state.running ? (state.now_playing ?
+      (state.visualization === "spectrum" ? "Stereo spectrum: 11 LEFT + 11 RIGHT" :
+        "Following radio metadata") : "Manual display scan") :
       "Stopped") +
     (state.running ? " \u00b7 " + (state.timing_grid_duty * 100).toFixed(3) + "% per grid" : "") +
     (state.pin_profile !== "ahct-v2" ?
@@ -423,8 +434,12 @@ async function screenCommand(stop) {
   const err = document.getElementById("vfd-error");
   err.hidden = true;
   try {
+    const visualization = document.getElementById("vfd-mode").value;
+    if (!stop && !["now_playing", "spectrum"].includes(visualization))
+      throw new Error("Choose NOW PLAYING or stereo spectrum");
     const body = stop ? {sample:"stop"} : {sample:"Timing", live_confirmed:true,
-      bench_confirmed:false, now_playing:true, words:Array(26).fill("0000000000"),
+      bench_confirmed:false, now_playing:true, visualization,
+      words:Array(26).fill("0000000000"),
       timing:screenTiming(Number(document.getElementById("grid-duty").value))};
     renderScreen(await screenRequest(body));
   } catch (error) {

@@ -1,6 +1,16 @@
 # DAR-1000ES internet radio baseline
 
-## Current release: 0.3.28
+## Current release: 0.3.29
+
+Option 1 adds a real stereo spectrum: 11 logarithmic bands per channel across
+the 22 matrices, seven-row bars with fast attack/smooth decay, selectable on
+the radio webpage instead of scrolling NOW PLAYING. The 48 kHz PCM tap is
+nonblocking; a separate low-priority worker performs the windowed FFT. Radio
+indicators, the GPIO map, authorization and selected scan duty are unchanged.
+Installed and checked while isolated: decoded stereo/channel-swap/mono/silence
+fixtures pass; a full analyser capture passes the TD timing/model checks at
+126.57 Hz. No dropped PCM frames or new steady-playback errors were observed.
+The new bars' optical appearance on the Sony remains to be confirmed.
 
 Start with the complete [screen-driver operating guide](../13-screen-driver-operating-guide.md).
 Radio is now enabled with MP3/AAC/ICY metadata, S/PDIF on GPIO42 and an

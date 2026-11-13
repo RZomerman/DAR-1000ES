@@ -10,6 +10,9 @@ Shared STB on **both** TD chips corrected the earlier multiplexing corruption;
 clean 22-matrix text and scrolling were observed. Firmware 0.3.28 includes
 internet radio, explicitly authorized full-width NOW PLAYING, and source
 channel/bitrate/playback/genre indicators.
+Installed 0.3.29 adds selectable Option 1 stereo spectrum (11 real PCM frequency
+bands per channel), verified with isolated TD-model captures and decoded
+stereo/mono/silence fixtures. The new bars' connected optical check is pending.
 Physical voltage/current validation remains outstanding.
 
 For current display control, start with the

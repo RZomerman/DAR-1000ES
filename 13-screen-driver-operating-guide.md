@@ -9,6 +9,9 @@ across all 22 matrices and an ESP-local marquee. The decisive wiring
 correction was connecting **STB to both TD62C950RF chips**, not just one.
 Firmware 0.3.26 integrates internet radio and opt-in, full-width NOW PLAYING.
 Firmware 0.3.28 adds channel, bitrate, playback and station-genre indicators.
+Firmware 0.3.29 adds selectable stereo spectrum visualization, installed and
+verified with isolated digital captures and decoded tone fixtures. Optical
+appearance of the new bars on the connected Sony remains to be confirmed.
 Electrical/current certification is still outstanding.
 
 ## 1. Hardware and signal ownership
@@ -122,7 +125,7 @@ after the shared-STB correction.
 
 | Mode | Purpose |
 |---|---|
-| Generated 26-slot scan | Normal full-screen text and NOW PLAYING |
+| Generated 26-slot scan | Normal full-screen text, NOW PLAYING or stereo spectrum |
 | Held grid | Load one 40-bit segment and 40-bit grid word once, then CLEAR-only PWM |
 | Repeated CLEAR | Multiple ON/OFF pulses after each load; use `pulses` |
 | Held alternation | Diagnostic: locally alternate two held grids with optional blank steps |
@@ -214,7 +217,7 @@ increase an experimental driver's current.
 
 Open the ESP's current IP address on the trusted local network:
 
-- `/`: internet radio, ICY song title, stream status and NOW PLAYING controls.
+- `/`: internet radio, ICY song title, stream status and display-mode controls.
 - `/screen`: full display editor, GPIO profile and timing laboratory.
 - `/settings`: Wi-Fi settings.
 - `/logs`: diagnostics.
@@ -227,8 +230,9 @@ For normal radio use:
 1. Select AHCT v2 in `/screen` **while disconnected**, as described above.
 2. Reconnect and enable the correctly isolated hardware safely.
 3. Open `/`, choose a station and check its stream/decoder status.
-4. Choose the tested per-grid brightness. Tick the hardware-ready
-   authorization and press **Start / apply NOW PLAYING**.
+4. Choose NOW PLAYING or Option 1 stereo spectrum and the tested per-grid
+   brightness. Tick the hardware-ready authorization and press
+   **Start / apply display**. Selecting a mode alone never starts output.
 5. **Stop display / CLEAR LOW** blanks the screen without stopping radio.
 
 NOW PLAYING uses 22 matrices. Text of 22 glyphs or fewer stays static;
@@ -237,7 +241,7 @@ every 300 ms, with a four-space cyclic gap. Metadata is followed on the
 ESP; closing the browser does not stop updates. Repeated identical titles
 do not restart the scroll.
 
-Manual text/editor commands take ownership away from NOW PLAYING.
+Manual text/editor commands take ownership away from either radio mode.
 Starting a new Timing request without `now_playing:true` also returns to
 manual control. Stop never permits a later metadata update to restart output.
 
@@ -254,9 +258,58 @@ song. Unsupported glyphs use the catalogue's fallback. The display bridge
 preserves valid UTF-8, handles Latin-1 metadata and truncates long input
 without splitting UTF-8 sequences.
 
+### Option 1: stereo spectrum (0.3.29)
+
+Select **Option 1 -- stereo spectrum, 11 bands per channel** on `/`, then
+press **Start / apply display**. NOW PLAYING remains the default. Both modes
+need the same hardware authorization; a page reload or selector change does
+not start output. The webpage still shows the title while the Sony shows bars.
+
+The left 11 matrices are LEFT-channel bands, the right 11 are RIGHT-channel
+bands. Each half independently runs low-to-high frequency, left-to-right:
+LEFT uses slots22..12; RIGHT uses slots11..1. Band edges, in Hz:
+
+```text
+20 | 37 | 70 | 132 | 247 | 462 | 866 | 1622 | 3040 | 5696 | 10673 | 20000
+```
+
+The source is actual decoded stereo PCM **after resampling to 48 kHz**, not
+ICY bitrate or an invented animation. Mono sources have already been duplicated
+to both channels and therefore show matching bars. This is a visualization,
+not an audio equalizer: it does not change frequency response or audio gain.
+
+Analysis uses a 4096-sample periodic Hann window (85.3 ms, 11.72 Hz bin
+spacing), packing the two channels into one complex FFT. Each band's summed,
+window-normalized power maps from -60..0 dBFS onto zero to seven bottom-up
+rows. A full-scale sine is approximately -3 dBFS under this RMS-power convention.
+Attack is immediate; decay is 8 dB per completed analysis, targeting about ten
+analyses per second. FFT work runs in a yielding low-priority core-0 task.
+It is not performed in the high-priority audio writer or the display scan.
+Sampled on-device analyses took 11.3-41.5 ms (median 16.6 ms), with updates
+near the 10 Hz target and no dropped PCM frames during the checks.
+
+The PCM tap never waits for space. Source-generation changes or dropped input
+invalidate the accumulated window and clear bars rather than combining
+discontinuous samples. Buffering silence decays to blank; loss of PCM delivery
+for over 250 ms clears the accumulated window. Lazy initialization reserves
+approximately 112 KiB PSRAM plus an 8 KiB task stack. After the first selection,
+those allocations remain available; analysis/input copying are disabled in
+text, manual and stopped modes.
+
+All 26 scan slots, guarded timing and selected per-grid brightness are
+unchanged. Zero amplitude is genuinely blank; row seven fills all 35 matrix
+dots. Radio fixed indicators remain active and metadata updates cannot
+overwrite the spectrum. Manual text, Stop and blank revoke spectrum ownership;
+FFT updates cannot restart a stopped display.
+
+Dense bars can illuminate more dots than text. Unchanged per-grid duty does
+**not** mean unchanged aggregate current. Start dim and measure supply/current
+before increasing brightness; this feature provides no electrical certification.
+
 ### Radio status indicators (0.3.28)
 
-These update with NOW PLAYING, without a browser or a change to scan duty.
+These update in either radio display mode, without a browser or a change to
+scan duty.
 
 | Indicator | Meaning |
 |---|---|
@@ -305,6 +358,10 @@ Internet port forwarding.
 timing revisions, timing values, nominal cycle rate and `timing_grid_duty`
 as a fraction. `now_playing` reports radio ownership; `text_width` is the
 current text viewport width. GPIO levels are commanded states, not voltages.
+`visualization` is `manual`, `now_playing` or `spectrum`. The `spectrum` object
+reports `initialized`, `enabled`, completed `updates`, `dropped_frames`,
+`last_fft_us`, `sample_rate`, 22 `levels` (LEFT then RIGHT), and `band_edges_hz`.
+These software diagnostics do not replace analyser or audio-output checks.
 
 Select a profile in a separate POST, stopped and physically disconnected:
 
@@ -317,6 +374,12 @@ above and exactly 26 ten-digit hexadecimal `words`, indexed by logical
 slot. Supply either a real disconnected-bench confirmation or explicit
 live authorization. Add `"now_playing":true` to follow radio metadata;
 this requires the normal full scan, not held/pair/alternation mode.
+Add `"visualization":"spectrum"` with `"now_playing":true` to select Option 1;
+use `"visualization":"now_playing"` to return to text. Omitting visualization
+preserves the previous text behavior. Within Timing/Display commands, unknown
+values, nonradio requests and held/pair/alternation combinations are rejected.
+Switching modes on an existing
+normal Timing scan does not reset the ESP or change the GPIO profile.
 
 For a manual T, slot22 is `"010842109F"`; all other words can be
 `"0000000000"`. Starting NOW PLAYING can use all-zero words; the bridge
@@ -438,6 +501,40 @@ underflows or S/PDIF write errors. The DMA underrun counter can increase
 during source resets; this is not a claim of gapless station switching.
 CMake now declares `version.txt` as a configuration dependency; always
 verify the reported image/runtime version after an incremental build.
+
+### Stereo spectrum checks: 0.3.29
+
+The application and matching radio page were installed with all six Sony
+signals physically disconnected. Boot was verified stopped on the original
+profile, with spectrum memory unallocated; AHCT v2 was selected while isolated.
+The image is 3,130,736 bytes and fits the existing 3 MiB application partition
+with 14,992 bytes spare. A verified 0.3.28 recovery image was retained locally.
+
+A complete five-second, 12 MS/s music capture contained 33 legitimate changing
+bar-frame variants. Every matrix word was one of the eight bottom-up levels,
+fixed indicators remained valid, and each latch had 40 segment clocks and one
+grid clock. The independent TD model passed one-hot connected grids,
+latch/blanking behavior, sampled timing limits and the conservative 2.4 us
+settling margin. Loaded refresh measured 126.57 Hz. Configured brightness
+remained 0.5% per grid (approximately 0.494% after measured scan overhead).
+
+Local 48 kHz MP3 fixtures were decoded through the actual radio/resampler/PCM
+tap: a 996.09 Hz LEFT tone at 0.8 amplitude reached band 7/row 7, while an
+8003.91 Hz RIGHT tone at 0.125 amplitude reached band 10/row 5. Swapping channels
+swapped the peaks without cross-channel bars. A true mono source produced
+identical halves (row 6 for a 0.5-amplitude tone); encoded silence blanked all
+22 matrices. Band numbers here are one-based. These fixtures temporarily used
+the custom station; the original settings were then restored and verified
+byte-for-byte, including the originally empty custom URL.
+
+Mode switching, unchanged metadata, manual ownership, invalid mode rejection
+and Stop were checked on-device. FFT copying/analysis disabled in text/manual/
+stopped modes, and later metadata/FFT work did not restart output. The monitored
+runs had no panic/watchdog warning and no dropped PCM frames. Each steady
+fixture interval and a separate 15-second music interval had no new decoder,
+buffer, S/PDIF write or DMA-underrun errors; source changes still are not
+guaranteed gapless. Host DSP/ownership/driver and webpage regressions also pass.
+Sony optics, audible playback and physical voltage/current remain separate checks.
 Firmware 0.3.28 retains the same GPIO allocation and boot-stopped safety policy.
 
 ## 8. Troubleshooting

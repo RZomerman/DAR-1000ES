@@ -5,6 +5,9 @@
 #include "spdif_encoder.h"
 #include "led.h"
 #include "rtsp_server.h"
+#ifdef CONFIG_SONY_SCREEN_BENCH
+#include "sony_spectrum.h"
+#endif
 #include "driver/i2s_std.h"
 #include "esp_check.h"
 #include "esp_attr.h"
@@ -183,6 +186,9 @@ static void playback_task(void *unused) {
       data = pcm;
       frames = FRAME_SAMPLES;
     }
+#ifdef CONFIG_SONY_SCREEN_BENCH
+    sony_spectrum_write(data, frames, generation);
+#endif
     output_queued_frames();
     if (spdif_write(data, frames) != ESP_OK)
       vTaskDelay(pdMS_TO_TICKS(10));

@@ -3,6 +3,7 @@
 #include "sony_text.h"
 #include "sony_vfd.h"
 #include "sony_pins.h"
+#include "sony_spectrum.h"
 
 #include "cJSON.h"
 #include "driver/gpio.h"
@@ -76,6 +77,7 @@ static atomic_uint timing_revision;
 static atomic_uint submitted_timing_revision;
 static portMUX_TYPE frame_lock = portMUX_INITIALIZER_UNLOCKED;
 static bool follow_radio;
+static bool follow_spectrum;
 static unsigned scrolling_width = 9;
 
 static esp_err_t show_text(const char *utf8, bool scroll, bool dim,
@@ -98,24 +100,30 @@ static esp_err_t show_text(const char *utf8, bool scroll, bool dim,
       (radio && (!follow_radio || !atomic_load(&timing_requested) ||
                  display_timing.hold || display_timing.pair))) {
     err = ESP_ERR_INVALID_STATE;
-  } else if (!scrolling_text.active || scrolling_text.scroll != scroll ||
+  } else if ((!radio && follow_spectrum) || !scrolling_text.active ||
+             scrolling_text.scroll != scroll ||
              scrolling_width != width ||
              scrolling_text.length != text->length ||
              memcmp(scrolling_text.glyphs, text->glyphs,
                     text->length * sizeof(text->glyphs[0]))) {
     scrolling_text = *text;
     scrolling_width = width;
-    sony_text_frame_width(&scrolling_text, esp_timer_get_time(), words, width);
+    if (!radio || !follow_spectrum)
+      sony_text_frame_width(&scrolling_text, esp_timer_get_time(), words, width);
   }
   if (err == ESP_OK) {
     display_dim = dim;
     if (radio)
       sony_radio_status_apply(words, radio);
-    else
+    else {
       follow_radio = false;
+      follow_spectrum = false;
+    }
   }
   portEXIT_CRITICAL(&frame_lock);
   free(text);
+  if (err == ESP_OK && !radio)
+    sony_spectrum_enable(false);
   return err;
 }
 
@@ -128,6 +136,22 @@ esp_err_t sony_vfd_show_radio(const char *utf8,
   if (!status)
     return ESP_ERR_INVALID_ARG;
   return show_text(utf8, true, true, 22, status);
+}
+
+esp_err_t sony_vfd_show_spectrum(const uint8_t levels[22]) {
+  if (!levels)
+    return ESP_ERR_INVALID_ARG;
+  esp_err_t err = ESP_ERR_INVALID_STATE;
+  portENTER_CRITICAL(&frame_lock);
+  if (follow_radio && follow_spectrum && atomic_load(&running) &&
+      atomic_load(&display_requested) && atomic_load(&timing_requested) &&
+      !atomic_load(&stop_requested) && !display_timing.hold &&
+      !display_timing.pair) {
+    sony_spectrum_frame(levels, words);
+    err = ESP_OK;
+  }
+  portEXIT_CRITICAL(&frame_lock);
+  return err;
 }
 
 static esp_err_t set(gpio_num_t pin, int level) {
@@ -311,8 +335,9 @@ static void scan_task(void *unused) {
       sony_timing_t timing;
       unsigned revision;
       portENTER_CRITICAL(&frame_lock);
-      sony_text_frame_width(&scrolling_text, esp_timer_get_time(), words,
-                            scrolling_width);
+      if (!follow_spectrum)
+        sony_text_frame_width(&scrolling_text, esp_timer_get_time(), words,
+                              scrolling_width);
       memcpy(frame, words, sizeof(frame));
       dim = display_dim;
       timing = display_timing;
@@ -430,6 +455,7 @@ static void scan_task(void *unused) {
       err = idle_err;
     atomic_store(&last_error, err);
     atomic_store(&active_held_slot, -1);
+    sony_spectrum_enable(false);
     atomic_store(&running, false);
     vTaskDelete(NULL);
     return;
@@ -550,8 +576,8 @@ static esp_err_t status_handler(httpd_req_t *req) {
   portENTER_CRITICAL(&frame_lock);
   memcpy(frame, words, sizeof(frame));
   bool dim = display_dim;
-  bool scrolling = scrolling_text.active && scrolling_text.scroll &&
-                   scrolling_text.length > scrolling_width;
+  bool scrolling = !follow_spectrum && scrolling_text.active &&
+                   scrolling_text.scroll && scrolling_text.length > scrolling_width;
   sony_timing_t timing = display_timing;
   portEXIT_CRITICAL(&frame_lock);
   cJSON_AddStringToObject(root, "brightness", dim ? "dim" : "bright");
@@ -562,12 +588,37 @@ static esp_err_t status_handler(httpd_req_t *req) {
                             atomic_load(&display_requested));
   portENTER_CRITICAL(&frame_lock);
   bool radio_following = follow_radio;
+  bool spectrum_following = follow_spectrum;
   unsigned text_width = scrolling_width;
   portEXIT_CRITICAL(&frame_lock);
   cJSON_AddBoolToObject(root, "now_playing", radio_following &&
                                                atomic_load(&running) &&
                                                !atomic_load(&stop_requested));
   cJSON_AddNumberToObject(root, "text_width", text_width);
+  const char *visualization = "manual";
+  if (radio_following)
+    visualization = spectrum_following ? "spectrum" : "now_playing";
+  cJSON_AddStringToObject(root, "visualization", visualization);
+  sony_spectrum_status_t spectrum;
+  sony_spectrum_get_status(&spectrum);
+  cJSON *spectrum_json = cJSON_AddObjectToObject(root, "spectrum");
+  cJSON *spectrum_levels = cJSON_AddArrayToObject(spectrum_json, "levels");
+  cJSON *spectrum_edges = cJSON_AddArrayToObject(spectrum_json, "band_edges_hz");
+  if (!spectrum_json || !spectrum_levels || !spectrum_edges) {
+    cJSON_Delete(root);
+    return httpd_resp_send_err(req, HTTPD_500_INTERNAL_SERVER_ERROR,
+                               "Out of memory");
+  }
+  cJSON_AddBoolToObject(spectrum_json, "initialized", spectrum.initialized);
+  cJSON_AddBoolToObject(spectrum_json, "enabled", spectrum.enabled);
+  cJSON_AddNumberToObject(spectrum_json, "updates", spectrum.updates);
+  cJSON_AddNumberToObject(spectrum_json, "dropped_frames", spectrum.dropped_frames);
+  cJSON_AddNumberToObject(spectrum_json, "last_fft_us", spectrum.last_fft_us);
+  cJSON_AddNumberToObject(spectrum_json, "sample_rate", SONY_SPECTRUM_RATE);
+  for (unsigned i = 0; i < SONY_SPECTRUM_COLUMNS; ++i)
+    cJSON_AddItemToArray(spectrum_levels, cJSON_CreateNumber(spectrum.levels[i]));
+  for (unsigned i = 0; i <= SONY_SPECTRUM_BANDS; ++i)
+    cJSON_AddItemToArray(spectrum_edges, cJSON_CreateNumber(sony_spectrum_edges[i]));
   cJSON_AddNumberToObject(root, "timing_revision",
                           atomic_load(&timing_revision));
   cJSON_AddNumberToObject(root, "submitted_timing_revision",
@@ -707,7 +758,9 @@ static esp_err_t control_handler(httpd_req_t *req) {
     atomic_store(&stop_requested, true);
     portENTER_CRITICAL(&frame_lock);
     follow_radio = false;
+    follow_spectrum = false;
     portEXIT_CRITICAL(&frame_lock);
+    sony_spectrum_enable(false);
     if (!atomic_load(&running) && atomic_load(&pin_levels[2]) >= 0) {
       set(GRID_CLEAR, 0);
     }
@@ -718,7 +771,9 @@ static esp_err_t control_handler(httpd_req_t *req) {
     atomic_store(&stop_requested, true);
     portENTER_CRITICAL(&frame_lock);
     follow_radio = false;
+    follow_spectrum = false;
     portEXIT_CRITICAL(&frame_lock);
+    sony_spectrum_enable(false);
     if (!atomic_load(&running))
       restore_idle_outputs();
     cJSON_Delete(root);
@@ -791,6 +846,18 @@ static esp_err_t control_handler(httpd_req_t *req) {
     uint64_t frame[26];
     sony_timing_t timing = sony_timing_defaults();
     cJSON *radio = cJSON_GetObjectItemCaseSensitive(root, "now_playing");
+    cJSON *visualization = cJSON_GetObjectItemCaseSensitive(root, "visualization");
+    if (visualization &&
+        (!cJSON_IsString(visualization) || !timed || !cJSON_IsTrue(radio) ||
+         (strcmp(visualization->valuestring, "now_playing") &&
+          strcmp(visualization->valuestring, "spectrum")))) {
+      cJSON_Delete(root);
+      return httpd_resp_send_err(
+          req, HTTPD_400_BAD_REQUEST,
+          "Choose now_playing/spectrum on a radio Timing scan");
+    }
+    bool spectrum = cJSON_IsString(visualization) &&
+                    !strcmp(visualization->valuestring, "spectrum");
     if (radio && (!cJSON_IsBool(radio) || !timed)) {
       cJSON_Delete(root);
       return httpd_resp_send_err(req, HTTPD_400_BAD_REQUEST,
@@ -858,6 +925,11 @@ static esp_err_t control_handler(httpd_req_t *req) {
           req, HTTPD_400_BAD_REQUEST,
           "Confirm isolation/bench and provide 26 ten-digit hex words");
     }
+    if (spectrum && sony_spectrum_init() != ESP_OK) {
+      cJSON_Delete(root);
+      return httpd_resp_send_err(req, HTTPD_500_INTERNAL_SERVER_ERROR,
+                                 "Cannot allocate spectrum analyzer");
+    }
     if (atomic_load(&running)) {
       if (!atomic_load(&display_requested) || atomic_load(&stop_requested) ||
           timed != atomic_load(&timing_requested)) {
@@ -869,6 +941,7 @@ static esp_err_t control_handler(httpd_req_t *req) {
       portENTER_CRITICAL(&frame_lock);
       scrolling_text.active = false;
       follow_radio = cJSON_IsTrue(radio);
+      follow_spectrum = spectrum;
       display_dim = true;
       memcpy(words, frame, sizeof(words));
       if (timed) {
@@ -876,6 +949,7 @@ static esp_err_t control_handler(httpd_req_t *req) {
         atomic_fetch_add(&timing_revision, 1);
       }
       portEXIT_CRITICAL(&frame_lock);
+      sony_spectrum_enable(spectrum);
       cJSON_Delete(root);
       return status_handler(req);
     }
@@ -887,6 +961,7 @@ static esp_err_t control_handler(httpd_req_t *req) {
     portENTER_CRITICAL(&frame_lock);
     scrolling_text.active = false;
     follow_radio = cJSON_IsTrue(radio);
+    follow_spectrum = spectrum;
     display_dim = true;
     memcpy(words, frame, sizeof(words));
     if (timed) {
@@ -901,9 +976,11 @@ static esp_err_t control_handler(httpd_req_t *req) {
     atomic_store(&held_last_interval_us, 0);
     atomic_store(&last_error, ESP_OK);
     atomic_store(&stop_requested, false);
+    sony_spectrum_enable(spectrum);
     cJSON_Delete(root);
     if (xTaskCreatePinnedToCore(scan_task, "screen_display", 4096, NULL, 5,
                                 NULL, 1) != pdPASS) {
+      sony_spectrum_enable(false);
       atomic_store(&running, false);
       return httpd_resp_send_err(req, HTTPD_500_INTERNAL_SERVER_ERROR,
                                  "Cannot start display");
