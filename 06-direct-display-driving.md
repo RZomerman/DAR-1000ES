@@ -281,21 +281,260 @@ rows = [pixels[i:i + 5] for i in range(0, 35, 5)]
 print("\n".join(row.replace("0", ".").replace("1", "#") for row in rows))
 ```
 
-This is a rendering convention for captured words, not a complete font or
-proven physical segment assignment. Do not apply it to the annunciator/red
-words as though those were ordinary 5x7 characters.
+This rendering convention was subsequently verified optically for slots
+1-22 in the complete camera inventory below. It is not a complete font.
+Do not apply it to the
+annunciator/red words as though those were ordinary 5x7 characters.
 
 | Slot(s) | Observed use |
 |---------|--------------|
-| 0 | Signal-strength indicator candidate: `0000004000` at startup, then `0000007FFF` at reported full scale; individual segments unresolved |
-| 1-2 | Zero in the documented states |
+| 0 | Signal strength: 14 cumulative bars in bits 0-13 (`0x3FFF`), bottom dots at `0x4000`; visually verified below |
+| 1-2 | Camera-verified 5x7 matrices in bits 0-34; bits 35-39 showed no resolved response |
 | 3-5 | `z`, `H`, `M`: reverse scan order for MHz |
 | 6-10 | Frequency, right to left; decimal point occupies a slot |
-| 11-13 | Zero in the documented states |
-| 14-22 | Nine-character message, right to left |
-| 23 | Source and LNC annunciators |
-| 24 | PROGRAM and MONO annunciators, plus unresolved bits |
-| 25 | Red letter/digit display, plus unresolved bits |
+| 11-13 | Camera-verified 5x7 matrices in bits 0-34; bits 35-39 showed no resolved response |
+| 14-22 | Nine-character message, right to left; camera-verified 5x7 matrices in bits 0-34 |
+| 23 | Source/LNC annunciators in bits 0-5; lower numbered markers 1-16 in bits 6-21 |
+| 24 | SPEECH/MUSIC/MONO, PROGRAM, TUNED and tuning triangles in bits 0-14 |
+| 25 | STEREO/MEMORY, seven-segment digit, adjacent "1" and 14-element red glyph in bits 0-23 |
+
+On 2026-11-12, a held-mode slot-11 sweep of words `0000000001`,
+`0000000002`, `0000000004` and `0000000008`, approximately two seconds each
+at 20 us CLEAR HIGH / 980 us LOW (2% duty), produced the user report
+"right top.. dots only". All other slots were zero. This locates the
+observed elements but does not assign individual dot positions to these bits.
+
+In a separate held-mode slot-0 probe on 2026-11-12, words `0000000001`,
+`0000000010` and `0000000100` illuminated progressively small, medium and
+large signal-strength elements, with intermediate elements skipped.
+Word `0000004000` illuminated bottom dots. Each word ran for approximately
+two seconds at 2% CLEAR duty with all other slots zero. This visually locates
+signal-strength elements in slot 0; exact sizes, positions and intermediate
+bit assignments remain to be mapped.
+
+The user then explicitly confirmed the cumulative slot-0 progression
+`0x01`, `0x03`, `0x07`, `0x0F`, ... through `0x3FFF`: one bar, two bars,
+three bars, and so on through 14 bars. Each step ran for approximately one
+second at the same 2% CLEAR duty, with `0x4000` kept clear. Thus the bar
+mask for `n` bars is `(1U << n) - 1`, for `n = 0..14`; add `0x4000` only
+when the bottom dots are also wanted. Bars plus dots give the captured
+full-scale word `0x7FFF`. This is a visually verified mapping, not an
+electrical waveform signoff.
+
+An OBSBOT Tiny 4K webcam independently checked this progression on
+2026-11-12. For each requested level 0..14, five local camera frames were
+captured after the firmware reported submission of the corresponding word.
+Bright-component counts in the signal-meter crop matched every requested
+level in all 75 frames; a contact sheet was also visually inspected.
+Five further frames after Stop contained zero illuminated bars. The test
+used the same held slot 0, 20 us HIGH / 980 us LOW (2% duty), with bottom dots
+off. Camera images verify visible bar counts in that crop, not electrical
+timing, the absence of faint ghosting, or the rest of the display.
+The local session artifacts are under
+`webcam-bars/progression-20261112-231552/` (`report.json`, raw meter crops
+and `contact-sheet.png`).
+
+A grouped live probe tested slots 1, 2, 12 and 13 in that order,
+each with `0000000001` then `0000000100`, approximately two seconds per word
+at the same held-mode 2% duty. The user reported dots on the right, apparently
+in the matrix. This report does not identify each slot/bit separately, and
+the bottom 1-16 markers remain unmapped. Other bits in these slots were not
+excluded as possible marker controls.
+
+### Camera sweep of slot 1
+
+On 2026-11-12, a complete held-mode slot-1 sweep tested all 40 one-hot
+words, from `0000000001` through `8000000000`, at 20 us CLEAR HIGH /
+980 us LOW (2% duty). Five camera frames were captured per word. After
+correcting camera framing, bits 0-34 each produced one resolved cyan
+matrix dot in all five frames; bits 35-39 produced no resolved response
+in the visible crop. The dots occupy a compact apparent 5x7 character
+area near the right of the display. This is not a mapping of the lower
+1-16 markers.
+
+For this earlier run, precise bit-to-pixel coordinates remain provisional:
+the view moved during the sweep, and translation-only registration failed its
+grid-fit check. Do not treat the fitted coordinates as a verified mapping.
+No visible response is not proof that a bit is unused.
+Stop was confirmed by the API, with zero resolved optical components in
+the post-Stop images. The usable local session evidence is under
+`webcam-bars/slot-1-20261112-232255/` (`report.json`, raw display crops and
+`bit-atlas.png`). The earlier `slot-1-20261112-231955` run missed the display
+because of changed framing; its optical results were rejected and its
+unusable images discarded. Neither run provides electrical verification.
+
+### Partial full-display camera inventory
+
+On 2026-11-13, a shaded-camera inventory verified all 40 one-hot words in
+slots 0-13: **560 commands**, with 470 resolved optical responses and 90
+without a resolved response. Five frames contributed to each consensus
+mask. The display remained at 20 us CLEAR HIGH / 980 us LOW (2% duty);
+only camera exposure/gain changed. Calibration resolved blank, one/seven/
+14 bars, a red segment and a matrix dot. Every accepted block had
+before/after 14-bar position checks, confirmed API Stop and a blank
+post-Stop optical image.
+
+Slots 1-13 each resolved one dot for every bit 0-34. In the camera view,
+bit 0 is top-left, bit 4 top-right, bit 5 starts the next row and bit 34
+is bottom-right. For zero-based `row = 0..6`, `column = 0..4`, the
+one-dot word is `1ULL << (row * 5 + column)`. Independent affine fits of
+all 35 measured centres in each slot had maximum residual below 0.83
+camera pixels and RMS below 0.30 pixels. This supersedes the earlier
+unverified slot-1 coordinate assignment for these newly captured data.
+Bits 35-39 showed no resolved response in these slots; they are not
+therefore proven unused. Slot 0 resolved its previously identified 14
+bars and bottom dots in bits 0-14, with no resolved response for bits 15-39.
+
+The portable [partial command map](media/display-command-map.partial.json)
+contains every accepted word, observed status, component coordinates,
+matrix cells and thresholded optical-core pixel runs. The
+[partial bit atlas](media/display-command-atlas.partial.svg) numbers the
+observed shapes by bit index; hover for each command. Coordinates are
+approximately translation-normalized using the bar references, not a
+full camera-geometry calibration. Raw display crops, masks, rejected
+attempts and checkpoints remain in the local session under
+`display-inventory/inventory-20261113-shaded/`.
+
+**At this stage, the full inventory was incomplete.** Position checks rejected attempts
+and capture resumed only from verified block boundaries. The last slot-14
+attempt resolved 14 reference bars but failed its final whole-pattern
+comparison: aligned similarity 0.896, below the required 0.95. Its word
+captures were excluded from the partial map. Slots 14-25 were marked
+unverified, not blank or unused. No further brightness increase or
+threshold relaxation was used to force acceptance. The lower 1-16 markers
+were not yet identified. Output was stopped and camera settings restored.
+These are optical observations, not electrical verification, a faint-
+ghosting exclusion or a Sony current-rating signoff.
+
+### Revalidation at 3.75% held-grid duty
+
+Later on 2026-11-13, all **560 commands in slots 0-13 passed**
+revalidation at 37.5 us CLEAR HIGH / 962.5 us LOW (3.75% duty).
+The requested 4% would exceed the existing held-grid limit of 1/26;
+the user selected 3.75% instead. The guard was not changed.
+All 470 previously resolved responses and 90 unresolved responses matched
+the saved map, including component counts and the 5x7 dot ordering.
+Maximum registered position difference was 2.10 camera pixels against
+a 3-pixel limit. Five-frame consensus and the original emission
+thresholds were retained.
+
+Camera autofocus was unsuitable for these shaded captures. Fixed focus
+30, 10 ms exposure and gain 8 resolved the calibration patterns. Supported
+UVC pan, tilt and zoom controls were exercised; the final setup used
+pan -14400 arcseconds (-4 degrees), tilt +3600 arcseconds (+1 degree)
+and zoom control 9/100. The fine source crop was
+`x=725, y=740, width=2400, height=800`; the display crop within it was
+`x=90..2340, y=60..430`. Four known corner dots registered each camera
+setup to the saved map. Bar references checked movement between blocks.
+When repeated bars confused phase correlation, a centroid-seeded
+translation fallback required ECC score >=0.98, aligned correlation
+>=0.95 and marker residual <=2 pixels; it did not relax the response
+or command-position thresholds.
+
+Validation resumed from accepted boundaries after camera setup changes;
+rejected attempts were not counted. Every accepted block ended with
+confirmed Stop and a blank optical image. The
+[validation summary](media/display-validation-375.json) records all 14
+blocks, their camera transforms and comparisons. Raw local evidence is in
+`display-inventory/validation-375-20261113/` (slots 0-3) and
+`display-inventory/validation-375-20261113-fixed-view/` (slots 4-13).
+ESP output was stopped with firmware error 0. Exposure/gain/focus settings
+were restored; the final PTZ position was retained. No new inventory
+blocks in slots 14-25 were run. This remains an optical validation, not
+electrical verification or proof that faint ghosting is absent.
+
+### Complete 26-slot camera inventory
+
+The remaining slots 14-25 were captured on 2026-11-13 at the validated
+3.75% duty, fixed focus and PTZ settings. All 480 one-hot commands had
+five-frame captures, before/after bar references, confirmed Stop and a
+blank post-Stop image. Combined with the retained and revalidated first
+560 commands, the inventory now covers **all 26 slots x 40 bits**:
+**846 resolved responses and 194 without a resolved response**.
+
+| Slot(s) | Bits with a resolved response |
+|---------|------------------------------|
+| 0 | 0-14: 14 signal bars and bottom dots |
+| 1-22 | 0-34: 5x7 dot matrices, same row-major convention |
+| 23 | 0-21: source/LNC and lower numbered markers |
+| 24 | 0-14: audio/program/tuning annunciators |
+| 25 | 0-23: STEREO/MEMORY and red glyph elements |
+
+The lower **1-16 markers are slot 23 bits 6-21**. For marker
+`n = 1..16`, use `1ULL << (n + 5)`; marker 1 is `0x40` and marker 16
+is `0x200000`. Each marker is a lit rectangle surrounding its numeral,
+as directly visible in the individual camera captures.
+
+Slot 25 bit 16 was too faint to meet the regular three-pixel core
+criterion. A controlled follow-up kept display duty at 3.75% and instead
+used camera exposure 20 ms / gain 16. The element then resolved in all
+five frames; zero-word and adjacent-element controls passed, as did
+before/after corner-dot position checks. The full map retains the initial
+unresolved status as provenance and uses this confirmed supplemental
+response. No detection threshold or held-grid duty guard was relaxed.
+
+The [complete command map](media/display-command-map.json) and
+[complete bit atlas](media/display-command-atlas.svg) supersede the
+partial exports for current coverage. The first 14 slots are preserved
+unchanged. New optical masks are affine-registered to the reference
+crop; native component measurements and source-camera transforms are
+retained. Original masks in slots 0-13 were captured at 2% and revalidated
+at 3.75%; slots 14-25 were captured at 3.75%. Raw new evidence is under
+`display-inventory/remaining-375-20261113/`, with the faint-element
+follow-up under `display-inventory/red16-sensitive-375-20261113/`.
+
+All commands have been tested, but an unresolved response does not prove
+an unused bit. Registration outside the corner-dot field is approximate;
+this is an optical command map, not an electrical signoff or proof of
+absent faint ghosting. Output was stopped with firmware error 0 after
+the sweep and follow-up.
+
+### Physical-reference coverage comparison
+
+The completed camera map was compared with the
+[FL701 service drawing](https://github.com/RZomerman/DAR-1000ES/blob/main/media/Screenshot%202026-11-08%20215103.png).
+**No functional symbol shown in that drawing remains unmatched to an
+observed command response.** The
+[annotated comparison](media/display-reference-coverage.svg) shows the
+reference alongside a union of the separately captured optical masks.
+Hover over reference annotations for their slot, bit and word. The
+[coverage report](media/display-reference-coverage.json) records each
+correspondence and its evidence.
+
+| Reference comparison units | Matched |
+|----------------------------|---------|
+| 22 matrices, each with 35 dots | 770 |
+| 14 signal bars and 14 bottom dots | 28 |
+| Lower numbered markers 1-16 | 16 |
+| Red glyph strokes, seven-segment digit and adjacent "1" strokes | 23 |
+| Source/audio/program/tuning/status legends and index symbols | 24 |
+| **Total comparison entries** | **861** |
+
+These are explicitly defined comparison units, not a count of individual
+phosphor islands: a whole word legend counts once. The 861 entries share
+846 observed commands because the meter dots share one bit, the adjacent
+red "1" shares one bit between its two strokes, and right MONO plus its
+index 2 share one bit.
+
+The reference itself independently yielded 22 enclosed matrix outlines
+with exactly 35 cells each. Reference and camera matrices were paired by
+their left-to-right order, then every dot was uniquely matched within its
+local grid; maximum local fit residual was 0.752 reference pixels.
+Fourteen enclosed meter-bar outlines were also independently counted.
+Other symbols were visually compared with individual captures, including
+the numbered pads, all annunciators and the left red glyph. Its faint
+centre-left response uses the previously controlled slot-25/bit-16
+sensitive-camera confirmation.
+
+The drawing is not a metric phosphor mask. Its outlined cells and printed
+numerals differ from luminous dots and negative-contrast pads; the small
+red-glyph drawing also joins strokes whose individual boundaries are not
+resolved. Coverage is therefore by functional identity and topology, not
+global pixel overlap, exact stroke boundaries or uniform brightness.
+The 194 unresolved commands are still not proven unused. This comparison
+adds no electrical/current-rating or faint-ghosting certification.
+It used existing sequential evidence only: no new illumination, brightness
+increase or simultaneous all-elements held-grid test was performed.
 
 ### Complete text examples
 
@@ -319,7 +558,7 @@ examples, not an exhaustive alphabet or numeric font.
 |-----------|------|----------|
 | CABLE | `0x01` | Primary CABLE/OFF versus SATELLITE/OFF |
 | SATELLITE | `0x02` | Same comparison |
-| LNC label candidate | `0x04` | Common to OFF/A/B states reported with LNC; not independently switched |
+| LNC label | `0x04` | Earlier passive candidate; now confirmed by the one-hot camera sweep |
 | LNC OFF | `0x08` | OFF to A clears this bit |
 | LNC A | `0x10` | OFF to A sets this bit |
 | LNC B | `0x20` | A to B clears A and sets this bit |
@@ -340,14 +579,21 @@ slot (`0x16 -> 0x26`). The primary SATELLITE/OFF -> CABLE/OFF comparison gives
 
 | Indicator | Mask | Status |
 |-----------|------|--------|
+| Left SPEECH | `0x01` | Camera-confirmed |
+| Left MUSIC | `0x02` | Camera-confirmed |
+| Left MONO index 2 | `0x04` | Passive transition and camera-confirmed |
+| Left MONO index 1 | `0x08` | Passive transition and camera-confirmed |
+| Left MONO label | `0x10` | Earlier passive candidate; camera-confirmed |
+| PROGRAM 3 | `0x20` | Passive transition and camera-confirmed |
+| PROGRAM 2 | `0x40` | Passive transition and camera-confirmed |
 | PROGRAM 1 | `0x80` | Isolated by PROGRAM 1 -> 2 -> 3 |
-| PROGRAM 2 | `0x40` | Isolated |
-| PROGRAM 3 | `0x20` | Isolated |
-| Left MONO index 1 | `0x08` | Left index 1 -> 2 clears this bit |
-| Left MONO index 2 | `0x04` | Left index 1 -> 2 sets this bit |
-| Right-hand MONO indicator | `0x800` | Clears when the right-hand MONO is removed |
-| Left MONO label candidate | `0x10` | Remains with either left index during the visible phase; not independently isolated |
-| Unassigned setup-state bit | `0x100` | Present in these setup snapshots, absent in primary No DSR |
+| PROGRAM label | `0x100` | Camera-confirmed; formerly unassigned setup-state bit |
+| Right SPEECH | `0x200` | Camera-confirmed |
+| Right MUSIC | `0x400` | Camera-confirmed |
+| Right-hand MONO 2 label | `0x800` | Passive transition and camera-confirmed |
+| Right-pointing tuning triangle | `0x1000` | Camera-confirmed |
+| TUNED | `0x2000` | Camera-confirmed |
+| Left-pointing tuning triangle | `0x4000` | Camera-confirmed |
 
 **Naming correction:** `0x800` was initially called "MONO 2". The user's
 clarification distinguishes the **left MONO with index 1/2** from the separate
@@ -367,12 +613,13 @@ Removing the right-hand MONO changes only `0x800` in the visible phase.
 Changing the left index changes only `0x0C` (clear `0x08`, set `0x04`).
 Neither operation changes the hidden phase or any other slot.
 MEMORY was reported on the setup screen, but no dedicated MEMORY-only
-transition implicates its bit in slot 24. Do not label `0x100` as MEMORY.
+transition implicates its bit in slot 24. The camera sweep identifies
+`0x100` as the PROGRAM label, not MEMORY.
 
 ## 7. Red display: slot 25
 
 These are complete measured words, including any coexisting indicators.
-Individual segment masks are not yet fully assigned.
+Individual segment masks are assigned in the live and camera mappings below.
 
 | User-reported red display/context | Slot-25 word |
 |----------------------------------|--------------|
@@ -397,7 +644,70 @@ has XOR `0x20000`. These deltas are not complete encodings for arbitrary
 letters/digits, and the setup and primary words should not be mixed without
 accounting for their other bits.
 
+### Live red-segment mapping
+
+On 2026-11-12, the user confirmed the following slot-25 single-bit mapping
+after a second held-mode sweep at approximately two seconds per bit,
+20 us CLEAR HIGH / 980 us LOW (2% duty). All other bits and slots were zero.
+
+| Mask | Observed element |
+|------|------------------|
+| `0x0000000004` | Red digit: top (a) |
+| `0x0000000008` | Red digit: upper-right (b) |
+| `0x0000000010` | Red digit: lower-right (c) |
+| `0x0000000020` | Red digit: bottom (d) |
+| `0x0000000040` | Red digit: lower-left (e) |
+| `0x0000000080` | Red digit: upper-left (f) |
+| `0x0000000100` | Red digit: centre (g) |
+| `0x0000000200` | Larger "1"-shaped element to the left of that digit |
+
+This is visual identification, not an electrical waveform signoff. Other
+bits were not identified by that confirmation.
+
+In a subsequent four-bit sweep using the same two-second dwell and 2% duty,
+the user reported these smaller red elements. The final identification was
+explicitly uncertain; do not treat it as confirmed.
+
+| Mask | Reported element |
+|------|------------------|
+| `0x0000000400` | Top |
+| `0x0000000800` | Upper-right |
+| `0x0000001000` | Upper-left |
+| `0x0000002000` | Tiny middle-right element (tentative) |
+
+### Camera-resolved left red glyph
+
+The 2026-11-13 camera inventory resolves the 14 elements in bits 10-23.
+These positions supersede the earlier smaller-field descriptions above:
+in particular, bit 12 is an upper-centre vertical, not the outer upper-left
+element; bit 13 is an upper-left diagonal. The camera-view assignments are:
+
+| Bit | Element |
+|-----|---------|
+| 10 | Top horizontal |
+| 11 | Upper-right outer vertical |
+| 12 | Upper-centre vertical |
+| 13 | Upper-left diagonal |
+| 14 | Upper-right diagonal |
+| 15 | Upper-left outer vertical |
+| 16 | Centre-left short element; confirmed by the sensitive-camera follow-up |
+| 17 | Centre-right short element |
+| 18 | Lower-right outer vertical |
+| 19 | Lower-right diagonal |
+| 20 | Lower-left diagonal |
+| 21 | Lower-centre vertical |
+| 22 | Lower-left outer vertical |
+| 23 | Bottom horizontal |
+
+Bits 0-9 retain the previously confirmed STEREO/MEMORY, seven-segment digit
+and adjacent "1" assignments. Bits 24-39 showed no resolved response.
+
 ### MEMORY mapping
+
+Live held-mode verification on 2026-11-12 identified slot 25 word
+`0000000001` (bit `0x01`) as **STEREO**, explicitly confirmed by the user
+after a three-second test at 20 us CLEAR HIGH / 980 us LOW (2% duty).
+This identifies the indicator; it is not an electrical waveform signoff.
 
 In a 30-second passive capture on 2026-11-08, the user pressed MEMORY and
 reported the MEMORY indicator appeared or blinked; pressing 1 produced no
@@ -423,7 +733,12 @@ blinked, consistent with `0x02` remaining set in both phases.
 The separately named `sony-td-primary-b-memory` and
 `sony-td-primary-b-memory-active` captures contain 633 and 634 valid frames
 respectively, all with slot 25 `0000A61C00`; they do not capture an active
-MEMORY bit. Physical element verification remains pending.
+MEMORY bit. In the 2026-11-12 held-mode slot-25 sweep (decimal words 1..16,
+approximately one second each, 20 us CLEAR HIGH / 980 us LOW), the user
+subsequently confirmed that word `0000000002` alone lit **MEMORY only**.
+This visually verifies bit `0x02`, alongside STEREO at bit `0x01`.
+The user also observed fragments of a red digit during the sweep; no
+individual red-segment assignment was established by that report.
 
 Evidence: the earlier decoded artifacts above and session artifacts
 `sony-original-memory-1-20261108-2027.bin` /
@@ -487,7 +802,8 @@ not committed to this repository; the tables preserve the decoded findings.
 In the final primary comparison, frequency slots 6/7/9/10, source slot 23 and
 red slot 25 change. No DSR, slot 0 (`0000004000`) and the remaining slots do not.
 The user reported antenna-strength dots/bars. See the startup comparison
-below; individual bar transitions and physical bit positions remain unverified.
+below; that passive evidence did not establish individual bar transitions.
+The later live slot-0 progression above visually verified the cumulative map.
 
 ### Startup signal-strength comparison
 

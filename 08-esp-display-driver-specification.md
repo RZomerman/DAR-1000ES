@@ -1,7 +1,41 @@
 # ESP32 direct display-driver specification
 
-Consolidated evidence through 2026-11-08. Detailed capture history and
+Consolidated capture evidence through 2026-11-08, with optical mapping
+updated on 2026-11-13. Detailed capture history and
 datasheet comparisons: [Direct Display driving](06-direct-display-driving.md).
+
+## Current optical mapping: 2026-11-13
+
+The complete camera inventory tested all **26 slots x 40 one-hot bits**:
+846 commands produced resolved optical responses; 194 remain unresolved,
+not proven unused. Comparison with the FL701 service drawing found
+**no unmatched functional reference symbol**.
+
+| Slot | Camera-confirmed assignment |
+|------|-----------------------------|
+| 0 | Bits 0-13: signal bars 1-14; bit 14: all 14 bottom dots together |
+| 1-22 | Bits 0-34: 5x7 dot matrices; bit = row * 5 + column, with top-left origin; slots increase right-to-left |
+| 23 | Bits 0-5: CABLE, SATELLITE, LNC, OFF, A, B; bits 6-21: lower markers 1-16 |
+| 24 | Bits 0-14: audio, PROGRAM and tuning symbols; `0x100` is PROGRAM, not MEMORY |
+| 25 | Bits 0-1: STEREO/MEMORY; bits 2-8: digit segments a-g; bit 9: adjacent "1"; bits 10-23: left red glyph strokes |
+
+Use the [complete command map](media/display-command-map.json) and
+[per-bit optical atlas](media/display-command-atlas.svg) for exact identities,
+words and observed shapes. The
+[annotated reference comparison](media/display-reference-coverage.svg) and
+[coverage report](media/display-reference-coverage.json) record 861 defined
+comparison entries linked to those 846 commands. Whole legends count once;
+coupled meter dots, digit strokes and right MONO/index 2 count separately.
+All 770 reference matrix cells have unique optical matches.
+
+This update supersedes the earlier candidate/unknown physical assignments
+in the capture-era tables below. It does not supersede electrical constraints.
+The inventory used conservative held-grid CLEAR PWM, with 560 commands
+revalidated at 3.75% duty and the remaining 480 captured at that duty.
+The reference comparison used existing sequential evidence, not simultaneous
+all-elements illumination. Coverage is by functional identity and topology,
+not exact phosphor boundaries, uniform brightness, absence of faint ghosting
+or electrical/current-rating certification.
 
 ## 1. Scope and evidence status
 

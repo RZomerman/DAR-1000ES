@@ -1,0 +1,1347 @@
+{
+  "description": "Revalidation of the accepted partial display map at 3.75% duty",
+  "date": "2026-11-13",
+  "reference": "display-command-map.partial.json",
+  "complete": true,
+  "validated_commands": 560,
+  "scope_slots": [
+    0,
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    7,
+    8,
+    9,
+    10,
+    11,
+    12,
+    13
+  ],
+  "inventory_not_advanced": true,
+  "timing": {
+    "setup_ns": 1000,
+    "clock_low_ns": 2000,
+    "clock_high_ns": 2000,
+    "strobe_ns": 5000,
+    "latch_guard_ns": 5000,
+    "blank_before_ns": 5000,
+    "blank_after_ns": 5000,
+    "on_ns": 37500,
+    "off_ns": 962500,
+    "pulses": 1,
+    "hold": 1,
+    "slot": 0,
+    "pair": 0,
+    "alternate_ms": 0,
+    "alternate_blank_steps": 0
+  },
+  "duty_percent": 3.75,
+  "camera_focus": 30,
+  "camera_autofocus": false,
+  "camera_exposure_100us": 100,
+  "camera_gain": 8,
+  "retained_ptz": {
+    "pan": -14400,
+    "tilt": 3600,
+    "zoom": 9
+  },
+  "last_capture_source_roi_xywh": [
+    725,
+    740,
+    2400,
+    800
+  ],
+  "last_capture_glass_roi_xyxy": [
+    90,
+    60,
+    2340,
+    430
+  ],
+  "detection_thresholds_unchanged": true,
+  "position_tolerance_px": 3.0,
+  "limitations": [
+    "Optical validation only, not electrical or Sony current-rating signoff",
+    "Brightness and gain may change core areas; compare status, count and position",
+    "Thresholding cannot exclude faint ghosting or prove unused bits",
+    "Four known corner dots calibrate camera affine geometry; bars track within-run drift",
+    "Position checks cannot exclude transient movement returning within a block"
+  ],
+  "slots": [
+    {
+      "slot": 0,
+      "validated_commands": 40,
+      "response_counts": {
+        "visible": 15,
+        "no_resolved_response": 25
+      },
+      "passed": true,
+      "comparison": {
+        "passed": true,
+        "failures": [],
+        "translation_to_reference_xy": [
+          -0.10685210312067284,
+          -0.4202510749646393
+        ],
+        "maximum_position_difference_px": 1.8135816778894251,
+        "position_tolerance_px": 3.0,
+        "matrix_fit": null
+      },
+      "fiducial_checks": {
+        "before": {
+          "shift_xy": [
+            -0.0010405069898240527,
+            0.02696237943150237
+          ],
+          "phase_response": 0.8437632971339756,
+          "similarity": 0.9966152799480124,
+          "displacement_px": 0.026982449099445638,
+          "reliable": true
+        },
+        "after": {
+          "shift_xy": [
+            -0.008569047078651693,
+            1.4454331402352523
+          ],
+          "phase_response": 0.8600302268134223,
+          "similarity": 0.9914230802768748,
+          "displacement_px": 1.4454585402072861,
+          "reliable": true
+        }
+      },
+      "blank_after_stop": true,
+      "camera_geometry": {
+        "transform_to_reference": [
+          [
+            1.000825564303332,
+            6.674565994130794e-05
+          ],
+          [
+            -0.007741985953740888,
+            1.0020244735061754
+          ],
+          [
+            -2.6883801266330174,
+            -9.762434978734793
+          ]
+        ],
+        "maximum_anchor_residual_px": 0.373378159114392,
+        "scale_factors": [
+          1.0053167868870376,
+          0.9975484732447966
+        ],
+        "maximum_anchor_shift_px": 10.037864982492783,
+        "passed": true
+      },
+      "evidence_directory": "validation-375-20261113"
+    },
+    {
+      "slot": 1,
+      "validated_commands": 40,
+      "response_counts": {
+        "visible": 35,
+        "no_resolved_response": 5
+      },
+      "passed": true,
+      "comparison": {
+        "passed": true,
+        "failures": [],
+        "translation_to_reference_xy": [
+          -0.6161778476906647,
+          -1.6599196976331712
+        ],
+        "maximum_position_difference_px": 0.5955177802130277,
+        "position_tolerance_px": 3.0,
+        "matrix_fit": {
+          "verified": true,
+          "columns": 5,
+          "rows": 7,
+          "bit_to_cell": "column = bit % 5; row = bit // 5",
+          "column_step_xy": [
+            9.361452880728775,
+            -0.07327096100370398
+          ],
+          "row_step_xy": [
+            -0.0885170551631264,
+            10.133820941544204
+          ],
+          "origin_xy": [
+            1841.468334259702,
+            146.00917221694905
+          ],
+          "maximum_residual_px": 0.45900463012375503,
+          "rms_residual_px": 0.21103931211760732
+        }
+      },
+      "fiducial_checks": {
+        "before": {
+          "shift_xy": [
+            0.1107016548707378,
+            1.4447684016252467
+          ],
+          "phase_response": 0.8824474223454793,
+          "similarity": 0.9947131066535767,
+          "displacement_px": 1.4490033094254444,
+          "reliable": true
+        },
+        "after": {
+          "shift_xy": [
+            0.27176333362750427,
+            -0.23391075328136424
+          ],
+          "phase_response": 0.7595255948172676,
+          "similarity": 0.9752932705416013,
+          "displacement_px": 0.3585659632550048,
+          "reliable": true
+        }
+      },
+      "blank_after_stop": true,
+      "camera_geometry": {
+        "transform_to_reference": [
+          [
+            1.000825564303332,
+            6.674565994130794e-05
+          ],
+          [
+            -0.007741985953740888,
+            1.0020244735061754
+          ],
+          [
+            -2.6883801266330174,
+            -9.762434978734793
+          ]
+        ],
+        "maximum_anchor_residual_px": 0.373378159114392,
+        "scale_factors": [
+          1.0053167868870376,
+          0.9975484732447966
+        ],
+        "maximum_anchor_shift_px": 10.037864982492783,
+        "passed": true
+      },
+      "evidence_directory": "validation-375-20261113"
+    },
+    {
+      "slot": 2,
+      "validated_commands": 40,
+      "response_counts": {
+        "visible": 35,
+        "no_resolved_response": 5
+      },
+      "passed": true,
+      "comparison": {
+        "passed": true,
+        "failures": [],
+        "translation_to_reference_xy": [
+          -0.9787984414961102,
+          -1.0532630963622722
+        ],
+        "maximum_position_difference_px": 0.9202871950610728,
+        "position_tolerance_px": 3.0,
+        "matrix_fit": {
+          "verified": true,
+          "columns": 5,
+          "rows": 7,
+          "bit_to_cell": "column = bit % 5; row = bit // 5",
+          "column_step_xy": [
+            9.331490673007039,
+            -0.0770913705261408
+          ],
+          "row_step_xy": [
+            -0.06578362804857506,
+            10.12542215006027
+          ],
+          "origin_xy": [
+            1776.2528130221835,
+            145.96165647462183
+          ],
+          "maximum_residual_px": 0.5473956208010922,
+          "rms_residual_px": 0.23871424641624156
+        }
+      },
+      "fiducial_checks": {
+        "before": {
+          "shift_xy": [
+            0.47122168087723537,
+            0.9802926512186403
+          ],
+          "phase_response": 0.8395487606260512,
+          "similarity": 0.9772841368097268,
+          "displacement_px": 1.087668862550564,
+          "reliable": true
+        },
+        "after": {
+          "shift_xy": [
+            0.29073987846852845,
+            0.04332695420971078
+          ],
+          "phase_response": 0.7986827886369493,
+          "similarity": 0.9876675385554321,
+          "displacement_px": 0.2939505092579107,
+          "reliable": true
+        }
+      },
+      "blank_after_stop": true,
+      "camera_geometry": {
+        "transform_to_reference": [
+          [
+            1.000825564303332,
+            6.674565994130794e-05
+          ],
+          [
+            -0.007741985953740888,
+            1.0020244735061754
+          ],
+          [
+            -2.6883801266330174,
+            -9.762434978734793
+          ]
+        ],
+        "maximum_anchor_residual_px": 0.373378159114392,
+        "scale_factors": [
+          1.0053167868870376,
+          0.9975484732447966
+        ],
+        "maximum_anchor_shift_px": 10.037864982492783,
+        "passed": true
+      },
+      "evidence_directory": "validation-375-20261113"
+    },
+    {
+      "slot": 3,
+      "validated_commands": 40,
+      "response_counts": {
+        "visible": 35,
+        "no_resolved_response": 5
+      },
+      "passed": true,
+      "comparison": {
+        "passed": true,
+        "failures": [],
+        "translation_to_reference_xy": [
+          -1.4551854478133919,
+          -1.4509769668737107
+        ],
+        "maximum_position_difference_px": 1.45194532466992,
+        "position_tolerance_px": 3.0,
+        "matrix_fit": {
+          "verified": true,
+          "columns": 5,
+          "rows": 7,
+          "bit_to_cell": "column = bit % 5; row = bit // 5",
+          "column_step_xy": [
+            9.264548347178971,
+            -0.1078319033312608
+          ],
+          "row_step_xy": [
+            -0.002016660617578105,
+            10.10731407690361
+          ],
+          "origin_xy": [
+            1710.9265619096614,
+            146.95130565516786
+          ],
+          "maximum_residual_px": 0.463641859391088,
+          "rms_residual_px": 0.2544664382351042
+        }
+      },
+      "fiducial_checks": {
+        "before": {
+          "shift_xy": [
+            1.1262092459784014,
+            1.1338900698575145
+          ],
+          "phase_response": 0.919263735877143,
+          "similarity": 0.9840451927490015,
+          "displacement_px": 1.598140781110575,
+          "reliable": true
+        },
+        "after": {
+          "shift_xy": [
+            0.44156499046260933,
+            0.2177613826475664
+          ],
+          "phase_response": 0.7246036020914713,
+          "similarity": 0.9809925139147883,
+          "displacement_px": 0.4923410002983949,
+          "reliable": true
+        }
+      },
+      "blank_after_stop": true,
+      "camera_geometry": {
+        "transform_to_reference": [
+          [
+            1.000825564303332,
+            6.674565994130794e-05
+          ],
+          [
+            -0.007741985953740888,
+            1.0020244735061754
+          ],
+          [
+            -2.6883801266330174,
+            -9.762434978734793
+          ]
+        ],
+        "maximum_anchor_residual_px": 0.373378159114392,
+        "scale_factors": [
+          1.0053167868870376,
+          0.9975484732447966
+        ],
+        "maximum_anchor_shift_px": 10.037864982492783,
+        "passed": true
+      },
+      "evidence_directory": "validation-375-20261113"
+    },
+    {
+      "slot": 4,
+      "validated_commands": 40,
+      "response_counts": {
+        "visible": 35,
+        "no_resolved_response": 5
+      },
+      "passed": true,
+      "comparison": {
+        "passed": true,
+        "failures": [],
+        "translation_to_reference_xy": [
+          -0.7436690002723481,
+          -0.25452223083327397
+        ],
+        "maximum_position_difference_px": 1.8391486804243942,
+        "position_tolerance_px": 3.0,
+        "matrix_fit": {
+          "verified": true,
+          "columns": 5,
+          "rows": 7,
+          "bit_to_cell": "column = bit % 5; row = bit // 5",
+          "column_step_xy": [
+            8.985503641375567,
+            -0.04654602709553826
+          ],
+          "row_step_xy": [
+            0.22480750725210416,
+            9.7878068137945
+          ],
+          "origin_xy": [
+            1649.7379612727245,
+            151.67413059097254
+          ],
+          "maximum_residual_px": 0.9633030229296131,
+          "rms_residual_px": 0.49543256106398686
+        }
+      },
+      "fiducial_checks": {
+        "before": {
+          "shift_xy": [
+            -0.10380138428509156,
+            -0.10545922476029546
+          ],
+          "phase_response": 0.8615709322470205,
+          "similarity": 0.9962688579899501,
+          "displacement_px": 0.14797423919907063,
+          "method": "phase correlation",
+          "ecc_score": null,
+          "reliable": true
+        },
+        "after": {
+          "shift_xy": [
+            2.382424980767155,
+            0.3070685102670083
+          ],
+          "phase_response": 0.6832484377755059,
+          "similarity": 0.9651986551714077,
+          "displacement_px": 2.4021323566741652,
+          "method": "phase correlation",
+          "ecc_score": null,
+          "reliable": true
+        }
+      },
+      "blank_after_stop": true,
+      "camera_geometry": {
+        "transform_to_reference": [
+          [
+            1.0339505234161581,
+            -0.00012309124861661347
+          ],
+          [
+            -0.01247559327073645,
+            1.031565646559937
+          ],
+          [
+            -61.22186033164045,
+            -18.74315026859735
+          ]
+        ],
+        "maximum_anchor_residual_px": 0.3597710890398277,
+        "scale_factors": [
+          1.0391877635571538,
+          1.0263653422086902
+        ],
+        "maximum_anchor_shift_px": 29.27647839513726,
+        "passed": true,
+        "maximum_anchor_shift_xy": [
+          25.989633173843686,
+          14.241741741741748
+        ]
+      },
+      "evidence_directory": "validation-375-20261113-fixed-view"
+    },
+    {
+      "slot": 5,
+      "validated_commands": 40,
+      "response_counts": {
+        "visible": 35,
+        "no_resolved_response": 5
+      },
+      "passed": true,
+      "comparison": {
+        "passed": true,
+        "failures": [],
+        "translation_to_reference_xy": [
+          -1.8166814295836957,
+          -0.40504141238528746
+        ],
+        "maximum_position_difference_px": 1.2664011949765517,
+        "position_tolerance_px": 3.0,
+        "matrix_fit": {
+          "verified": true,
+          "columns": 5,
+          "rows": 7,
+          "bit_to_cell": "column = bit % 5; row = bit // 5",
+          "column_step_xy": [
+            8.940093505944981,
+            -0.11513570821614806
+          ],
+          "row_step_xy": [
+            -0.029114634232950114,
+            9.742952456629782
+          ],
+          "origin_xy": [
+            1589.028276196378,
+            152.5340954418255
+          ],
+          "maximum_residual_px": 0.48944452011898265,
+          "rms_residual_px": 0.23217897579305283
+        }
+      },
+      "fiducial_checks": {
+        "before": {
+          "shift_xy": [
+            1.6994886353686098,
+            0.3256314747488318
+          ],
+          "phase_response": 0.8870162579748365,
+          "similarity": 0.9867900716443375,
+          "displacement_px": 1.7304038485550588,
+          "method": "phase correlation",
+          "ecc_score": null,
+          "reliable": true
+        },
+        "after": {
+          "shift_xy": [
+            -0.004528904059299066,
+            -0.2568643280333447
+          ],
+          "phase_response": 0.807353322815012,
+          "similarity": 0.9846177049489414,
+          "displacement_px": 0.2569042506226786,
+          "method": "phase correlation",
+          "ecc_score": null,
+          "reliable": true
+        }
+      },
+      "blank_after_stop": true,
+      "camera_geometry": {
+        "transform_to_reference": [
+          [
+            1.0339505234161581,
+            -0.00012309124861661347
+          ],
+          [
+            -0.01247559327073645,
+            1.031565646559937
+          ],
+          [
+            -61.22186033164045,
+            -18.74315026859735
+          ]
+        ],
+        "maximum_anchor_residual_px": 0.3597710890398277,
+        "scale_factors": [
+          1.0391877635571538,
+          1.0263653422086902
+        ],
+        "maximum_anchor_shift_px": 29.27647839513726,
+        "passed": true,
+        "maximum_anchor_shift_xy": [
+          25.989633173843686,
+          14.241741741741748
+        ]
+      },
+      "evidence_directory": "validation-375-20261113-fixed-view"
+    },
+    {
+      "slot": 6,
+      "validated_commands": 40,
+      "response_counts": {
+        "visible": 35,
+        "no_resolved_response": 5
+      },
+      "passed": true,
+      "comparison": {
+        "passed": true,
+        "failures": [],
+        "translation_to_reference_xy": [
+          -1.8682303940225893,
+          -0.7086834357910874
+        ],
+        "maximum_position_difference_px": 1.4098939094465868,
+        "position_tolerance_px": 3.0,
+        "matrix_fit": {
+          "verified": true,
+          "columns": 5,
+          "rows": 7,
+          "bit_to_cell": "column = bit % 5; row = bit // 5",
+          "column_step_xy": [
+            8.794326942276257,
+            -0.09773622987723722
+          ],
+          "row_step_xy": [
+            -0.030332617330290246,
+            9.739018036939788
+          ],
+          "origin_xy": [
+            1527.0158921389177,
+            153.36613462626025
+          ],
+          "maximum_residual_px": 0.5681949948425156,
+          "rms_residual_px": 0.29093489632271824
+        }
+      },
+      "fiducial_checks": {
+        "before": {
+          "shift_xy": [
+            1.8476334443568874,
+            0.29073158879243977
+          ],
+          "phase_response": 0.8253218325199905,
+          "similarity": 0.986761287513267,
+          "displacement_px": 1.870367397445719,
+          "method": "phase correlation",
+          "ecc_score": null,
+          "reliable": true
+        },
+        "after": {
+          "shift_xy": [
+            0.12821884709050835,
+            -0.09749669934986116
+          ],
+          "phase_response": 0.8456333442970558,
+          "similarity": 0.9953523760050806,
+          "displacement_px": 0.16107662503708098,
+          "method": "phase correlation",
+          "ecc_score": null,
+          "reliable": true
+        }
+      },
+      "blank_after_stop": true,
+      "camera_geometry": {
+        "transform_to_reference": [
+          [
+            1.0339505234161581,
+            -0.00012309124861661347
+          ],
+          [
+            -0.01247559327073645,
+            1.031565646559937
+          ],
+          [
+            -61.22186033164045,
+            -18.74315026859735
+          ]
+        ],
+        "maximum_anchor_residual_px": 0.3597710890398277,
+        "scale_factors": [
+          1.0391877635571538,
+          1.0263653422086902
+        ],
+        "maximum_anchor_shift_px": 29.27647839513726,
+        "passed": true,
+        "maximum_anchor_shift_xy": [
+          25.989633173843686,
+          14.241741741741748
+        ]
+      },
+      "evidence_directory": "validation-375-20261113-fixed-view"
+    },
+    {
+      "slot": 7,
+      "validated_commands": 40,
+      "response_counts": {
+        "visible": 35,
+        "no_resolved_response": 5
+      },
+      "passed": true,
+      "comparison": {
+        "passed": true,
+        "failures": [],
+        "translation_to_reference_xy": [
+          -1.9144062607927026,
+          -0.7713809056796919
+        ],
+        "maximum_position_difference_px": 1.0923612273472174,
+        "position_tolerance_px": 3.0,
+        "matrix_fit": {
+          "verified": true,
+          "columns": 5,
+          "rows": 7,
+          "bit_to_cell": "column = bit % 5; row = bit // 5",
+          "column_step_xy": [
+            8.8086645863785,
+            -0.09073265975127234
+          ],
+          "row_step_xy": [
+            0.007966089977669637,
+            9.755762683882285
+          ],
+          "origin_xy": [
+            1464.3932425228927,
+            153.99735181834217
+          ],
+          "maximum_residual_px": 0.46722554196038873,
+          "rms_residual_px": 0.22962520048014903
+        }
+      },
+      "fiducial_checks": {
+        "before": {
+          "shift_xy": [
+            2.016539590370158,
+            0.5305306657669178
+          ],
+          "phase_response": 0.7726690956839809,
+          "similarity": 0.9835438709040741,
+          "displacement_px": 2.0851605949780785,
+          "method": "phase correlation",
+          "ecc_score": null,
+          "reliable": true
+        },
+        "after": {
+          "shift_xy": [
+            -0.07148707605301752,
+            0.17344722603636598
+          ],
+          "phase_response": 0.8785266823238796,
+          "similarity": 0.9953367125895743,
+          "displacement_px": 0.18760155186543673,
+          "method": "phase correlation",
+          "ecc_score": null,
+          "reliable": true
+        }
+      },
+      "blank_after_stop": true,
+      "camera_geometry": {
+        "transform_to_reference": [
+          [
+            1.0339505234161581,
+            -0.00012309124861661347
+          ],
+          [
+            -0.01247559327073645,
+            1.031565646559937
+          ],
+          [
+            -61.22186033164045,
+            -18.74315026859735
+          ]
+        ],
+        "maximum_anchor_residual_px": 0.3597710890398277,
+        "scale_factors": [
+          1.0391877635571538,
+          1.0263653422086902
+        ],
+        "maximum_anchor_shift_px": 29.27647839513726,
+        "passed": true,
+        "maximum_anchor_shift_xy": [
+          25.989633173843686,
+          14.241741741741748
+        ]
+      },
+      "evidence_directory": "validation-375-20261113-fixed-view"
+    },
+    {
+      "slot": 8,
+      "validated_commands": 40,
+      "response_counts": {
+        "visible": 35,
+        "no_resolved_response": 5
+      },
+      "passed": true,
+      "comparison": {
+        "passed": true,
+        "failures": [],
+        "translation_to_reference_xy": [
+          -1.971624868257095,
+          -0.7980680984765769
+        ],
+        "maximum_position_difference_px": 1.0732485059328862,
+        "position_tolerance_px": 3.0,
+        "matrix_fit": {
+          "verified": true,
+          "columns": 5,
+          "rows": 7,
+          "bit_to_cell": "column = bit % 5; row = bit // 5",
+          "column_step_xy": [
+            8.859285415834306,
+            -0.10774940858257981
+          ],
+          "row_step_xy": [
+            0.004429752876784282,
+            9.711041750025101
+          ],
+          "origin_xy": [
+            1402.2671846102903,
+            154.99931916887766
+          ],
+          "maximum_residual_px": 0.3405024748765028,
+          "rms_residual_px": 0.1818180450461131
+        }
+      },
+      "fiducial_checks": {
+        "before": {
+          "shift_xy": [
+            1.9606811368703774,
+            0.6913503478447538
+          ],
+          "phase_response": 0.8161998239932237,
+          "similarity": 0.9863222279993399,
+          "displacement_px": 2.0789987551570053,
+          "method": "phase correlation",
+          "ecc_score": null,
+          "reliable": true
+        },
+        "after": {
+          "shift_xy": [
+            -0.007011529605904343,
+            -0.1511425752445703
+          ],
+          "phase_response": 0.838471809581474,
+          "similarity": 0.9949183328305438,
+          "displacement_px": 0.15130512086170472,
+          "method": "phase correlation",
+          "ecc_score": null,
+          "reliable": true
+        }
+      },
+      "blank_after_stop": true,
+      "camera_geometry": {
+        "transform_to_reference": [
+          [
+            1.0339505234161581,
+            -0.00012309124861661347
+          ],
+          [
+            -0.01247559327073645,
+            1.031565646559937
+          ],
+          [
+            -61.22186033164045,
+            -18.74315026859735
+          ]
+        ],
+        "maximum_anchor_residual_px": 0.3597710890398277,
+        "scale_factors": [
+          1.0391877635571538,
+          1.0263653422086902
+        ],
+        "maximum_anchor_shift_px": 29.27647839513726,
+        "passed": true,
+        "maximum_anchor_shift_xy": [
+          25.989633173843686,
+          14.241741741741748
+        ]
+      },
+      "evidence_directory": "validation-375-20261113-fixed-view"
+    },
+    {
+      "slot": 9,
+      "validated_commands": 40,
+      "response_counts": {
+        "visible": 35,
+        "no_resolved_response": 5
+      },
+      "passed": true,
+      "comparison": {
+        "passed": true,
+        "failures": [],
+        "translation_to_reference_xy": [
+          -2.065578094647549,
+          -0.7473511655847886
+        ],
+        "maximum_position_difference_px": 1.262266661934388,
+        "position_tolerance_px": 3.0,
+        "matrix_fit": {
+          "verified": true,
+          "columns": 5,
+          "rows": 7,
+          "bit_to_cell": "column = bit % 5; row = bit // 5",
+          "column_step_xy": [
+            8.721123476548456,
+            -0.10644556765748367
+          ],
+          "row_step_xy": [
+            0.05719136339351223,
+            9.718422392753473
+          ],
+          "origin_xy": [
+            1340.3944524034273,
+            155.46282669805333
+          ],
+          "maximum_residual_px": 0.5000386232082287,
+          "rms_residual_px": 0.24007274785794963
+        }
+      },
+      "fiducial_checks": {
+        "before": {
+          "shift_xy": [
+            2.1419479294387145,
+            0.659140990626625
+          ],
+          "phase_response": 0.753431295244782,
+          "similarity": 0.9855034491090815,
+          "displacement_px": 2.241072907772312,
+          "method": "phase correlation",
+          "ecc_score": null,
+          "reliable": true
+        },
+        "after": {
+          "shift_xy": [
+            0.07659550804343951,
+            -0.02369576667904738
+          ],
+          "phase_response": 0.7866610235638088,
+          "similarity": 0.9909290043939407,
+          "displacement_px": 0.08017706162575715,
+          "method": "phase correlation",
+          "ecc_score": null,
+          "reliable": true
+        }
+      },
+      "blank_after_stop": true,
+      "camera_geometry": {
+        "transform_to_reference": [
+          [
+            1.0339505234161581,
+            -0.00012309124861661347
+          ],
+          [
+            -0.01247559327073645,
+            1.031565646559937
+          ],
+          [
+            -61.22186033164045,
+            -18.74315026859735
+          ]
+        ],
+        "maximum_anchor_residual_px": 0.3597710890398277,
+        "scale_factors": [
+          1.0391877635571538,
+          1.0263653422086902
+        ],
+        "maximum_anchor_shift_px": 29.27647839513726,
+        "passed": true,
+        "maximum_anchor_shift_xy": [
+          25.989633173843686,
+          14.241741741741748
+        ]
+      },
+      "evidence_directory": "validation-375-20261113-fixed-view"
+    },
+    {
+      "slot": 10,
+      "validated_commands": 40,
+      "response_counts": {
+        "visible": 35,
+        "no_resolved_response": 5
+      },
+      "passed": true,
+      "comparison": {
+        "passed": true,
+        "failures": [],
+        "translation_to_reference_xy": [
+          -2.0377953913077818,
+          -0.7624043503444966
+        ],
+        "maximum_position_difference_px": 2.0981589061606996,
+        "position_tolerance_px": 3.0,
+        "matrix_fit": {
+          "verified": true,
+          "columns": 5,
+          "rows": 7,
+          "bit_to_cell": "column = bit % 5; row = bit // 5",
+          "column_step_xy": [
+            8.68957099801455,
+            -0.07155158134077802
+          ],
+          "row_step_xy": [
+            0.047088423576913535,
+            9.712024440071474
+          ],
+          "origin_xy": [
+            1278.7613549233665,
+            156.15784123860684
+          ],
+          "maximum_residual_px": 0.5783593706089981,
+          "rms_residual_px": 0.20361041835115817
+        }
+      },
+      "fiducial_checks": {
+        "before": {
+          "shift_xy": [
+            2.2118440510879367,
+            0.7047220453043437
+          ],
+          "phase_response": 0.794825389429375,
+          "similarity": 0.9903690896715179,
+          "displacement_px": 2.3213976969642736,
+          "method": "phase correlation",
+          "ecc_score": null,
+          "reliable": true
+        },
+        "after": {
+          "shift_xy": [
+            -0.014998344385702467,
+            0.013819266997479929
+          ],
+          "phase_response": 0.8443858391708798,
+          "similarity": 0.9915274668039618,
+          "displacement_px": 0.020394177469556615,
+          "method": "phase correlation",
+          "ecc_score": null,
+          "reliable": true
+        }
+      },
+      "blank_after_stop": true,
+      "camera_geometry": {
+        "transform_to_reference": [
+          [
+            1.0339505234161581,
+            -0.00012309124861661347
+          ],
+          [
+            -0.01247559327073645,
+            1.031565646559937
+          ],
+          [
+            -61.22186033164045,
+            -18.74315026859735
+          ]
+        ],
+        "maximum_anchor_residual_px": 0.3597710890398277,
+        "scale_factors": [
+          1.0391877635571538,
+          1.0263653422086902
+        ],
+        "maximum_anchor_shift_px": 29.27647839513726,
+        "passed": true,
+        "maximum_anchor_shift_xy": [
+          25.989633173843686,
+          14.241741741741748
+        ]
+      },
+      "evidence_directory": "validation-375-20261113-fixed-view"
+    },
+    {
+      "slot": 11,
+      "validated_commands": 40,
+      "response_counts": {
+        "visible": 35,
+        "no_resolved_response": 5
+      },
+      "passed": true,
+      "comparison": {
+        "passed": true,
+        "failures": [],
+        "translation_to_reference_xy": [
+          -2.0016136069958748,
+          -0.6341005657144905
+        ],
+        "maximum_position_difference_px": 1.5033807580091378,
+        "position_tolerance_px": 3.0,
+        "matrix_fit": {
+          "verified": true,
+          "columns": 5,
+          "rows": 7,
+          "bit_to_cell": "column = bit % 5; row = bit // 5",
+          "column_step_xy": [
+            8.745212414286861,
+            -0.06598122347315655
+          ],
+          "row_step_xy": [
+            0.06265392227522129,
+            9.65160749211026
+          ],
+          "origin_xy": [
+            1216.6863392145094,
+            156.8886433166939
+          ],
+          "maximum_residual_px": 0.5289674699321044,
+          "rms_residual_px": 0.20265953759497404
+        }
+      },
+      "fiducial_checks": {
+        "before": {
+          "shift_xy": [
+            2.1880587281094392,
+            0.6811971068340767
+          ],
+          "phase_response": 0.7648025468543723,
+          "similarity": 0.9880333132153098,
+          "displacement_px": 2.2916436232571185,
+          "method": "phase correlation",
+          "ecc_score": null,
+          "reliable": true
+        },
+        "after": {
+          "shift_xy": [
+            -0.0299728751390802,
+            -0.32457594008482005
+          ],
+          "phase_response": 0.8276656124326918,
+          "similarity": 0.993295957734028,
+          "displacement_px": 0.3259569206598436,
+          "method": "phase correlation",
+          "ecc_score": null,
+          "reliable": true
+        }
+      },
+      "blank_after_stop": true,
+      "camera_geometry": {
+        "transform_to_reference": [
+          [
+            1.0339505234161581,
+            -0.00012309124861661347
+          ],
+          [
+            -0.01247559327073645,
+            1.031565646559937
+          ],
+          [
+            -61.22186033164045,
+            -18.74315026859735
+          ]
+        ],
+        "maximum_anchor_residual_px": 0.3597710890398277,
+        "scale_factors": [
+          1.0391877635571538,
+          1.0263653422086902
+        ],
+        "maximum_anchor_shift_px": 29.27647839513726,
+        "passed": true,
+        "maximum_anchor_shift_xy": [
+          25.989633173843686,
+          14.241741741741748
+        ]
+      },
+      "evidence_directory": "validation-375-20261113-fixed-view"
+    },
+    {
+      "slot": 12,
+      "validated_commands": 40,
+      "response_counts": {
+        "visible": 35,
+        "no_resolved_response": 5
+      },
+      "passed": true,
+      "comparison": {
+        "passed": true,
+        "failures": [],
+        "translation_to_reference_xy": [
+          -2.0880875091447706,
+          -0.5570621308496158
+        ],
+        "maximum_position_difference_px": 1.338506839934127,
+        "position_tolerance_px": 3.0,
+        "matrix_fit": {
+          "verified": true,
+          "columns": 5,
+          "rows": 7,
+          "bit_to_cell": "column = bit % 5; row = bit // 5",
+          "column_step_xy": [
+            8.698908821171713,
+            -0.09600013001230638
+          ],
+          "row_step_xy": [
+            0.11562376859411995,
+            9.640741222915043
+          ],
+          "origin_xy": [
+            1155.0013418953251,
+            157.4861754018829
+          ],
+          "maximum_residual_px": 0.3469005563868113,
+          "rms_residual_px": 0.21288801802335106
+        }
+      },
+      "fiducial_checks": {
+        "before": {
+          "shift_xy": [
+            2.1187438943029093,
+            0.5586278495341332
+          ],
+          "phase_response": 0.7658856612664682,
+          "similarity": 0.9807159739921277,
+          "displacement_px": 2.191150557109435,
+          "method": "phase correlation",
+          "ecc_score": null,
+          "reliable": true
+        },
+        "after": {
+          "shift_xy": [
+            0.2097732448110321,
+            -0.08312114546527738
+          ],
+          "phase_response": 0.7841083138077347,
+          "similarity": 0.9865404396985104,
+          "displacement_px": 0.22564117324196178,
+          "method": "phase correlation",
+          "ecc_score": null,
+          "reliable": true
+        }
+      },
+      "blank_after_stop": true,
+      "camera_geometry": {
+        "transform_to_reference": [
+          [
+            1.0339505234161581,
+            -0.00012309124861661347
+          ],
+          [
+            -0.01247559327073645,
+            1.031565646559937
+          ],
+          [
+            -61.22186033164045,
+            -18.74315026859735
+          ]
+        ],
+        "maximum_anchor_residual_px": 0.3597710890398277,
+        "scale_factors": [
+          1.0391877635571538,
+          1.0263653422086902
+        ],
+        "maximum_anchor_shift_px": 29.27647839513726,
+        "passed": true,
+        "maximum_anchor_shift_xy": [
+          25.989633173843686,
+          14.241741741741748
+        ]
+      },
+      "evidence_directory": "validation-375-20261113-fixed-view"
+    },
+    {
+      "slot": 13,
+      "validated_commands": 40,
+      "response_counts": {
+        "visible": 35,
+        "no_resolved_response": 5
+      },
+      "passed": true,
+      "comparison": {
+        "passed": true,
+        "failures": [],
+        "translation_to_reference_xy": [
+          -2.146996807942628,
+          -0.6274460440111511
+        ],
+        "maximum_position_difference_px": 1.130518140297657,
+        "position_tolerance_px": 3.0,
+        "matrix_fit": {
+          "verified": true,
+          "columns": 5,
+          "rows": 7,
+          "bit_to_cell": "column = bit % 5; row = bit // 5",
+          "column_step_xy": [
+            8.684498052681919,
+            -0.055615528965539125
+          ],
+          "row_step_xy": [
+            0.08855379710360292,
+            9.61543731256662
+          ],
+          "origin_xy": [
+            1093.545741388718,
+            157.91780117489355
+          ],
+          "maximum_residual_px": 0.473441668120906,
+          "rms_residual_px": 0.23645772076846605
+        }
+      },
+      "fiducial_checks": {
+        "before": {
+          "shift_xy": [
+            2.1442487595679296,
+            0.3589195026299521
+          ],
+          "phase_response": 0.8381543436536083,
+          "similarity": 0.9894568622682736,
+          "displacement_px": 2.1740804843144,
+          "method": "phase correlation",
+          "ecc_score": null,
+          "reliable": true
+        },
+        "after": {
+          "shift_xy": [
+            -0.11452859504953494,
+            0.12918663012440135
+          ],
+          "phase_response": 0.8305552111731636,
+          "similarity": 0.9916667363519664,
+          "displacement_px": 0.17264409774712614,
+          "method": "phase correlation",
+          "ecc_score": null,
+          "reliable": true
+        }
+      },
+      "blank_after_stop": true,
+      "camera_geometry": {
+        "transform_to_reference": [
+          [
+            1.0339505234161581,
+            -0.00012309124861661347
+          ],
+          [
+            -0.01247559327073645,
+            1.031565646559937
+          ],
+          [
+            -61.22186033164045,
+            -18.74315026859735
+          ]
+        ],
+        "maximum_anchor_residual_px": 0.3597710890398277,
+        "scale_factors": [
+          1.0391877635571538,
+          1.0263653422086902
+        ],
+        "maximum_anchor_shift_px": 29.27647839513726,
+        "passed": true,
+        "maximum_anchor_shift_xy": [
+          25.989633173843686,
+          14.241741741741748
+        ]
+      },
+      "evidence_directory": "validation-375-20261113-fixed-view"
+    }
+  ],
+  "response_counts": {
+    "visible": 470,
+    "no_resolved_response": 90
+  },
+  "maximum_position_difference_px": 2.0981589061606996,
+  "final_stop_confirmed": true,
+  "last_error": 0,
+  "camera_image_controls_restored": true
+}
