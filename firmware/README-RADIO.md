@@ -33,6 +33,11 @@ Version 0.3.30 adds MONO 1/2 spectrum bank labels without forcing STEREO,
 the 0.75% brightness preset, and longer full-scan DMA buffering to avoid
 measured music-related scan gaps. Independent captures now show approximately
 128.20 Hz refresh and 8.02 ms worst steady intervals; Stop measured 0.28 s.
+After reconnection, a camera snapshot confirms all 22 bars and
+STEREO/MONO 1/MONO 2/TUNED at 0.75% per-grid duty. Live diagnostics showed
+zero PCM drops and no new audio errors. Subjective flicker confirmation and
+physical voltage/current validation remain outstanding; a still image
+cannot establish temporal stability.
 
 This profile does **not** start AirPlay or Sony mute/relay/PCM-I2S controls.
 AirPlay behavior below describes the inherited standalone implementation,

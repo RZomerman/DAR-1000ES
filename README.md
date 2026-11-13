@@ -14,8 +14,10 @@ Installed 0.3.29 adds selectable Option 1 stereo spectrum (11 real PCM frequency
 bands per channel), verified with isolated TD-model captures and decoded
 stereo/mono/silence fixtures; the user confirmed the bars at 0.75% brightness.
 Version 0.3.30 adds MONO 1/2 bank labels while retaining actual-source STEREO
-and fixes measured scan gaps with longer DMA batching. Its connected optical
-recheck is pending.
+and fixes measured scan gaps with longer DMA batching. A connected camera
+snapshot confirms all 22 bars and STEREO/MONO 1/MONO 2/TUNED at 0.75%
+per-grid duty. User confirmation of residual flicker is still pending;
+a still image cannot establish temporal stability.
 Physical voltage/current validation remains outstanding.
 
 For current display control, start with the

@@ -13,7 +13,8 @@ Firmware 0.3.29 adds selectable stereo spectrum visualization, installed and
 verified with isolated digital captures and decoded tone fixtures. Optical
 appearance was subsequently confirmed by the user at 0.75% per-grid duty.
 Firmware 0.3.30 adds MONO 1/2 spectrum-bank labels and longer DMA buffering
-after music exposed visible scan jitter; its connected optical recheck is pending.
+after music exposed visible scan jitter. A connected camera snapshot confirms
+the bank labels and bars at 0.75%; subjective flicker confirmation is pending.
 Electrical/current certification is still outstanding.
 
 ## 1. Hardware and signal ownership
@@ -590,9 +591,20 @@ text/manual takeover passed on-device; stereo, mono and buffering behavior
 also have host coverage. The 28 host regressions and both browser checks pass.
 The installed image is 3,131,408 bytes; the original settings and 0.3.29
 recovery image are retained. The matching webpage offers the 0.75% preset.
-This removes the measured software scan holes; a connected camera/user
-recheck is still needed before claiming all perceived flicker is resolved.
-Firmware 0.3.28 retains the same GPIO allocation and boot-stopped safety policy.
+This removes the measured software scan holes. After fresh user confirmation
+of reconnection readiness, 0.3.30 was enabled on the connected Sony using
+AHCT v2 at 0.75% per-grid duty (58,500 ns ON, 104,000 ns OFF). Live status
+showed changing spectrum levels, zero PCM drops and unchanged audio-error
+counters, with NPO Radio 2 restored. A connected camera snapshot confirms
+STEREO, MONO 1, MONO 2, TUNED and all 22 bars. STEREO remains source-based;
+MONO 1/2 identify the LEFT/RIGHT spectrum banks, not mono audio.
+
+The snapshot confirms appearance, not temporal stability. User confirmation
+that music-related flicker is resolved is still pending; camera aliasing and
+autoexposure must not be mistaken for scan-timing evidence. Physical
+voltage/current/thermal compliance and audible Sony playback remain separate
+checks. Firmware 0.3.30 retains the same GPIO allocation and boot-stopped
+safety policy; do not reset, open serial or flash while connected.
 
 ## 8. Troubleshooting
 
