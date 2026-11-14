@@ -1,6 +1,6 @@
 # DAR-1000ES internet radio baseline
 
-## Prepared release: 0.3.32
+## Current release: 0.3.32
 
 Eight display modes now cycle in order: Now Playing, Stream Source, Audio
 Format, BitRate, Station Genre, StreamURL, Equalizer, ESP IP address. Shared
@@ -8,10 +8,13 @@ task-context controls are ready for a future debounced Display Mode button;
 short press advances one mode, long press cycles 0.25% / 0.5% / 0.75% duty
 without changing the mode or scan period. The radio webpage exposes the
 same controls. They cannot start stopped output or take over manual display.
-The build and 30 host regressions plus both browser checks pass. This release
-is not yet installed; the connected device remains on 0.3.31.
+The build and 30 host regressions plus both browser checks pass. Installed
+with all six Sony signals disconnected: boot pins, webpage bytes, all eight
+mode frames, wraparound, exact DIM timing submission and ownership guards
+passed. After confirmed reconnection, Equalizer resumed at 0.75% duty with
+zero PCM drops and no new audio errors.
 
-## Installed baseline: 0.3.31
+## Boot-map baseline: 0.3.31
 
 AHCT v2 is now the fixed boot GPIO map, avoiding the former return to the
 legacy pins after reboot. Display output still starts stopped. Runtime

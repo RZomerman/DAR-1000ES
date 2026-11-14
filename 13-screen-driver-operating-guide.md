@@ -19,9 +19,9 @@ Electrical/current certification is still outstanding.
 Firmware 0.3.31 fixes the boot GPIO map to AHCT v2 while retaining
 boot-stopped display output. The legacy profile remains selectable only
 while physically isolated; that runtime selection is not persisted.
-Prepared firmware 0.3.32 adds eight display modes and shared mode/DIM cycling
-for a future physical button. It is built and host-tested but not installed;
-the connected ESP remains on 0.3.31.
+Installed firmware 0.3.32 adds eight display modes and shared mode/DIM cycling
+for a future physical button. Isolated on-device checks verified mode frames
+and DIM submission; connected Equalizer was restored at 0.75% duty.
 
 ## 1. Hardware and signal ownership
 
@@ -280,7 +280,7 @@ song. Unsupported glyphs use the catalogue's fallback. The display bridge
 preserves valid UTF-8, handles Latin-1 metadata and truncates long input
 without splitting UTF-8 sequences.
 
-### Display Mode and DIM controls (prepared 0.3.32)
+### Display Mode and DIM controls (0.3.32)
 
 The radio webpage offers these modes in short-press cycle order:
 
@@ -329,8 +329,8 @@ are not restored across reboot; boot remains AHCT v2 with output stopped.
 
 ### Option 1: stereo spectrum (0.3.29)
 
-Select **Equalizer -- stereo spectrum, 11 bands per channel** on the prepared
-0.3.32 webpage, then press **Start / apply display**. On the installed older
+Select **Equalizer -- stereo spectrum, 11 bands per channel** on the installed
+0.3.32 webpage, then press **Start / apply display**. On older versions'
 page this is called Option 1. NOW PLAYING remains the default. All modes
 need the same hardware authorization; a page reload or selector change does
 not start output. The webpage still shows the title while the Sony shows bars.
@@ -461,7 +461,7 @@ Add `"visualization":"spectrum"` with `"now_playing":true` to select Option 1;
 use `"visualization":"now_playing"` to return to text. Omitting visualization
 preserves the previous text behavior. Within Timing/Display commands, unknown
 values, nonradio requests and held/pair/alternation combinations are rejected.
-Prepared 0.3.32 additionally accepts `"display_mode":"stream_source"` (or any
+Version 0.3.32 additionally accepts `"display_mode":"stream_source"` (or any
 ID in the mode table) on an authorized radio Timing request. If both fields
 are supplied, `visualization` must agree with the selected text/spectrum
 backend. Legacy `"visualization":"spectrum"` still selects Equalizer.
@@ -698,7 +698,7 @@ including boot-default/idle-pin coverage and the existing isolated profile
 switch/rollback checks. These are software checks, not reset-transient or
 electrical safety certification.
 
-### Prepared multi-mode build: 0.3.32
+### Installed multi-mode build: 0.3.32
 
 The application builds at 3,135,312 bytes, with 10,416 bytes spare in the
 unchanged 3 MiB slot. The exact binary contains version 0.3.32. All 30 host
@@ -706,8 +706,26 @@ regressions and both browser checks pass, including mode wraparound, stale
 metadata rejection, manual/Stop/held/pair ownership guards, metadata fallbacks,
 UTF-8/long-URL handling, reentrant spectrum-initialization protection and
 exact three-level duty cycling with unchanged slot timing.
-Physical button integration and on-device deployment/captures
-remain pending. No firmware or webpage was changed on the connected ESP.
+With all six Sony signals disconnected and AHCT outputs disabled, the active
+0.3.31 application was backed up and its hash verified. OTA selection,
+partitions and NVS were preserved. After flashing, network status verified
+0.3.32, AHCT v2, output stopped and correct commanded idle pins. The installed
+radio webpage matched the source byte-for-byte.
+
+On-device checks matched all seven text modes' matrix words to legitimate
+renderer frames using live NPO metadata; Equalizer produced real PCM updates
+and bank labels. Short presses visited all eight modes and wrapped back to
+Now Playing. DIM cycled all three exact levels in both text and Equalizer,
+with each timing revision submitted and the 300 us slot preserved. Invalid,
+unconfirmed, mixed and stopped control requests were rejected; manual
+takeover blocked both button actions. Stop remained stopped despite metadata.
+No new decoder, buffer, S/PDIF write or DMA-underrun errors occurred.
+
+After fresh reconnection confirmation, Equalizer was restored at 0.75% duty;
+live spectrum updates advanced with zero PCM drops and no new audio errors.
+Physical button integration, new digital captures and temporal optical
+confirmation remain separate pending checks. No serial/reset/programming
+operation was performed while connected.
 
 ## 8. Troubleshooting
 
