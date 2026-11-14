@@ -182,7 +182,13 @@ dd { margin: 0; overflow-wrap: anywhere; }
   <label for="vfd-mode">Display mode</label>
   <select id="vfd-mode">
     <option value="now_playing" selected>NOW PLAYING &mdash; scrolling title</option>
-    <option value="spectrum">Option 1 &mdash; stereo spectrum, 11 bands per channel</option>
+    <option value="stream_source">Stream Source</option>
+    <option value="audio_format">Audio Format</option>
+    <option value="bitrate">BitRate</option>
+    <option value="station_genre">Station Genre</option>
+    <option value="stream_url">StreamURL</option>
+    <option value="equalizer">Equalizer &mdash; stereo spectrum, 11 bands per channel</option>
+    <option value="esp_ip">ESP IP address</option>
   </select>
   <p class="muted">Spectrum uses actual decoded audio: left 11 matrices are LEFT,
     right 11 are RIGHT, each bass to treble (20 Hz&ndash;20 kHz).
@@ -195,7 +201,6 @@ dd { margin: 0; overflow-wrap: anywhere; }
     <option value="0.25">Low dim: 0.25% per grid / 6.5% total</option>
     <option value="0.5" selected>Working dim: 0.5% per grid / 13% total</option>
     <option value="0.75">Medium: 0.75% per grid / 19.5% total</option>
-    <option value="1">Brighter: 1% per grid / 26% total</option>
   </select>
   <p>All 26 slots stay scanned, even with one character. Do not divide brightness
     by the number of lit characters. Current limits are not measured.</p>
@@ -207,8 +212,14 @@ dd { margin: 0; overflow-wrap: anywhere; }
     Sony powered and outputs ready. I authorize display output.</label></p>
   <div class="stations">
     <button id="vfd-start" type="button" disabled>Start / apply display</button>
+    <button id="vfd-next-mode" type="button" disabled>Display Mode &mdash; short press</button>
+    <button id="vfd-next-dim" type="button" disabled>DIM &mdash; long press</button>
     <button id="vfd-stop" type="button">Stop display / CLEAR LOW</button>
   </div>
+  <p class="muted">Short press cycles the eight modes in the order above.
+    Long press cycles 0.25%, 0.5%, 0.75% per-grid duty without changing the mode.
+    These controls require an already running, authorized radio display.
+    Physical button wiring and press detection will be added later.</p>
   <p id="vfd-error" role="alert" hidden></p>
 </section>
 <section class="card">
@@ -388,7 +399,7 @@ document.getElementById("custom").addEventListener("submit", event => {
   select(4, urlInput.value.trim());
 });
 function screenTiming(percent) {
-  if (![0.25, 0.5, 0.75, 1].includes(percent))
+  if (![0.25, 0.5, 0.75].includes(percent))
     throw new Error("Choose a tested per-grid brightness");
   const on = Math.round(26 * 300000 * percent / 100);
   return {setup_ns:500, clock_low_ns:1000, clock_high_ns:1000,
@@ -402,21 +413,34 @@ let screenStopPending = false;
 const vfdStart = document.getElementById("vfd-start");
 const vfdStop = document.getElementById("vfd-stop");
 const vfdConfirm = document.getElementById("vfd-confirm");
+const vfdNextMode = document.getElementById("vfd-next-mode");
+const vfdNextDim = document.getElementById("vfd-next-dim");
+const displayModes = ["now_playing", "stream_source", "audio_format", "bitrate",
+  "station_genre", "stream_url", "equalizer", "esp_ip"];
 function renderScreen(state) {
   if (screenState && screenState.pin_profile !== state.pin_profile)
     vfdConfirm.checked = false;
+  const previous = screenState;
   screenState = state;
+  if (displayModes.includes(state.display_mode) &&
+      state.display_mode !== previous?.display_mode)
+    document.getElementById("vfd-mode").value = state.display_mode;
+  if (state.dim_level >= 0 && state.dim_level < 3 &&
+      state.timing_grid_duty !== previous?.timing_grid_duty)
+    document.getElementById("grid-duty").value = String([0.25, 0.5, 0.75][state.dim_level]);
   document.getElementById("vfd-controls").hidden = false;
   document.getElementById("vfd-status").textContent =
     state.pin_profile_name + " \u00b7 " +
     (state.running ? (state.now_playing ?
-      (state.visualization === "spectrum" ? "Stereo spectrum: 11 LEFT + 11 RIGHT" :
-        "Following radio metadata") : "Manual display scan") :
+      (state.visualization === "spectrum" ? "Equalizer: 11 LEFT + 11 RIGHT" :
+        (state.display_mode_label || "Following radio metadata")) : "Manual display scan") :
       "Stopped") +
     (state.running ? " \u00b7 " + (state.timing_grid_duty * 100).toFixed(3) + "% per grid" : "") +
     (state.pin_profile !== "ahct-v2" ?
       ". Select AHCT v2 in the timing laboratory while all six signals are disconnected." : "");
   vfdStart.disabled = screenBusy || !vfdConfirm.checked || state.pin_profile !== "ahct-v2";
+  vfdNextMode.disabled = vfdNextDim.disabled = vfdStart.disabled ||
+    !state.running || !state.now_playing || !displayModes.includes(state.display_mode);
 }
 async function screenRequest(body) {
   const response = await fetch("/api/screen", {cache:"no-store",
@@ -425,23 +449,30 @@ async function screenRequest(body) {
   if (!response.ok) throw new Error(await response.text() || "Display request failed");
   return response.json();
 }
-async function screenCommand(stop) {
+async function screenCommand(stop, action) {
   if (screenBusy) {
     if (stop) screenStopPending = true;
     return;
   }
   if (!stop && (!vfdConfirm.checked || screenState?.pin_profile !== "ahct-v2"))
     return;
+  if (!stop && action && (!screenState.running || !screenState.now_playing))
+    return;
   screenBusy = true;
-  vfdStart.disabled = true;
+  vfdStart.disabled = vfdNextMode.disabled = vfdNextDim.disabled = true;
   const err = document.getElementById("vfd-error");
   err.hidden = true;
   try {
-    const visualization = document.getElementById("vfd-mode").value;
-    if (!stop && !["now_playing", "spectrum"].includes(visualization))
-      throw new Error("Choose NOW PLAYING or stereo spectrum");
-    const body = stop ? {sample:"stop"} : {sample:"Timing", live_confirmed:true,
-      bench_confirmed:false, now_playing:true, visualization,
+    const mode = document.getElementById("vfd-mode").value;
+    if (!stop && !displayModes.includes(mode))
+      throw new Error("Choose one of the eight display modes");
+    if (action && !["short_press", "long_press"].includes(action))
+      throw new Error("Unknown display button action");
+    const body = stop ? {sample:"stop"} : action ?
+      {display_action:action, live_confirmed:true} :
+      {sample:"Timing", live_confirmed:true,
+      bench_confirmed:false, now_playing:true, display_mode:mode,
+      visualization:mode === "equalizer" ? "spectrum" : "now_playing",
       words:Array(26).fill("0000000000"),
       timing:screenTiming(Number(document.getElementById("grid-duty").value))};
     renderScreen(await screenRequest(body));
@@ -459,13 +490,15 @@ async function screenCommand(stop) {
 vfdConfirm.addEventListener("change", () => { if (screenState) renderScreen(screenState); });
 vfdStart.addEventListener("click", () => screenCommand(false));
 vfdStop.addEventListener("click", () => screenCommand(true));
+vfdNextMode.addEventListener("click", () => screenCommand(false, "short_press"));
+vfdNextDim.addEventListener("click", () => screenCommand(false, "long_press"));
 async function pollScreen() {
   if (!screenBusy) {
     try { renderScreen(await screenRequest()); }
     catch {
       screenState = undefined;
       vfdConfirm.checked = false;
-      vfdStart.disabled = true;
+      vfdStart.disabled = vfdNextMode.disabled = vfdNextDim.disabled = true;
       document.getElementById("vfd-status").textContent = "Display unavailable; output state unknown.";
     }
   }

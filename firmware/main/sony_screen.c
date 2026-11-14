@@ -78,11 +78,13 @@ static atomic_uint submitted_timing_revision;
 static portMUX_TYPE frame_lock = portMUX_INITIALIZER_UNLOCKED;
 static bool follow_radio;
 static bool follow_spectrum;
+static sony_display_mode_t radio_display_mode;
 static sony_radio_status_t last_radio_status;
 static unsigned scrolling_width = 9;
 
 static esp_err_t show_text(const char *utf8, bool scroll, bool dim,
-                          unsigned width, const sony_radio_status_t *radio) {
+                          unsigned width, const sony_radio_status_t *radio,
+                          sony_display_mode_t mode) {
   if (!atomic_load(&running) || !atomic_load(&display_requested) ||
       atomic_load(&stop_requested))
     return ESP_ERR_INVALID_STATE;
@@ -99,7 +101,8 @@ static esp_err_t show_text(const char *utf8, bool scroll, bool dim,
   if (!atomic_load(&running) || !atomic_load(&display_requested) ||
       atomic_load(&stop_requested) ||
       (radio && (!follow_radio || !atomic_load(&timing_requested) ||
-                 display_timing.hold || display_timing.pair))) {
+                 display_timing.hold || display_timing.pair ||
+                 radio_display_mode != mode))) {
     err = ESP_ERR_INVALID_STATE;
   } else if ((!radio && follow_spectrum) || !scrolling_text.active ||
              scrolling_text.scroll != scroll ||
@@ -132,14 +135,85 @@ static esp_err_t show_text(const char *utf8, bool scroll, bool dim,
 }
 
 esp_err_t sony_vfd_show(const char *utf8, bool scroll, bool dim) {
-  return show_text(utf8, scroll, dim, 9, NULL);
+  return show_text(utf8, scroll, dim, 9, NULL, SONY_DISPLAY_MODE_COUNT);
 }
 
 esp_err_t sony_vfd_show_radio(const char *utf8,
                               const sony_radio_status_t *status) {
   if (!status)
     return ESP_ERR_INVALID_ARG;
-  return show_text(utf8, true, true, 22, status);
+  return show_text(utf8, true, true, 22, status, sony_screen_display_mode());
+}
+
+esp_err_t sony_vfd_show_radio_mode(const char *utf8,
+                                  const sony_radio_status_t *status,
+                                  sony_display_mode_t mode) {
+  if (!status || (unsigned)mode >= SONY_DISPLAY_MODE_COUNT)
+    return ESP_ERR_INVALID_ARG;
+  return show_text(utf8, true, true, 22, status, mode);
+}
+
+sony_display_mode_t sony_screen_display_mode(void) {
+  portENTER_CRITICAL(&frame_lock);
+  sony_display_mode_t mode = radio_display_mode;
+  portEXIT_CRITICAL(&frame_lock);
+  return mode;
+}
+
+static bool radio_controls_ready(void) {
+  return follow_radio && atomic_load(&running) &&
+         atomic_load(&display_requested) && atomic_load(&timing_requested) &&
+         !atomic_load(&stop_requested) && !display_timing.hold &&
+         !display_timing.pair && !display_timing.alternate_ms;
+}
+
+esp_err_t sony_screen_set_display_mode(sony_display_mode_t mode) {
+  if ((unsigned)mode >= SONY_DISPLAY_MODE_COUNT)
+    return ESP_ERR_INVALID_ARG;
+  portENTER_CRITICAL(&frame_lock);
+  bool ready = radio_controls_ready();
+  portEXIT_CRITICAL(&frame_lock);
+  if (!ready)
+    return ESP_ERR_INVALID_STATE;
+  bool spectrum = mode == SONY_DISPLAY_EQUALIZER;
+  if (spectrum && sony_spectrum_init() != ESP_OK)
+    return ESP_ERR_NO_MEM;
+  portENTER_CRITICAL(&frame_lock);
+  ready = radio_controls_ready();
+  if (ready && radio_display_mode != mode) {
+    radio_display_mode = mode;
+    follow_spectrum = spectrum;
+    scrolling_text.active = false;
+    for (unsigned slot = 1; slot <= 22; ++slot)
+      words[slot] = 0;
+    sony_radio_status_apply_view(words, &last_radio_status, spectrum);
+  }
+  if (ready)
+    sony_spectrum_enable(spectrum);
+  portEXIT_CRITICAL(&frame_lock);
+  if (!ready)
+    return ESP_ERR_INVALID_STATE;
+  return ESP_OK;
+}
+
+esp_err_t sony_screen_display_mode_press(bool long_press) {
+  if (!long_press)
+    return sony_screen_set_display_mode(
+        (sony_screen_display_mode() + 1) % SONY_DISPLAY_MODE_COUNT);
+  esp_err_t err = ESP_ERR_INVALID_STATE;
+  portENTER_CRITICAL(&frame_lock);
+  if (radio_controls_ready()) {
+    sony_timing_t timing = display_timing;
+    if (sony_display_dim_next(&timing)) {
+      display_timing = timing;
+      atomic_fetch_add(&timing_revision, 1);
+      err = ESP_OK;
+    } else {
+      err = ESP_ERR_INVALID_ARG;
+    }
+  }
+  portEXIT_CRITICAL(&frame_lock);
+  return err;
 }
 
 esp_err_t sony_vfd_show_spectrum(const uint8_t levels[22]) {
@@ -594,6 +668,7 @@ static esp_err_t status_handler(httpd_req_t *req) {
   bool radio_following = follow_radio;
   bool spectrum_following = follow_spectrum;
   unsigned text_width = scrolling_width;
+  sony_display_mode_t mode = radio_display_mode;
   portEXIT_CRITICAL(&frame_lock);
   cJSON_AddBoolToObject(root, "now_playing", radio_following &&
                                                atomic_load(&running) &&
@@ -603,6 +678,11 @@ static esp_err_t status_handler(httpd_req_t *req) {
   if (radio_following)
     visualization = spectrum_following ? "spectrum" : "now_playing";
   cJSON_AddStringToObject(root, "visualization", visualization);
+  cJSON_AddStringToObject(root, "display_mode",
+                          radio_following ? sony_display_mode_id(mode) : "manual");
+  cJSON_AddStringToObject(root, "display_mode_label",
+                          radio_following ? sony_display_mode_label(mode) : "Manual");
+  cJSON_AddNumberToObject(root, "dim_level", sony_display_dim_level(&timing));
   sony_spectrum_status_t spectrum;
   sony_spectrum_get_status(&spectrum);
   cJSON *spectrum_json = cJSON_AddObjectToObject(root, "spectrum");
@@ -732,6 +812,39 @@ static esp_err_t control_handler(httpd_req_t *req) {
   cJSON *confirmed = cJSON_GetObjectItemCaseSensitive(root, "bench_confirmed");
   cJSON *live = cJSON_GetObjectItemCaseSensitive(root, "live_confirmed");
   cJSON *profile = cJSON_GetObjectItemCaseSensitive(root, "pin_profile");
+  cJSON *action = cJSON_GetObjectItemCaseSensitive(root, "display_action");
+  cJSON *mode_item = cJSON_GetObjectItemCaseSensitive(root, "display_mode");
+  if (action || (mode_item && !sample)) {
+    sony_display_mode_t mode = SONY_DISPLAY_NOW_PLAYING;
+    bool valid_action = cJSON_IsString(action) &&
+        (!strcmp(action->valuestring, "short_press") ||
+         !strcmp(action->valuestring, "long_press"));
+    bool valid_mode = cJSON_IsString(mode_item) &&
+        sony_display_mode_parse(mode_item->valuestring, &mode);
+    if ((!cJSON_IsTrue(confirmed) && !cJSON_IsTrue(live)) ||
+        sample || profile || (action && mode_item) ||
+        cJSON_GetObjectItemCaseSensitive(root, "gpio") ||
+        cJSON_GetObjectItemCaseSensitive(root, "words") ||
+        cJSON_GetObjectItemCaseSensitive(root, "timing") ||
+        (action ? !valid_action : !valid_mode)) {
+      cJSON_Delete(root);
+      return httpd_resp_send_err(req, HTTPD_400_BAD_REQUEST,
+                                 "Confirm bench/live and choose one display control");
+    }
+    esp_err_t err = action
+        ? sony_screen_display_mode_press(!strcmp(action->valuestring, "long_press"))
+        : sony_screen_set_display_mode(mode);
+    cJSON_Delete(root);
+    if (err == ESP_ERR_INVALID_STATE) {
+      httpd_resp_set_status(req, "409 Conflict");
+      return httpd_resp_sendstr(req, "Start an authorized radio full scan first");
+    }
+    if (err != ESP_OK)
+      return httpd_resp_send_err(req, err == ESP_ERR_NO_MEM
+          ? HTTPD_500_INTERNAL_SERVER_ERROR : HTTPD_400_BAD_REQUEST,
+          "Cannot apply display mode or exact dim level");
+    return status_handler(req);
+  }
   if (profile) {
     if (!cJSON_IsString(profile) || !cJSON_IsTrue(confirmed) || sample ||
         cJSON_GetObjectItemCaseSensitive(root, "gpio") ||
@@ -829,7 +942,8 @@ static esp_err_t control_handler(httpd_req_t *req) {
     }
     esp_err_t err = show_text(text->valuestring, !scroll || cJSON_IsTrue(scroll),
                               !dim || cJSON_IsTrue(dim),
-                              width ? (unsigned)width->valueint : 9, NULL);
+                              width ? (unsigned)width->valueint : 9, NULL,
+                              SONY_DISPLAY_MODE_COUNT);
     cJSON_Delete(root);
     if (err == ESP_ERR_INVALID_STATE) {
       httpd_resp_set_status(req, "409 Conflict");
@@ -860,8 +974,22 @@ static esp_err_t control_handler(httpd_req_t *req) {
           req, HTTPD_400_BAD_REQUEST,
           "Choose now_playing/spectrum on a radio Timing scan");
     }
-    bool spectrum = cJSON_IsString(visualization) &&
-                    !strcmp(visualization->valuestring, "spectrum");
+    sony_display_mode_t mode = SONY_DISPLAY_NOW_PLAYING;
+    if (cJSON_IsString(visualization))
+      sony_display_mode_parse(visualization->valuestring, &mode);
+    if (mode_item) {
+      sony_display_mode_t selected;
+      if (!cJSON_IsString(mode_item) || !timed || !cJSON_IsTrue(radio) ||
+          !sony_display_mode_parse(mode_item->valuestring, &selected) ||
+          (visualization && ((selected == SONY_DISPLAY_EQUALIZER) !=
+                             (mode == SONY_DISPLAY_EQUALIZER)))) {
+        cJSON_Delete(root);
+        return httpd_resp_send_err(req, HTTPD_400_BAD_REQUEST,
+                                   "Choose a valid display_mode on a radio Timing scan");
+      }
+      mode = selected;
+    }
+    bool spectrum = mode == SONY_DISPLAY_EQUALIZER;
     if (radio && (!cJSON_IsBool(radio) || !timed)) {
       cJSON_Delete(root);
       return httpd_resp_send_err(req, HTTPD_400_BAD_REQUEST,
@@ -947,6 +1075,7 @@ static esp_err_t control_handler(httpd_req_t *req) {
       scrolling_text.active = false;
       follow_radio = cJSON_IsTrue(radio);
       follow_spectrum = spectrum;
+      radio_display_mode = mode;
       display_dim = true;
       memcpy(words, frame, sizeof(words));
       if (leaving_spectrum && follow_radio)
@@ -969,6 +1098,7 @@ static esp_err_t control_handler(httpd_req_t *req) {
     scrolling_text.active = false;
     follow_radio = cJSON_IsTrue(radio);
     follow_spectrum = spectrum;
+    radio_display_mode = mode;
     display_dim = true;
     memcpy(words, frame, sizeof(words));
     if (timed) {

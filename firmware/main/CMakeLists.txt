@@ -59,6 +59,7 @@ if(CONFIG_SONY_SCREEN_BENCH)
     list(APPEND SRC_FILES "sony_display_frame.c")
     list(APPEND SRC_FILES "sony_text.c")
     list(APPEND SRC_FILES "sony_radio_status.c")
+    list(APPEND SRC_FILES "sony_display_modes.c")
     list(APPEND SRC_FILES "sony_spectrum.c" "sony_spectrum_dsp.c")
     list(APPEND SRC_FILES "sony_timing.c")
     set(SCREEN_EMBED_FILES "../tests/fixtures/screen/mono-blink.rle"

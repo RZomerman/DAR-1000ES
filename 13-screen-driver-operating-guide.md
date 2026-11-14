@@ -19,6 +19,9 @@ Electrical/current certification is still outstanding.
 Firmware 0.3.31 fixes the boot GPIO map to AHCT v2 while retaining
 boot-stopped display output. The legacy profile remains selectable only
 while physically isolated; that runtime selection is not persisted.
+Prepared firmware 0.3.32 adds eight display modes and shared mode/DIM cycling
+for a future physical button. It is built and host-tested but not installed;
+the connected ESP remains on 0.3.31.
 
 ## 1. Hardware and signal ownership
 
@@ -277,10 +280,58 @@ song. Unsupported glyphs use the catalogue's fallback. The display bridge
 preserves valid UTF-8, handles Latin-1 metadata and truncates long input
 without splitting UTF-8 sequences.
 
+### Display Mode and DIM controls (prepared 0.3.32)
+
+The radio webpage offers these modes in short-press cycle order:
+
+| Mode | API `display_mode` | Matrix content |
+|---|---|---|
+| Now Playing | `now_playing` | Current title; station fallback or connecting/reconnecting message |
+| Stream Source | `stream_source` | Radio and station-provided stream name, or selected station fallback |
+| Audio Format | `audio_format` | Decoded source codec, sample rate and MONO/STEREO; not the resampled output format |
+| BitRate | `bitrate` | Station-reported ICY kbps, or unavailable; not measured audio quality |
+| Station Genre | `station_genre` | Station-provided genre, or unknown |
+| StreamURL | `stream_url` | Configured stream URL, not the final redirect destination |
+| Equalizer | `equalizer` | Existing Option 1 real stereo spectrum; visualization only |
+| ESP IP address | `esp_ip` | Current Wi-Fi station IPv4 address, or disconnected |
+
+All text modes use the existing 22-matrix scrolling renderer and source-status
+indicators. Metadata refresh does not restart an unchanged scroll. Text is
+normalized and bounded to 200 codepoints, without splitting UTF-8; unusually
+long URLs are therefore truncated. Unknown values use explicit fallbacks.
+Equalizer alone shows MONO 1/2 bank legends and enables FFT input/analysis.
+Leaving it clears bank labels and bars before the next metadata update.
+The bridge refreshes every 500 ms; DMA queueing adds the existing update latency.
+
+**Short press** advances once, wrapping ESP IP address back to Now Playing.
+**Long press** advances DIM through 0.25%, 0.5%, 0.75%, then 0.25%, leaving
+the mode unchanged. With the guarded 300 us slots, ON is respectively
+19,500 / 39,000 / 58,500 ns; OFF is 143,000 / 123,500 / 104,000 ns.
+Only ON/OFF changes; transfer timing, slot duration, 26-slot scan and refresh
+rate are preserved. A custom duty enters the cycle at 0.25%. Nonstandard
+timings that cannot represent the target duty exactly in 125 ns ticks,
+or cannot retain valid ON/OFF limits, are rejected without changes.
+The radio page now offers these three levels; the timing laboratory retains
+its separate diagnostic settings.
+
+No physical GPIO, debounce interval or long-press threshold is assigned yet.
+The eventual debounced button task calls
+`sony_screen_display_mode_press(false)` once for a short press or
+`sony_screen_display_mode_press(true)` once for a long press. Do not call from
+an ISR and do not also emit a short press after handling a long press.
+`sony_screen_set_display_mode()` selects a mode directly.
+
+These task-context functions and their HTTP equivalents require an already
+running, authorized, radio-owned full scan. They reject stopped, stopping,
+manual, held and pair scans; neither metadata nor a button can start output.
+The hardware wiring/enable precautions still apply. Mode and DIM selections
+are not restored across reboot; boot remains AHCT v2 with output stopped.
+
 ### Option 1: stereo spectrum (0.3.29)
 
-Select **Option 1 -- stereo spectrum, 11 bands per channel** on `/`, then
-press **Start / apply display**. NOW PLAYING remains the default. Both modes
+Select **Equalizer -- stereo spectrum, 11 bands per channel** on the prepared
+0.3.32 webpage, then press **Start / apply display**. On the installed older
+page this is called Option 1. NOW PLAYING remains the default. All modes
 need the same hardware authorization; a page reload or selector change does
 not start output. The webpage still shows the title while the Sony shows bars.
 
@@ -335,7 +386,7 @@ before increasing brightness; this feature provides no electrical certification.
 
 ### Radio status indicators (0.3.28)
 
-These update in either radio display mode, without a browser or a change to
+These update in every radio display mode, without a browser or a change to
 scan duty.
 
 | Indicator | Meaning |
@@ -410,8 +461,27 @@ Add `"visualization":"spectrum"` with `"now_playing":true` to select Option 1;
 use `"visualization":"now_playing"` to return to text. Omitting visualization
 preserves the previous text behavior. Within Timing/Display commands, unknown
 values, nonradio requests and held/pair/alternation combinations are rejected.
+Prepared 0.3.32 additionally accepts `"display_mode":"stream_source"` (or any
+ID in the mode table) on an authorized radio Timing request. If both fields
+are supplied, `visualization` must agree with the selected text/spectrum
+backend. Legacy `"visualization":"spectrum"` still selects Equalizer.
 Switching modes on an existing
 normal Timing scan does not reset the ESP or change the GPIO profile.
+
+On an already authorized radio full scan, change only the mode or DIM with:
+
+```json
+{"display_mode":"audio_format","live_confirmed":true}
+{"display_action":"short_press","live_confirmed":true}
+{"display_action":"long_press","live_confirmed":true}
+```
+
+Send each as a separate POST to `/api/screen`; disconnected tests can use
+`bench_confirmed:true` instead. Do not combine these controls with Start,
+profile, GPIO, word or timing changes. Status adds `display_mode`,
+`display_mode_label` and zero-based `dim_level` (0/1/2 for the three levels,
+-1 for a custom/noncompatible duty). Existing `visualization` remains
+`now_playing` for every text mode and `spectrum` for Equalizer.
 
 For a manual T, slot22 is `"010842109F"`; all other words can be
 `"0000000000"`. Starting NOW PLAYING can use all-zero words; the bridge
@@ -627,6 +697,17 @@ byte-for-byte. The 28 host regressions and both browser checks passed,
 including boot-default/idle-pin coverage and the existing isolated profile
 switch/rollback checks. These are software checks, not reset-transient or
 electrical safety certification.
+
+### Prepared multi-mode build: 0.3.32
+
+The application builds at 3,135,312 bytes, with 10,416 bytes spare in the
+unchanged 3 MiB slot. The exact binary contains version 0.3.32. All 30 host
+regressions and both browser checks pass, including mode wraparound, stale
+metadata rejection, manual/Stop/held/pair ownership guards, metadata fallbacks,
+UTF-8/long-URL handling, reentrant spectrum-initialization protection and
+exact three-level duty cycling with unchanged slot timing.
+Physical button integration and on-device deployment/captures
+remain pending. No firmware or webpage was changed on the connected ESP.
 
 ## 8. Troubleshooting
 

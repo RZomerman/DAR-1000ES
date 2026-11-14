@@ -416,6 +416,94 @@ class ScreenRadioStatusTests(unittest.TestCase):
             subprocess.run([str(binary)], check=True)
 
 
+class ScreenDisplayModeTests(unittest.TestCase):
+    def test_metadata_views_fallbacks_and_exact_dim_cycle(self):
+        with tempfile.TemporaryDirectory() as temp:
+            binary = Path(temp) / "display-modes"
+            subprocess.run(["cc", "-Wall", "-Wextra", "-Werror",
+                            "-fsanitize=undefined",
+                            str(ROOT / "tests/test_sony_display_modes.c"),
+                            str(ROOT / "main/sony_display_modes.c"),
+                            str(ROOT / "main/sony_timing.c"),
+                            str(ROOT / "main/sony_text.c"),
+                            str(ROOT / "main/audio/radio_display_text.c"),
+                            "-o", str(binary)], check=True)
+            subprocess.run([str(binary)], check=True)
+
+    def test_first_spectrum_selection_rejects_reentrant_initialization(self):
+        source = (ROOT / "main/sony_spectrum.c").read_text()
+        initializer = source[source.index("esp_err_t sony_spectrum_init(void)"):
+                             source.index("void sony_spectrum_enable(")]
+        harness = r"""
+#include <assert.h>
+#include <stdatomic.h>
+#include <stdlib.h>
+#include "sony_spectrum_dsp.h"
+typedef int esp_err_t;
+enum { ESP_OK, ESP_ERR_INVALID_STATE, ESP_ERR_NO_MEM };
+enum { MALLOC_CAP_SPIRAM = 1, MALLOC_CAP_8BIT = 2, pdPASS = 1 };
+#define INPUT_BYTES (SONY_SPECTRUM_SIZE * 8)
+static atomic_bool initialized;
+static atomic_flag initializing = ATOMIC_FLAG_INIT;
+static sony_spectrum_dsp_t *dsp;
+static int16_t *history;
+static uint8_t *storage;
+static int input_control;
+static void *input;
+static bool fail_allocations, reenter;
+static unsigned allocations, tasks;
+esp_err_t sony_spectrum_init(void);
+static void *heap_caps_malloc(size_t bytes, int caps) {
+    (void)caps;
+    ++allocations;
+    if (reenter) {
+        reenter = false;
+        assert(sony_spectrum_init() == ESP_ERR_INVALID_STATE);
+        assert(allocations == 4);
+    }
+    return fail_allocations ? NULL : malloc(bytes);
+}
+static void *xStreamBufferCreateStatic(size_t bytes, unsigned trigger,
+                                       void *buffer, int *control) {
+    (void)bytes; (void)trigger; (void)control;
+    return buffer;
+}
+static void vStreamBufferDelete(void *buffer) { (void)buffer; }
+static void spectrum_task(void *unused) { (void)unused; }
+static int xTaskCreatePinnedToCore(void (*task)(void *), const char *name,
+                                   int stack, void *arg, int priority,
+                                   void *handle, int core) {
+    (void)task; (void)name; (void)stack; (void)arg;
+    (void)priority; (void)handle; (void)core;
+    ++tasks;
+    return pdPASS;
+}
+"""
+        harness += initializer + r"""
+int main(void) {
+    fail_allocations = true;
+    assert(sony_spectrum_init() == ESP_ERR_NO_MEM);
+    assert(!atomic_load(&initialized) && !dsp && !history && !storage);
+    fail_allocations = false;
+    reenter = true;
+    assert(sony_spectrum_init() == ESP_OK);
+    assert(allocations == 6 && tasks == 1 && atomic_load(&initialized));
+    assert(sony_spectrum_init() == ESP_OK && allocations == 6 && tasks == 1);
+    free(dsp); free(history); free(storage);
+    return 0;
+}
+"""
+        with tempfile.TemporaryDirectory() as temp:
+            path = Path(temp) / "init.c"
+            path.write_text(harness)
+            binary = Path(temp) / "init"
+            subprocess.run(["cc", "-Wall", "-Wextra", "-Werror",
+                            "-I", str(ROOT / "main"), str(path),
+                            str(ROOT / "main/sony_spectrum_dsp.c"),
+                            "-lm", "-o", str(binary)], check=True)
+            subprocess.run([str(binary)], check=True)
+
+
 class ScreenRadioOwnershipTests(unittest.TestCase):
     def test_metadata_cannot_start_output_or_override_manual_control(self):
         source = (ROOT / "main/sony_screen.c").read_text()
@@ -429,13 +517,18 @@ class ScreenRadioOwnershipTests(unittest.TestCase):
 #include "sony_text.h"
 #include "sony_radio_status.h"
 #include "sony_spectrum_dsp.h"
+#include "sony_display_modes.h"
 typedef int esp_err_t;
 enum { ESP_OK, ESP_ERR_INVALID_STATE, ESP_ERR_NO_MEM, ESP_ERR_INVALID_ARG };
 static atomic_bool running, display_requested, stop_requested, timing_requested;
-static struct { bool hold, pair; } display_timing;
+static sony_timing_t display_timing;
+static atomic_uint timing_revision;
+static sony_display_mode_t radio_display_mode;
+sony_display_mode_t sony_screen_display_mode(void);
 static bool follow_radio, follow_spectrum, display_dim, analyzer_enabled;
 static sony_radio_status_t last_radio_status;
 static void sony_spectrum_enable(bool on) { analyzer_enabled = on; }
+static esp_err_t sony_spectrum_init(void) { return ESP_OK; }
 static unsigned scrolling_width = 9;
 static sony_text_t scrolling_text;
 static uint64_t words[26];
@@ -451,6 +544,8 @@ int main(void) {
     uint8_t bars[22];
     memset(bars, 3, sizeof(bars));
     assert(sony_vfd_show_spectrum(bars) == ESP_ERR_INVALID_STATE);
+    assert(sony_screen_display_mode_press(false) == ESP_ERR_INVALID_STATE);
+    assert(sony_screen_display_mode_press(true) == ESP_ERR_INVALID_STATE);
     assert(sony_vfd_show_radio("Song", &status) == ESP_ERR_INVALID_STATE);
     assert(!atomic_load(&running) && !scrolling_text.active);
     atomic_store(&running, true);
@@ -482,7 +577,7 @@ int main(void) {
     status = sony_radio_status(false, 2, "192", "Mixed");
     assert(sony_vfd_show_radio("New title", &status) == ESP_OK);
     assert(words[24] == 0x818 && words[25] == 0);
-    assert(show_text("New title", true, true, 22, NULL) == ESP_OK);
+    assert(show_text("New title", true, true, 22, NULL, SONY_DISPLAY_MODE_COUNT) == ESP_OK);
     assert(!follow_spectrum && !analyzer_enabled);
     assert(words[24] == 0 && words[25] == 0);
     assert(memcmp(spectrum_words, words, sizeof(words)));
@@ -490,20 +585,61 @@ int main(void) {
     assert(!follow_radio && !follow_spectrum && !analyzer_enabled &&
            scrolling_width == 9);
     assert(sony_vfd_show_spectrum(bars) == ESP_ERR_INVALID_STATE);
+    assert(sony_screen_display_mode_press(false) == ESP_ERR_INVALID_STATE);
     uint64_t before[26];
     memcpy(before, words, sizeof(words));
     assert(sony_vfd_show_radio("New song", &status) == ESP_ERR_INVALID_STATE);
     assert(!memcmp(before, words, sizeof(words)));
     assert(sony_vfd_show_spectrum(bars) == ESP_ERR_INVALID_STATE);
     follow_radio = true;
+    follow_spectrum = false;
+    display_timing = (sony_timing_t){
+        .setup_ns=500, .clock_low_ns=1000, .clock_high_ns=1000,
+        .strobe_ns=5000, .latch_guard_ns=10000,
+        .blank_before_ns=10000, .blank_after_ns=10000,
+        .on_ns=58500, .off_ns=104000, .pulses=1};
+    radio_display_mode = SONY_DISPLAY_NOW_PLAYING;
+    for (unsigned i = 1; i <= SONY_DISPLAY_MODE_COUNT; ++i) {
+        assert(sony_screen_display_mode_press(false) == ESP_OK);
+        assert(sony_screen_display_mode() == i % SONY_DISPLAY_MODE_COUNT);
+        assert(follow_spectrum == (i == SONY_DISPLAY_EQUALIZER));
+        assert(analyzer_enabled == follow_spectrum);
+        assert(!scrolling_text.active);
+        for (unsigned slot = 1; slot <= 22; ++slot)
+            assert(words[slot] == 0);
+        assert(display_timing.on_ns == 58500);
+    }
+    assert(sony_screen_set_display_mode(SONY_DISPLAY_MODE_COUNT) == ESP_ERR_INVALID_ARG);
+    assert(sony_screen_set_display_mode(SONY_DISPLAY_AUDIO_FORMAT) == ESP_OK);
+    assert(sony_vfd_show_radio_mode("stale title", &status,
+                                  SONY_DISPLAY_NOW_PLAYING) == ESP_ERR_INVALID_STATE);
+    assert(sony_vfd_show_radio_mode("MP3 44.1 kHz STEREO", &status,
+                                  SONY_DISPLAY_AUDIO_FORMAT) == ESP_OK);
+    int64_t started = scrolling_text.started_us;
+    assert(sony_screen_set_display_mode(SONY_DISPLAY_AUDIO_FORMAT) == ESP_OK);
+    assert(scrolling_text.active && scrolling_text.started_us == started);
+    for (unsigned level = 0; level < 3; ++level) {
+        assert(sony_screen_display_mode_press(true) == ESP_OK);
+        assert(sony_display_dim_level(&display_timing) == (int)level);
+        assert(radio_display_mode == SONY_DISPLAY_AUDIO_FORMAT);
+    }
+    assert(atomic_load(&timing_revision) == 3);
+    memcpy(before, words, sizeof(words));
+    follow_radio = true;
     display_timing.hold = true;
     assert(sony_vfd_show_radio("Song", &status) == ESP_ERR_INVALID_STATE);
+    assert(sony_screen_display_mode_press(false) == ESP_ERR_INVALID_STATE);
+    assert(sony_screen_display_mode_press(true) == ESP_ERR_INVALID_STATE);
     display_timing.hold = false;
     display_timing.pair = true;
     assert(sony_vfd_show_radio("Song", &status) == ESP_ERR_INVALID_STATE);
+    assert(sony_screen_display_mode_press(false) == ESP_ERR_INVALID_STATE);
+    assert(sony_screen_display_mode_press(true) == ESP_ERR_INVALID_STATE);
     display_timing.pair = false;
     atomic_store(&stop_requested, true);
     assert(sony_vfd_show_radio("Song", &status) == ESP_ERR_INVALID_STATE);
+    assert(sony_screen_display_mode_press(false) == ESP_ERR_INVALID_STATE);
+    assert(sony_screen_display_mode_press(true) == ESP_ERR_INVALID_STATE);
     assert(!memcmp(before, words, sizeof(words)));
     return 0;
 }
@@ -517,6 +653,9 @@ int main(void) {
                             str(ROOT / "main/sony_text.c"),
                             str(ROOT / "main/sony_radio_status.c"),
                             str(ROOT / "main/sony_spectrum_dsp.c"),
+                            str(ROOT / "main/sony_display_modes.c"),
+                            str(ROOT / "main/sony_timing.c"),
+                            str(ROOT / "main/audio/radio_display_text.c"),
                             "-lm", "-o", str(binary)],
                            check=True)
             subprocess.run([str(binary)], check=True)

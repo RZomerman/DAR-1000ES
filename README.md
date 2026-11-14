@@ -21,6 +21,9 @@ a still image cannot establish temporal stability.
 Physical voltage/current validation remains outstanding.
 Firmware 0.3.31 boots with the fixed AHCT v2 GPIO map. Display output still
 starts stopped; the legacy profile remains an isolated-only runtime option.
+Prepared firmware 0.3.32 adds eight display modes and shared short-/long-press
+controls for a future Display Mode button, with 0.25% / 0.5% / 0.75% DIM cycling.
+It is built and host-tested, not yet installed on the connected ESP.
 
 For current display control, start with the
 [fixed-element guide](08-esp-display-driver-specification.md#6-fixed-element-control-guide)

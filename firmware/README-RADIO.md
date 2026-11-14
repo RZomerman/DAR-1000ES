@@ -11,7 +11,15 @@ remains **STR-E200ES**.
 Hobby/non-commercial adaptation of [rbouteiller/airplay-esp32](https://github.com/rbouteiller/airplay-esp32).
 The upstream license and third-party notices remain applicable.
 
-## DAR-1000ES profile (0.3.31)
+## DAR-1000ES profile (prepared 0.3.32; installed 0.3.31)
+
+The prepared 0.3.32 build adds eight display modes and shared task-context
+short-/long-press controls for a future physical Display Mode button.
+The webpage offers direct mode selection and the same mode/DIM cycle actions;
+DIM cycles 0.25% / 0.5% / 0.75% per-grid duty. No button GPIO is assigned yet.
+Controls only update an already authorized radio full scan and never start
+stopped output. See the operating guide for mode IDs and API examples.
+Host and browser checks pass; connected deployment is still pending.
 
 The checked-in `radio-s3` profile now combines radio with the Sony timing
 laboratory and explicitly authorized 22-character NOW PLAYING display.

@@ -18,6 +18,7 @@ static uint8_t *storage;
 static StaticStreamBuffer_t input_control;
 static StreamBufferHandle_t input;
 static atomic_bool initialized;
+static atomic_flag initializing = ATOMIC_FLAG_INIT;
 static atomic_bool enabled;
 static atomic_uint epoch;
 static atomic_uint source_generation;
@@ -101,6 +102,12 @@ static void spectrum_task(void *unused) {
 esp_err_t sony_spectrum_init(void) {
   if (atomic_load(&initialized))
     return ESP_OK;
+  if (atomic_flag_test_and_set(&initializing))
+    return ESP_ERR_INVALID_STATE;
+  if (atomic_load(&initialized)) {
+    atomic_flag_clear(&initializing);
+    return ESP_OK;
+  }
   dsp = heap_caps_malloc(sizeof(*dsp), MALLOC_CAP_SPIRAM | MALLOC_CAP_8BIT);
   history = heap_caps_malloc(SONY_SPECTRUM_SIZE * 4,
                              MALLOC_CAP_SPIRAM | MALLOC_CAP_8BIT);
@@ -114,6 +121,7 @@ esp_err_t sony_spectrum_init(void) {
       if (xTaskCreatePinnedToCore(spectrum_task, "spectrum", 8192, NULL, 1,
                                   NULL, 0) == pdPASS) {
         atomic_store(&initialized, true);
+        atomic_flag_clear(&initializing);
         return ESP_OK;
       }
       vStreamBufferDelete(input);
@@ -126,6 +134,7 @@ esp_err_t sony_spectrum_init(void) {
   dsp = NULL;
   history = NULL;
   storage = NULL;
+  atomic_flag_clear(&initializing);
   return ESP_ERR_NO_MEM;
 }
 

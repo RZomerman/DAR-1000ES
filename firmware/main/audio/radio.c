@@ -5,6 +5,7 @@
 #include "radio_display_text.h"
 #ifdef CONFIG_SONY_SCREEN_BENCH
 #include "sony_vfd.h"
+#include "sony_screen.h"
 #endif
 
 #ifdef CONFIG_SONY_MANUAL_CONTROLS
@@ -411,16 +412,26 @@ static void display_task(void *unused) {
   (void)unused;
   for (;;) {
     char text[768];
+    char ip[16] = "";
+    if (wifi_is_connected())
+      wifi_get_ip_str(ip, sizeof(ip));
+    sony_display_mode_t mode = sony_screen_display_mode();
     xSemaphoreTake(lock, portMAX_DELAY);
     const char *station = *stream_name ? stream_name :
                           selected == 4 ? "Custom stream" : names[selected];
-    radio_display_text(text, sizeof(text), radio_title, station,
-                       atomic_load(&ready), error_text[0] != 0);
+    sony_display_metadata_t metadata = {
+        .title = radio_title, .station = station, .source = "Radio",
+        .codec = atomic_load(&codec) == ESP_AUDIO_SIMPLE_DEC_TYPE_MP3 ? "MP3" :
+                 atomic_load(&codec) == ESP_AUDIO_SIMPLE_DEC_TYPE_AAC ? "AAC" : "",
+        .bitrate = stream_bitrate, .genre = stream_genre, .url = stream_url,
+        .ip = ip, .sample_rate = radio_rate, .channels = radio_channels,
+        .receiving = atomic_load(&ready), .failed = error_text[0] != 0};
+    sony_display_mode_text(mode, text, sizeof(text), &metadata);
     sony_radio_status_t status = sony_radio_status(
         atomic_load(&decoding) && !atomic_load(&airplay) && !error_text[0],
         radio_channels, stream_bitrate, stream_genre);
     xSemaphoreGive(lock);
-    sony_vfd_show_radio(text, &status);
+    sony_vfd_show_radio_mode(text, &status, mode);
     vTaskDelay(pdMS_TO_TICKS(500));
   }
 }
