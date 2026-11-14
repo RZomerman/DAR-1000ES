@@ -16,6 +16,9 @@ Firmware 0.3.30 adds MONO 1/2 spectrum-bank labels and longer DMA buffering
 after music exposed visible scan jitter. A connected camera snapshot confirms
 the bank labels and bars at 0.75%; subjective flicker confirmation is pending.
 Electrical/current certification is still outstanding.
+Firmware 0.3.31 fixes the boot GPIO map to AHCT v2 while retaining
+boot-stopped display output. The legacy profile remains selectable only
+while physically isolated; that runtime selection is not persisted.
 
 ## 1. Hardware and signal ownership
 
@@ -80,18 +83,20 @@ backfeed an unpowered TD input.
 2. Disable AHCT outputs in hardware: `/OE` HIGH.
 3. Power the Sony off before changing wiring. Physically disconnect all
    six signal wires before flashing, resetting or unplugging the ESP.
-4. With the signals disconnected, boot/program the ESP. Boot selects
-   **the original profile**, not AHCT v2, and starts no display output.
-5. In `/screen`, confirm the disconnected bench and select `ahct-v2`.
-   Check its six idle signals before reconnecting.
+4. With the signals disconnected, boot/program the ESP. Firmware 0.3.31
+   and later boot with **AHCT v2** and start no display output. Older
+   versions boot with the original profile.
+5. In `/screen`, verify `ahct-v2` and its six idle signals before
+   reconnecting. If a profile change is needed, confirm the disconnected
+   bench before applying it.
 6. With outputs disabled and Sony off, make connections and check that
    the original controller remains isolated, including both STB routes.
 7. Power the Sony's logic before enabling AHCT outputs. Enable `/OE` LOW
    only when the chosen pins and idle levels are verified.
 8. Start a low-duty display test. Keep a physical cutoff available.
 
-Do not reset or unplug the ESP while connected: the nonpersistent profile
-returns to the original GPIOs. Software Stop is not a hardware fail-safe
+Do not reset or unplug the ESP while connected: a fixed boot GPIO map does
+not guarantee safe signals during reset or power transitions. Software Stop is not a hardware fail-safe
 for a stalled CPU, floating inputs, power loss or incorrect wiring.
 
 Idle, in analyser order D0..D5, is `0,1,0,1,0,0` (`0x0A`):
@@ -606,6 +611,23 @@ voltage/current/thermal compliance and audible Sony playback remain separate
 checks. Firmware 0.3.30 retains the same GPIO allocation and boot-stopped
 safety policy; do not reset, open serial or flash while connected.
 
+### Fixed boot GPIO map: 0.3.31
+
+After an ESP reboot left the display blank on the legacy GPIO profile,
+the boot default was changed to AHCT v2 at the user's request. No scan
+timing, brightness, radio ownership or automatic-start behavior changed.
+All six Sony signals were physically disconnected and AHCT outputs disabled
+for deployment. The active 0.3.30 application was backed up and its hash
+verified; OTA selection, partition layout and NVS were preserved.
+
+The installed 0.3.31 image is 3,131,424 bytes. Network status after boot
+confirmed AHCT v2, output stopped, no display error and commanded idle levels
+on GPIO2/1/40/38/21/39. The matching screen webpage was installed and compared
+byte-for-byte. The 28 host regressions and both browser checks passed,
+including boot-default/idle-pin coverage and the existing isolated profile
+switch/rollback checks. These are software checks, not reset-transient or
+electrical safety certification.
+
 ## 8. Troubleshooting
 
 | Observation | First checks |
@@ -617,7 +639,7 @@ safety policy; do not reset, open serial or flash while connected.
 | Missing title | Station's ICY metadata availability; stream status; station-name fallback |
 | Title stops scrolling after refresh | Repeated title must not be re-parsed as a new song; use ESP-local NOW PLAYING |
 | Display changes while editing | Manual commands must release radio ownership; inspect `now_playing` |
-| Wrong pins after reboot | Boot selects original; disable outputs and isolate before selecting v2 again |
+| Wrong pins after reboot | Check firmware version: 0.3.31+ boots AHCT v2; older versions boot original. Disable outputs and isolate before any profile change |
 | Truncated analyser trace | Lower shared USB bandwidth; validate sample count and duration |
 
 Always stop and hardware-disable before moving wires/probes. Do not use a

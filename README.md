@@ -19,6 +19,8 @@ snapshot confirms all 22 bars and STEREO/MONO 1/MONO 2/TUNED at 0.75%
 per-grid duty. User confirmation of residual flicker is still pending;
 a still image cannot establish temporal stability.
 Physical voltage/current validation remains outstanding.
+Firmware 0.3.31 boots with the fixed AHCT v2 GPIO map. Display output still
+starts stopped; the legacy profile remains an isolated-only runtime option.
 
 For current display control, start with the
 [fixed-element guide](08-esp-display-driver-specification.md#6-fixed-element-control-guide)

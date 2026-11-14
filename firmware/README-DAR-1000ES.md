@@ -1,6 +1,12 @@
 # DAR-1000ES internet radio baseline
 
-## Current release: 0.3.30
+## Current release: 0.3.31
+
+AHCT v2 is now the fixed boot GPIO map, avoiding the former return to the
+legacy pins after reboot. Display output still starts stopped. Runtime
+selection of the original profile remains isolated-only and is not persisted.
+This does not make reset or power transitions electrically safe: firmware
+still cannot control AHCT /OE.
 
 Spectrum now labels the left bank MONO 1 and the right bank MONO 2; STEREO
 still follows the actual source. The webpage includes the connected 0.75%
@@ -30,7 +36,7 @@ Radio is now enabled with MP3/AAC/ICY metadata, S/PDIF on GPIO42 and an
 explicitly authorized 22-character NOW PLAYING display. The homepage is
 the radio; `/screen` retains the editor and timing laboratory. Long titles
 scroll on the ESP. Display output remains stopped on boot and pin-profile
-selection still defaults to original.
+selection now defaults to AHCT v2.
 
 Radio-owned fixed indicators now show source STEREO/left MONO, bitrate bars,
 buffering dots, TUNED and explicit station-genre MUSIC/SPEECH. The GPIO map
@@ -79,8 +85,9 @@ pins take CLEAR/DATA/STB LOW and clocks HIGH. Switching does not start output.
 Status reports `pin_profile`, `pin_profile_name` and the active `pins` array,
 which also supplies the webpage's individual voltage controls.
 
-Boot always selects **V1 original**; the profile is not persisted. Disable the
-AHCT outputs in hardware until V2 has been selected and its idle levels checked.
+Firmware 0.3.31 and later boot with **AHCT v2**, with output stopped. A runtime
+V1 selection is not persisted. Disable AHCT outputs in hardware through
+reset/programming and check V2 idle levels before reconnecting/enabling.
 Firmware does not control OE on either profile. GPIO12-14 remain disconnected
 DMA helper pins for both profiles. New V2 timing at the buffered outputs must be
 checked with the analyser before reconnecting Sony.

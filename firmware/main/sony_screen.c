@@ -36,7 +36,7 @@ static const sony_pin_profile_t pin_profiles[] = {
      .pins = {GPIO_NUM_2, GPIO_NUM_1, GPIO_NUM_40, GPIO_NUM_38, GPIO_NUM_21,
               GPIO_NUM_39}},
 };
-static atomic_uint pin_profile_index;
+static atomic_uint pin_profile_index = 1;
 
 const sony_pin_profile_t *sony_pins_get(void) {
   return &pin_profiles[atomic_load(&pin_profile_index)];

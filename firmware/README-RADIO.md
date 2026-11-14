@@ -11,7 +11,7 @@ remains **STR-E200ES**.
 Hobby/non-commercial adaptation of [rbouteiller/airplay-esp32](https://github.com/rbouteiller/airplay-esp32).
 The upstream license and third-party notices remain applicable.
 
-## DAR-1000ES profile (0.3.30)
+## DAR-1000ES profile (0.3.31)
 
 The checked-in `radio-s3` profile now combines radio with the Sony timing
 laboratory and explicitly authorized 22-character NOW PLAYING display.
@@ -42,8 +42,10 @@ cannot establish temporal stability.
 This profile does **not** start AirPlay or Sony mute/relay/PCM-I2S controls.
 AirPlay behavior below describes the inherited standalone implementation,
 not the active Sony profile. Radio starts at boot, but display output does
-not; the nonpersistent GPIO profile starts as original and must be selected
-while physically isolated. S/PDIF is the separate GPIO42 output.
+not. Firmware 0.3.31 boots with AHCT v2; a runtime legacy-profile selection
+is not persisted. Profile changes remain physically isolated-only. Fixed pins
+do not make reset/power transitions safe or replace hardware /OE control.
+S/PDIF is the separate GPIO42 output.
 
 ## Hardware
 

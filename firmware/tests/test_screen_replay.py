@@ -92,7 +92,14 @@ static esp_err_t gpio_config(const gpio_config_t *config) {
             harness += switch + r"""
 int main(void) {
     const int old[] = {4,5,6,15,16,7}, next[] = {2,1,40,38,21,39};
+    assert(!strcmp(sony_pins_get()->id, "ahct-v2"));
+    assert(!atomic_load(&running));
     assert(hold_idle_outputs() == ESP_OK);
+    for (int i = 0; i < 6; ++i) {
+        assert(!output[old[i]] && output[next[i]]);
+        assert(level[next[i]] == (i == 1 || i == 5));
+    }
+    assert(select_pin_profile("original") == ESP_OK);
     int before = writes;
     assert(select_pin_profile("missing") == ESP_ERR_INVALID_ARG);
     atomic_store(&running, true);
