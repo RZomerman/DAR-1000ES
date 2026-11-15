@@ -1,0 +1,496 @@
+#include "sony_keypad.h"
+#include "sony_screen.h"
+#include "radio.h"
+
+#include "cJSON.h"
+#include "driver/gpio.h"
+#include "esp_rom_sys.h"
+#include "esp_timer.h"
+#include "freertos/FreeRTOS.h"
+#include "freertos/semphr.h"
+#include "freertos/task.h"
+#include "nvs.h"
+#include <stdbool.h>
+#include <stdint.h>
+#include <stdlib.h>
+#include <string.h>
+
+enum {
+  KEYPAD_ADDR = 0x34, KEYPAD_SCL = 9, KEYPAD_SDA = 10,
+  REG_CFG = 0x01, REG_INT = 0x02, REG_COUNT = 0x03, REG_EVENT = 0x04,
+  REG_GPIO_DATA_1 = 0x14, REG_GPIO_DATA_2 = 0x15, REG_GPIO_DATA_3 = 0x16,
+  REG_KP_ROW = 0x1d, REG_KP_COL = 0x1e, REG_KP_COL_HI = 0x1f,
+  EVENT_CAPACITY = 32
+};
+
+typedef struct {
+  uint32_t sequence;
+  uint8_t raw;
+  int64_t time_ms;
+} key_event_t;
+
+static SemaphoreHandle_t lock;
+static bool present, scanning, restore_on_boot;
+static unsigned rows, columns, errors, overflows;
+static uint8_t hardware_rows, hardware_columns, hardware_columns_hi;
+static uint8_t chip_cfg, chip_status, chip_count, chip_gpio[3];
+static esp_err_t last_error;
+static uint32_t sequence;
+static key_event_t events[EVENT_CAPACITY];
+
+enum { DISPLAY_KEY_CODE = 58, CHECK_KEY_CODE = 25, BUTTON_CHECK_ACTION = 18,
+       BUTTON_DEBOUNCE_MS = 60,
+       BUTTON_ARM_MS = 200, BUTTON_LONG_MS = 1200 };
+
+typedef struct {
+  uint64_t down[2];
+  int64_t change_ms, pressed_ms;
+  uint8_t key_code;
+  bool armed, candidate, stable, contaminated, long_sent;
+} display_button_t;
+
+static display_button_t display_button;
+
+static int preset_number(unsigned code) {
+  static const uint8_t codes[] = {5, 6, 7, 8, 1, 2, 3, 9,
+                                  15, 16, 17, 18, 11, 12, 13, 19};
+  for (unsigned i = 0; i < sizeof(codes); ++i)
+    if (codes[i] == code) return (int)i + 1;
+  return 0;
+}
+
+static void display_button_reset(display_button_t *button, int64_t now) {
+  memset(button, 0, sizeof(*button));
+  button->change_ms = now;
+}
+
+static void display_button_event(display_button_t *button, uint8_t raw,
+                                 int64_t now) {
+  unsigned code = raw & 0x7f;
+  if (code < 1 || code > 80)
+    return;
+  unsigned index = code - 1;
+  uint64_t bit = UINT64_C(1) << (index % 64);
+  bool pressed = (raw & 0x80) != 0;
+  if (pressed)
+    button->down[index / 64] |= bit;
+  else
+    button->down[index / 64] &= ~bit;
+  if (!button->armed)
+    button->change_ms = now;
+  if (!button->key_code && pressed && button->armed &&
+      (code == DISPLAY_KEY_CODE || code == CHECK_KEY_CODE || preset_number(code)))
+    button->key_code = code;
+  if (code != button->key_code) {
+    if (pressed && (button->candidate || button->stable))
+      button->contaminated = true;
+    return;
+  }
+  if (pressed == button->candidate)
+    return;
+  button->candidate = pressed;
+  button->change_ms = now;
+  if (pressed) {
+    uint64_t other_low = button->down[0] & ~bit;
+    button->contaminated = (button->stable && button->contaminated) ||
+                           other_low || button->down[1];
+  }
+}
+
+/* Returns -1 for no action, 0/1 for display, 2-17 for presets, or 18 for CHECK. */
+static int display_button_poll(display_button_t *button, int64_t now) {
+  if (!button->armed) {
+    if (!button->down[0] && !button->down[1] &&
+        now - button->change_ms >= BUTTON_ARM_MS)
+      button->armed = true;
+    return -1;
+  }
+  if (now - button->change_ms < BUTTON_DEBOUNCE_MS)
+    return -1;
+  if (button->candidate == button->stable) {
+    if (!button->stable)
+      button->key_code = 0;
+    else if (button->key_code == DISPLAY_KEY_CODE && !button->contaminated &&
+             !button->long_sent && now - button->pressed_ms >= BUTTON_LONG_MS) {
+      button->long_sent = true;
+      return 1;
+    }
+    return -1;
+  }
+  button->stable = button->candidate;
+  if (button->stable) {
+    button->pressed_ms = button->change_ms;
+    button->long_sent = false;
+    return -1;
+  }
+  unsigned code = button->key_code;
+  button->key_code = 0;
+  if (button->contaminated || button->long_sent)
+    return -1;
+  if (code == CHECK_KEY_CODE)
+    return BUTTON_CHECK_ACTION;
+  if (code != DISPLAY_KEY_CODE)
+    return preset_number(code) + 1;
+  return button->change_ms - button->pressed_ms >= BUTTON_LONG_MS ? 1 : 0;
+}
+
+static void bus_delay(void) { esp_rom_delay_us(5); }
+
+static esp_err_t clock_high(void) {
+  gpio_set_level(KEYPAD_SCL, 1);
+  for (unsigned i = 0; i < 200; ++i) {
+    if (gpio_get_level(KEYPAD_SCL)) {
+      bus_delay();
+      return ESP_OK;
+    }
+    esp_rom_delay_us(5);
+  }
+  return ESP_ERR_TIMEOUT;
+}
+
+static esp_err_t bus_start(void) {
+  gpio_set_level(KEYPAD_SDA, 1);
+  bus_delay();
+  esp_err_t err = clock_high();
+  if (err != ESP_OK)
+    return err;
+  if (!gpio_get_level(KEYPAD_SDA))
+    return ESP_ERR_INVALID_STATE;
+  gpio_set_level(KEYPAD_SDA, 0);
+  bus_delay();
+  gpio_set_level(KEYPAD_SCL, 0);
+  return ESP_OK;
+}
+
+static void bus_stop(void) {
+  gpio_set_level(KEYPAD_SDA, 0);
+  bus_delay();
+  clock_high();
+  gpio_set_level(KEYPAD_SDA, 1);
+  bus_delay();
+}
+
+static esp_err_t bus_send(uint8_t byte) {
+  for (unsigned bit = 0; bit < 8; ++bit) {
+    gpio_set_level(KEYPAD_SDA, (byte & 0x80) != 0);
+    byte <<= 1;
+    bus_delay();
+    esp_err_t err = clock_high();
+    gpio_set_level(KEYPAD_SCL, 0);
+    if (err != ESP_OK)
+      return err;
+  }
+  gpio_set_level(KEYPAD_SDA, 1);
+  bus_delay();
+  esp_err_t err = clock_high();
+  bool nack = gpio_get_level(KEYPAD_SDA);
+  gpio_set_level(KEYPAD_SCL, 0);
+  if (err != ESP_OK)
+    return err;
+  return nack ? ESP_ERR_NOT_FOUND : ESP_OK;
+}
+
+static esp_err_t bus_receive(uint8_t *value) {
+  uint8_t result = 0;
+  gpio_set_level(KEYPAD_SDA, 1);
+  for (unsigned bit = 0; bit < 8; ++bit) {
+    bus_delay();
+    esp_err_t err = clock_high();
+    result = (uint8_t)((result << 1) | (gpio_get_level(KEYPAD_SDA) != 0));
+    gpio_set_level(KEYPAD_SCL, 0);
+    if (err != ESP_OK)
+      return err;
+  }
+  bus_delay();
+  esp_err_t err = clock_high();
+  gpio_set_level(KEYPAD_SCL, 0);
+  if (err == ESP_OK)
+    *value = result;
+  return err;
+}
+
+static esp_err_t read_reg(uint8_t reg, uint8_t *value) {
+  esp_err_t err = bus_start();
+  if (err == ESP_OK) err = bus_send(KEYPAD_ADDR << 1);
+  if (err == ESP_OK) err = bus_send(reg);
+  if (err == ESP_OK) err = bus_start();
+  if (err == ESP_OK) err = bus_send((KEYPAD_ADDR << 1) | 1);
+  if (err == ESP_OK) err = bus_receive(value);
+  bus_stop();
+  return err;
+}
+
+static esp_err_t write_reg(uint8_t reg, uint8_t value) {
+  esp_err_t err = bus_start();
+  if (err == ESP_OK) err = bus_send(KEYPAD_ADDR << 1);
+  if (err == ESP_OK) err = bus_send(reg);
+  if (err == ESP_OK) err = bus_send(value);
+  bus_stop();
+  return err;
+}
+
+static esp_err_t disable_scan(void) {
+  esp_err_t err = write_reg(REG_KP_ROW, 0);
+  esp_err_t next = write_reg(REG_KP_COL, 0);
+  if (err == ESP_OK)
+    err = next;
+  next = write_reg(REG_KP_COL_HI, 0);
+  if (err == ESP_OK)
+    err = next;
+  scanning = false;
+  rows = columns = 0;
+  display_button_reset(&display_button, esp_timer_get_time() / 1000);
+  return err;
+}
+
+static esp_err_t configure_scan(unsigned r, unsigned c) {
+  uint8_t cfg;
+  esp_err_t err = read_reg(REG_CFG, &cfg);
+  if (err == ESP_OK)
+    err = write_reg(REG_KP_ROW, 0);
+  if (err == ESP_OK)
+    err = write_reg(REG_KP_COL, (uint8_t)((1U << (c > 8 ? 8 : c)) - 1));
+  if (err == ESP_OK)
+    err = write_reg(REG_KP_COL_HI, c > 8 ? (uint8_t)((1U << (c - 8)) - 1) : 0);
+  if (err == ESP_OK)
+    err = write_reg(REG_KP_ROW, (uint8_t)((1U << r) - 1));
+  if (err == ESP_OK)
+    err = write_reg(REG_CFG, cfg | 0x09);
+  if (err != ESP_OK) {
+    disable_scan();
+    return err;
+  }
+  rows = r;
+  columns = c;
+  scanning = true;
+  display_button_reset(&display_button, esp_timer_get_time() / 1000);
+  return ESP_OK;
+}
+
+static void keypad_task(void *unused) {
+  (void)unused;
+  for (;;) {
+    int button_action = -1;
+    xSemaphoreTake(lock, portMAX_DELAY);
+    uint8_t cfg;
+    esp_err_t err = read_reg(REG_CFG, &cfg);
+    if (err == ESP_OK)
+      err = read_reg(REG_KP_ROW, &hardware_rows);
+    if (err == ESP_OK)
+      err = read_reg(REG_KP_COL, &hardware_columns);
+    if (err == ESP_OK)
+      err = read_reg(REG_KP_COL_HI, &hardware_columns_hi);
+    if (err == ESP_OK)
+      chip_cfg = cfg;
+    if (err == ESP_OK && scanning) {
+      uint8_t status, count;
+      err = read_reg(REG_INT, &status);
+      if (err == ESP_OK)
+        err = read_reg(REG_COUNT, &count);
+      if (err == ESP_OK) {
+        chip_status = status;
+        chip_count = count;
+        count &= 0x0f;
+        if (count > 10)
+          err = ESP_ERR_INVALID_RESPONSE;
+      }
+      if (err == ESP_OK && (status & 0x08))
+        display_button_reset(&display_button, esp_timer_get_time() / 1000);
+      for (unsigned i = 0; err == ESP_OK && i < count; ++i) {
+        uint8_t raw;
+        err = read_reg(REG_EVENT, &raw);
+        if (err == ESP_OK && raw) {
+          ++sequence;
+          events[(sequence - 1) % EVENT_CAPACITY] =
+              (key_event_t){sequence, raw, esp_timer_get_time() / 1000};
+          if (!(status & 0x08))
+            display_button_event(&display_button, raw, esp_timer_get_time() / 1000);
+        }
+      }
+      if (err == ESP_OK && (status & 0x08))
+        ++overflows;
+      if (err == ESP_OK && (status & 0x09))
+        err = write_reg(REG_INT, status & 0x09);
+    }
+    if (err == ESP_OK)
+      err = read_reg(REG_GPIO_DATA_1, &chip_gpio[0]);
+    if (err == ESP_OK)
+      err = read_reg(REG_GPIO_DATA_2, &chip_gpio[1]);
+    if (err == ESP_OK)
+      err = read_reg(REG_GPIO_DATA_3, &chip_gpio[2]);
+    if (err != ESP_OK) {
+      if (present)
+        ++errors;
+      present = false;
+      if (scanning)
+        disable_scan();
+    } else {
+      present = true;
+      if (scanning)
+        button_action = display_button_poll(&display_button, esp_timer_get_time() / 1000);
+    }
+    last_error = err;
+    xSemaphoreGive(lock);
+    if (button_action == BUTTON_CHECK_ACTION)
+      (void)sony_screen_start_from_check();
+    else if (button_action >= 2)
+      (void)radio_select_preset((unsigned)button_action - 1);
+    else if (button_action >= 0)
+      (void)sony_screen_display_button_press(button_action == 1);
+    vTaskDelay(pdMS_TO_TICKS(40));
+  }
+}
+
+esp_err_t sony_keypad_init(void) {
+  lock = xSemaphoreCreateMutex();
+  if (!lock)
+    return ESP_ERR_NO_MEM;
+  gpio_set_level(KEYPAD_SDA, 1);
+  gpio_set_level(KEYPAD_SCL, 1);
+  gpio_config_t config = {.pin_bit_mask = (1ULL << KEYPAD_SDA) | (1ULL << KEYPAD_SCL),
+                          .mode = GPIO_MODE_INPUT_OUTPUT_OD,
+                          .pull_up_en = GPIO_PULLUP_DISABLE,
+                          .pull_down_en = GPIO_PULLDOWN_DISABLE};
+  esp_err_t err = gpio_config(&config);
+  if (err != ESP_OK)
+    return err;
+  uint8_t remembered = 0;
+  nvs_handle_t nvs;
+  if (nvs_open("keypad", NVS_READONLY, &nvs) == ESP_OK) {
+    (void)nvs_get_u8(nvs, "scan69", &remembered);
+    nvs_close(nvs);
+  }
+  restore_on_boot = remembered == 1;
+  if (disable_scan() == ESP_OK && restore_on_boot)
+    (void)configure_scan(6, 9);
+  if (xTaskCreatePinnedToCore(keypad_task, "keypad", 5120, NULL, 2, NULL, 0) != pdPASS)
+    return ESP_ERR_NO_MEM;
+  return ESP_OK;
+}
+
+static esp_err_t status_handler(httpd_req_t *req) {
+  cJSON *root = cJSON_CreateObject();
+  if (!root)
+    return httpd_resp_send_err(req, HTTPD_500_INTERNAL_SERVER_ERROR, "Out of memory");
+  xSemaphoreTake(lock, portMAX_DELAY);
+  cJSON_AddBoolToObject(root, "present", present);
+  cJSON_AddBoolToObject(root, "scanning", scanning);
+  cJSON_AddBoolToObject(root, "restore_on_boot", restore_on_boot);
+  cJSON_AddBoolToObject(root, "hardware_scan_active", present &&
+      hardware_rows && (hardware_columns || (hardware_columns_hi & 3)));
+  cJSON_AddNumberToObject(root, "hardware_row_mask", hardware_rows);
+  cJSON_AddNumberToObject(root, "hardware_column_mask",
+                          hardware_columns | ((hardware_columns_hi & 3) << 8));
+  cJSON_AddNumberToObject(root, "chip_cfg", chip_cfg);
+  cJSON_AddNumberToObject(root, "chip_status", chip_status);
+  cJSON_AddNumberToObject(root, "chip_key_count", chip_count);
+  cJSON_AddNumberToObject(root, "gpio_rows", chip_gpio[0]);
+  cJSON_AddNumberToObject(root, "gpio_cols", chip_gpio[1] | ((chip_gpio[2] & 3) << 8));
+  cJSON_AddNumberToObject(root, "address", KEYPAD_ADDR);
+  cJSON_AddNumberToObject(root, "rows", rows);
+  cJSON_AddNumberToObject(root, "columns", columns);
+  cJSON_AddNumberToObject(root, "errors", errors);
+  cJSON_AddNumberToObject(root, "overflows", overflows);
+  cJSON_AddStringToObject(root, "last_error", esp_err_to_name(last_error));
+  cJSON *array = cJSON_AddArrayToObject(root, "events");
+  if (array) {
+    uint32_t first = sequence > EVENT_CAPACITY ? sequence - EVENT_CAPACITY + 1 : 1;
+    for (uint32_t n = first; n <= sequence; ++n) {
+      key_event_t event = events[(n - 1) % EVENT_CAPACITY];
+      cJSON *item = cJSON_CreateObject();
+      if (!item)
+        break;
+      unsigned code = event.raw & 0x7f;
+      cJSON_AddNumberToObject(item, "sequence", event.sequence);
+      cJSON_AddNumberToObject(item, "time_ms", event.time_ms);
+      cJSON_AddNumberToObject(item, "raw", event.raw);
+      cJSON_AddNumberToObject(item, "code", code);
+      cJSON_AddBoolToObject(item, "pressed", (event.raw & 0x80) != 0);
+      if (code >= 1 && code <= 80) {
+        cJSON_AddNumberToObject(item, "row", (code - 1) / 10);
+        cJSON_AddNumberToObject(item, "column", (code - 1) % 10);
+      }
+      cJSON_AddItemToArray(array, item);
+    }
+  }
+  xSemaphoreGive(lock);
+  if (!array) {
+    cJSON_Delete(root);
+    return httpd_resp_send_err(req, HTTPD_500_INTERNAL_SERVER_ERROR, "Out of memory");
+  }
+  char *json = cJSON_PrintUnformatted(root);
+  cJSON_Delete(root);
+  if (!json)
+    return httpd_resp_send_err(req, HTTPD_500_INTERNAL_SERVER_ERROR, "Out of memory");
+  httpd_resp_set_type(req, "application/json");
+  httpd_resp_set_hdr(req, "Cache-Control", "no-store");
+  esp_err_t err = httpd_resp_sendstr(req, json);
+  free(json);
+  return err;
+}
+
+static esp_err_t control_handler(httpd_req_t *req) {
+  char body[256];
+  if (!req->content_len || req->content_len >= sizeof(body))
+    return httpd_resp_send_err(req, HTTPD_400_BAD_REQUEST, "Invalid request size");
+  size_t used = 0;
+  while (used < req->content_len) {
+    int n = httpd_req_recv(req, body + used, req->content_len - used);
+    if (n <= 0)
+      return httpd_resp_send_err(req, HTTPD_400_BAD_REQUEST, "Incomplete request");
+    used += n;
+  }
+  body[used] = 0;
+  cJSON *root = cJSON_Parse(body);
+  cJSON *enabled = cJSON_GetObjectItemCaseSensitive(root, "enable");
+  cJSON *r = cJSON_GetObjectItemCaseSensitive(root, "rows");
+  cJSON *c = cJSON_GetObjectItemCaseSensitive(root, "columns");
+  cJSON *confirmed = cJSON_GetObjectItemCaseSensitive(root, "isolated_matrix_confirmed");
+  cJSON *remember = cJSON_GetObjectItemCaseSensitive(root, "remember");
+  bool start = cJSON_IsTrue(enabled);
+  bool persist = start && cJSON_IsTrue(remember);
+  bool valid = cJSON_IsBool(enabled) &&
+      (!remember || cJSON_IsBool(remember)) &&
+      (!start || (cJSON_IsTrue(confirmed) && cJSON_IsNumber(r) &&
+                  r->valuedouble == r->valueint && r->valueint >= 1 && r->valueint <= 8 &&
+                  cJSON_IsNumber(c) && c->valuedouble == c->valueint &&
+                  c->valueint >= 1 && c->valueint <= 10 &&
+                  (!persist || (r->valueint == 6 && c->valueint == 9))));
+  if (!valid) {
+    cJSON_Delete(root);
+    return httpd_resp_send_err(req, HTTPD_400_BAD_REQUEST,
+        "Confirm electrically isolated passive switches and specify 1-8 rows, 1-10 columns");
+  }
+  xSemaphoreTake(lock, portMAX_DELAY);
+  esp_err_t err = start && !present ? ESP_ERR_NOT_FOUND : ESP_OK;
+  if (!start && present)
+    err = disable_scan();
+  if (!start || err == ESP_OK) {
+    nvs_handle_t nvs;
+    esp_err_t save_err = nvs_open("keypad", NVS_READWRITE, &nvs);
+    if (save_err == ESP_OK) {
+      save_err = nvs_set_u8(nvs, "scan69", persist ? 1 : 0);
+      if (save_err == ESP_OK) save_err = nvs_commit(nvs);
+      nvs_close(nvs);
+    }
+    if (save_err == ESP_OK)
+      restore_on_boot = persist;
+    if (err == ESP_OK) err = save_err;
+  }
+  if (err == ESP_OK) {
+    if (start)
+      err = configure_scan((unsigned)r->valueint, (unsigned)c->valueint);
+  }
+  xSemaphoreGive(lock);
+  cJSON_Delete(root);
+  if (err != ESP_OK)
+    return httpd_resp_send_err(req, HTTPD_500_INTERNAL_SERVER_ERROR, "Keypad unavailable or configuration failed");
+  return status_handler(req);
+}
+
+esp_err_t sony_keypad_register_http(httpd_handle_t server) {
+  httpd_uri_t status = {.uri = "/api/keypad", .method = HTTP_GET, .handler = status_handler};
+  httpd_uri_t control = {.uri = "/api/keypad", .method = HTTP_POST, .handler = control_handler};
+  esp_err_t err = httpd_register_uri_handler(server, &status);
+  return err == ESP_OK ? httpd_register_uri_handler(server, &control) : err;
+}

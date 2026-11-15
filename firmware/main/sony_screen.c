@@ -11,6 +11,7 @@
 #include "esp_rom_sys.h"
 #include "esp_timer.h"
 #include "freertos/FreeRTOS.h"
+#include "freertos/semphr.h"
 #include "freertos/task.h"
 #include <stdatomic.h>
 #include <stdio.h>
@@ -73,14 +74,24 @@ static bool mono_test_requested;
 static atomic_bool display_requested;
 static atomic_bool timing_requested;
 static sony_timing_t display_timing;
+static sony_timing_t remembered_radio_timing;
+static bool remembered_radio_timing_valid;
 static atomic_uint timing_revision;
 static atomic_uint submitted_timing_revision;
 static portMUX_TYPE frame_lock = portMUX_INITIALIZER_UNLOCKED;
+static SemaphoreHandle_t control_lock;
 static bool follow_radio;
 static bool follow_spectrum;
 static sony_display_mode_t radio_display_mode;
 static sony_radio_status_t last_radio_status;
+static int64_t search_started_us;
 static unsigned scrolling_width = 9;
+static struct {
+  uint64_t preset[22], result[22];
+  int64_t started_us, result_started_us;
+  uint32_t generation;
+  bool active, assigned, result_ready;
+} preset_overlay;
 
 static esp_err_t show_text(const char *utf8, bool scroll, bool dim,
                           unsigned width, const sony_radio_status_t *radio,
@@ -102,6 +113,7 @@ static esp_err_t show_text(const char *utf8, bool scroll, bool dim,
       atomic_load(&stop_requested) ||
       (radio && (!follow_radio || !atomic_load(&timing_requested) ||
                  display_timing.hold || display_timing.pair ||
+                 (int32_t)(radio->generation - last_radio_status.generation) < 0 ||
                  radio_display_mode != mode))) {
     err = ESP_ERR_INVALID_STATE;
   } else if ((!radio && follow_spectrum) || !scrolling_text.active ||
@@ -118,11 +130,18 @@ static esp_err_t show_text(const char *utf8, bool scroll, bool dim,
   if (err == ESP_OK) {
     display_dim = dim;
     if (radio) {
+      if (radio->searching && (!last_radio_status.searching ||
+          radio->generation != last_radio_status.generation))
+        search_started_us = esp_timer_get_time();
       last_radio_status = *radio;
-      sony_radio_status_apply_view(words, radio, follow_spectrum);
+      sony_radio_status_apply_view(words, radio,
+                                   mode == SONY_DISPLAY_EQUALIZER);
     } else {
-      if (follow_spectrum)
+      preset_overlay.active = false;
+      if (follow_spectrum) {
+        words[24] &= ~0x51c0ULL;
         sony_radio_status_apply_view(words, &last_radio_status, false);
+      }
       follow_radio = false;
       follow_spectrum = false;
     }
@@ -167,6 +186,113 @@ static bool radio_controls_ready(void) {
          !display_timing.pair && !display_timing.alternate_ms;
 }
 
+static void remember_radio_timing_locked(void) {
+  if (radio_controls_ready()) {
+    remembered_radio_timing = display_timing;
+    remembered_radio_timing_valid = true;
+  }
+}
+
+void sony_vfd_radio_search(uint32_t generation) {
+  portENTER_CRITICAL(&frame_lock);
+  if (radio_controls_ready() &&
+      (int32_t)(generation - last_radio_status.generation) >= 0) {
+    preset_overlay.active = false;
+    last_radio_status.searching = true;
+    last_radio_status.generation = generation;
+    search_started_us = esp_timer_get_time();
+  }
+  portEXIT_CRITICAL(&frame_lock);
+}
+
+static bool preset_text(const char *value, uint64_t output[22]) {
+  sony_text_t *text = calloc(1, sizeof(*text));
+  if (!text)
+    return false;
+  bool valid = sony_text_parse(text, value, 0);
+  if (valid)
+    for (unsigned i = 0; i < 22; ++i)
+      output[i] = i < text->length ? text->glyphs[i] : 0;
+  free(text);
+  return valid;
+}
+
+void sony_vfd_preset_start(unsigned number, uint32_t generation, bool assigned) {
+  if (number < 1 || number > 16)
+    return;
+  char label[20];
+  uint64_t preset[22], result[22];
+  snprintf(label, sizeof(label), "   Preset %u", number);
+  if (!preset_text(label, preset) ||
+      (!assigned && !preset_text("Unassigned", result)))
+    return;
+  int64_t now = esp_timer_get_time();
+  portENTER_CRITICAL(&frame_lock);
+  if (radio_controls_ready() &&
+      (!assigned || (int32_t)(generation - last_radio_status.generation) >= 0)) {
+    memcpy(preset_overlay.preset, preset, sizeof(preset));
+    if (!assigned)
+      memcpy(preset_overlay.result, result, sizeof(result));
+    preset_overlay.active = true;
+    preset_overlay.assigned = assigned;
+    preset_overlay.result_ready = !assigned;
+    preset_overlay.generation = generation;
+    preset_overlay.started_us = now;
+    preset_overlay.result_started_us = 0;
+    if (assigned) {
+      last_radio_status.searching = true;
+      last_radio_status.generation = generation;
+      search_started_us = now;
+    }
+  }
+  portEXIT_CRITICAL(&frame_lock);
+}
+
+void sony_vfd_preset_connected(uint32_t generation, const char *station) {
+  portENTER_CRITICAL(&frame_lock);
+  bool needed = radio_controls_ready() && preset_overlay.active &&
+      preset_overlay.assigned && !preset_overlay.result_ready &&
+      (int32_t)(generation - preset_overlay.generation) >= 0;
+  portEXIT_CRITICAL(&frame_lock);
+  if (!needed)
+    return;
+  uint64_t result[22];
+  if (!preset_text(station, result) && !preset_text("Station", result))
+    return;
+  portENTER_CRITICAL(&frame_lock);
+  if (radio_controls_ready() && preset_overlay.active &&
+      preset_overlay.assigned && !preset_overlay.result_ready &&
+      (int32_t)(generation - preset_overlay.generation) >= 0) {
+    memcpy(preset_overlay.result, result, sizeof(result));
+    preset_overlay.result_ready = true;
+  }
+  portEXIT_CRITICAL(&frame_lock);
+}
+
+static bool preset_overlay_frame(int64_t now, uint64_t frame[26]) {
+  if (!preset_overlay.active)
+    return false;
+  const uint64_t *text = preset_overlay.preset;
+  if (now - preset_overlay.started_us >= 1000000) {
+    if (preset_overlay.assigned &&
+        (!preset_overlay.result_ready ||
+         now - preset_overlay.started_us < 1100000)) {
+      sony_search_frame(now - preset_overlay.started_us - 1000000, frame);
+      return true;
+    }
+    if (!preset_overlay.result_started_us)
+      preset_overlay.result_started_us = now;
+    if (now - preset_overlay.result_started_us >= 2000000) {
+      preset_overlay.active = false;
+      return false;
+    }
+    text = preset_overlay.result;
+  }
+  for (unsigned i = 0; i < 22; ++i)
+    frame[22 - i] = text[i];
+  return true;
+}
+
 esp_err_t sony_screen_set_display_mode(sony_display_mode_t mode) {
   if ((unsigned)mode >= SONY_DISPLAY_MODE_COUNT)
     return ESP_ERR_INVALID_ARG;
@@ -175,7 +301,7 @@ esp_err_t sony_screen_set_display_mode(sony_display_mode_t mode) {
   portEXIT_CRITICAL(&frame_lock);
   if (!ready)
     return ESP_ERR_INVALID_STATE;
-  bool spectrum = mode == SONY_DISPLAY_EQUALIZER;
+  bool spectrum = sony_display_mode_graphical(mode);
   if (spectrum && sony_spectrum_init() != ESP_OK)
     return ESP_ERR_NO_MEM;
   portENTER_CRITICAL(&frame_lock);
@@ -184,9 +310,11 @@ esp_err_t sony_screen_set_display_mode(sony_display_mode_t mode) {
     radio_display_mode = mode;
     follow_spectrum = spectrum;
     scrolling_text.active = false;
+    words[24] &= ~0x51c0ULL;
     for (unsigned slot = 1; slot <= 22; ++slot)
       words[slot] = 0;
-    sony_radio_status_apply_view(words, &last_radio_status, spectrum);
+    sony_radio_status_apply_view(words, &last_radio_status,
+                                 mode == SONY_DISPLAY_EQUALIZER);
   }
   if (ready)
     sony_spectrum_enable(spectrum);
@@ -221,11 +349,28 @@ esp_err_t sony_vfd_show_spectrum(const uint8_t levels[22]) {
     return ESP_ERR_INVALID_ARG;
   esp_err_t err = ESP_ERR_INVALID_STATE;
   portENTER_CRITICAL(&frame_lock);
-  if (follow_radio && follow_spectrum && atomic_load(&running) &&
+  if (follow_radio && follow_spectrum &&
+      radio_display_mode == SONY_DISPLAY_EQUALIZER && atomic_load(&running) &&
       atomic_load(&display_requested) && atomic_load(&timing_requested) &&
       !atomic_load(&stop_requested) && !display_timing.hold &&
       !display_timing.pair) {
     sony_spectrum_frame(levels, words);
+    err = ESP_OK;
+  }
+  portEXIT_CRITICAL(&frame_lock);
+  return err;
+}
+
+esp_err_t sony_vfd_show_vu(const uint32_t rms[2], const uint32_t peak[2],
+                           const uint32_t held[2]) {
+  if (!rms || !peak || !held) return ESP_ERR_INVALID_ARG;
+  esp_err_t err = ESP_ERR_INVALID_STATE;
+  portENTER_CRITICAL(&frame_lock);
+  if (follow_radio && follow_spectrum &&
+      (radio_display_mode == SONY_DISPLAY_VU_STEREO ||
+       radio_display_mode == SONY_DISPLAY_VU_CENTER) &&
+      radio_controls_ready()) {
+    sony_vu_frame(rms, peak, held, radio_display_mode == SONY_DISPLAY_VU_CENTER, words);
     err = ESP_OK;
   }
   portEXIT_CRITICAL(&frame_lock);
@@ -412,6 +557,8 @@ static void scan_task(void *unused) {
       bool dim;
       sony_timing_t timing;
       unsigned revision;
+      bool searching;
+      int64_t search_start;
       portENTER_CRITICAL(&frame_lock);
       if (!follow_spectrum)
         sony_text_frame_width(&scrolling_text, esp_timer_get_time(), words,
@@ -420,7 +567,13 @@ static void scan_task(void *unused) {
       dim = display_dim;
       timing = display_timing;
       revision = atomic_load(&timing_revision);
+      bool overlay = follow_radio &&
+                     preset_overlay_frame(esp_timer_get_time(), frame);
+      searching = !overlay && follow_radio && last_radio_status.searching;
+      search_start = search_started_us;
       portEXIT_CRITICAL(&frame_lock);
+      if (searching)
+        sony_search_frame(esp_timer_get_time() - search_start, frame);
       if (timed && timing.hold && timing.alternate_ms) {
         int64_t now = esp_timer_get_time();
         if (!schedule_start || schedule_revision != revision) {
@@ -581,6 +734,102 @@ static void scan_task(void *unused) {
   vTaskDelete(NULL);
 }
 
+static esp_err_t start_radio_display_locked(sony_display_mode_t mode) {
+  sony_timing_t timing = {
+      .setup_ns = 500, .clock_low_ns = 1000, .clock_high_ns = 1000,
+      .strobe_ns = 5000, .latch_guard_ns = 10000,
+      .blank_before_ns = 10000, .blank_after_ns = 10000,
+      .on_ns = 93625, .off_ns = 68875, .pulses = 1};
+  portENTER_CRITICAL(&frame_lock);
+  if (remembered_radio_timing_valid)
+    timing = remembered_radio_timing;
+  portEXIT_CRITICAL(&frame_lock);
+  bool spectrum = sony_display_mode_graphical(mode);
+  esp_err_t err = ESP_OK;
+  if (atomic_load(&running) || atomic_load(&pin_profile_index) != 1)
+    err = ESP_ERR_INVALID_STATE;
+  else if (sony_timing_validate(&timing))
+    err = ESP_ERR_INVALID_ARG;
+  else if (spectrum)
+    err = sony_spectrum_init();
+  if (err == ESP_OK && atomic_exchange(&running, true))
+    err = ESP_ERR_INVALID_STATE;
+  if (err == ESP_OK) {
+    portENTER_CRITICAL(&frame_lock);
+    scrolling_text.active = false;
+    preset_overlay.active = false;
+    follow_radio = true;
+    follow_spectrum = spectrum;
+    radio_display_mode = mode;
+    display_dim = true;
+    memset(words, 0, sizeof(words));
+    display_timing = timing;
+    atomic_fetch_add(&timing_revision, 1);
+    portEXIT_CRITICAL(&frame_lock);
+    atomic_store(&display_requested, true);
+    atomic_store(&timing_requested, true);
+    atomic_store(&completed_frames, 0);
+    atomic_store(&held_switches, 0);
+    atomic_store(&held_last_interval_us, 0);
+    atomic_store(&last_error, ESP_OK);
+    atomic_store(&stop_requested, false);
+    sony_spectrum_enable(spectrum);
+    if (xTaskCreatePinnedToCore(scan_task, "screen_display", 4096, NULL, 5,
+                                NULL, 1) != pdPASS) {
+      sony_spectrum_enable(false);
+      portENTER_CRITICAL(&frame_lock);
+      follow_radio = follow_spectrum = false;
+      portEXIT_CRITICAL(&frame_lock);
+      atomic_store(&display_requested, false);
+      atomic_store(&timing_requested, false);
+      atomic_store(&stop_requested, true);
+      atomic_store(&running, false);
+      atomic_store(&last_error, ESP_ERR_NO_MEM);
+      err = ESP_ERR_NO_MEM;
+    }
+  }
+  return err;
+}
+
+esp_err_t sony_screen_start_from_check(void) {
+  if (!control_lock)
+    return ESP_ERR_INVALID_STATE;
+  xSemaphoreTake(control_lock, portMAX_DELAY);
+  esp_err_t err = start_radio_display_locked(SONY_DISPLAY_VU_STEREO);
+  xSemaphoreGive(control_lock);
+  return err;
+}
+
+static esp_err_t display_button_action_locked(bool long_press) {
+  if (long_press)
+    return sony_screen_display_mode_press(true);
+  if (!atomic_load(&running))
+    return start_radio_display_locked(SONY_DISPLAY_NOW_PLAYING);
+  portENTER_CRITICAL(&frame_lock);
+  bool ready = radio_controls_ready();
+  bool last = radio_display_mode == SONY_DISPLAY_MODE_COUNT - 1;
+  if (ready && last) {
+    remember_radio_timing_locked();
+    atomic_store(&stop_requested, true);
+    follow_radio = follow_spectrum = false;
+  }
+  portEXIT_CRITICAL(&frame_lock);
+  if (ready && last) {
+    sony_spectrum_enable(false);
+    return ESP_OK;
+  }
+  return sony_screen_display_mode_press(false);
+}
+
+esp_err_t sony_screen_display_button_press(bool long_press) {
+  if (!control_lock)
+    return ESP_ERR_INVALID_STATE;
+  xSemaphoreTake(control_lock, portMAX_DELAY);
+  esp_err_t err = display_button_action_locked(long_press);
+  xSemaphoreGive(control_lock);
+  return err;
+}
+
 static esp_err_t release_profile(const sony_pin_profile_t *profile) {
   uint64_t mask = 0;
   for (unsigned i = 0; i < 6; ++i)
@@ -622,6 +871,9 @@ static esp_err_t select_pin_profile(const char *id) {
 }
 
 esp_err_t sony_screen_init(void) {
+  control_lock = xSemaphoreCreateMutex();
+  if (!control_lock)
+    return ESP_ERR_NO_MEM;
   display_timing = sony_timing_defaults();
   for (size_t i = 0; i < 6; ++i) {
     atomic_store(&pin_levels[i], 0);
@@ -653,6 +905,8 @@ static esp_err_t status_handler(httpd_req_t *req) {
   uint64_t frame[26];
   portENTER_CRITICAL(&frame_lock);
   memcpy(frame, words, sizeof(frame));
+  if (follow_radio && atomic_load(&running))
+    preset_overlay_frame(esp_timer_get_time(), frame);
   bool dim = display_dim;
   bool scrolling = !follow_spectrum && scrolling_text.active &&
                    scrolling_text.scroll && scrolling_text.length > scrolling_width;
@@ -793,7 +1047,7 @@ static esp_err_t status_handler(httpd_req_t *req) {
   return err;
 }
 
-static esp_err_t control_handler(httpd_req_t *req) {
+static esp_err_t control_handler_unlocked(httpd_req_t *req) {
   char body[2048];
   if (!req->content_len || req->content_len >= sizeof(body))
     return httpd_resp_send_err(req, HTTPD_400_BAD_REQUEST,
@@ -832,7 +1086,7 @@ static esp_err_t control_handler(httpd_req_t *req) {
                                  "Confirm bench/live and choose one display control");
     }
     esp_err_t err = action
-        ? sony_screen_display_mode_press(!strcmp(action->valuestring, "long_press"))
+        ? display_button_action_locked(!strcmp(action->valuestring, "long_press"))
         : sony_screen_set_display_mode(mode);
     cJSON_Delete(root);
     if (err == ESP_ERR_INVALID_STATE) {
@@ -872,8 +1126,9 @@ static esp_err_t control_handler(httpd_req_t *req) {
     return status_handler(req);
   }
   if (cJSON_IsString(sample) && !strcmp(sample->valuestring, "blank")) {
-    atomic_store(&stop_requested, true);
     portENTER_CRITICAL(&frame_lock);
+    remember_radio_timing_locked();
+    atomic_store(&stop_requested, true);
     follow_radio = false;
     follow_spectrum = false;
     portEXIT_CRITICAL(&frame_lock);
@@ -885,8 +1140,9 @@ static esp_err_t control_handler(httpd_req_t *req) {
     return status_handler(req);
   }
   if (cJSON_IsString(sample) && strcmp(sample->valuestring, "stop") == 0) {
-    atomic_store(&stop_requested, true);
     portENTER_CRITICAL(&frame_lock);
+    remember_radio_timing_locked();
+    atomic_store(&stop_requested, true);
     follow_radio = false;
     follow_spectrum = false;
     portEXIT_CRITICAL(&frame_lock);
@@ -981,15 +1237,15 @@ static esp_err_t control_handler(httpd_req_t *req) {
       sony_display_mode_t selected;
       if (!cJSON_IsString(mode_item) || !timed || !cJSON_IsTrue(radio) ||
           !sony_display_mode_parse(mode_item->valuestring, &selected) ||
-          (visualization && ((selected == SONY_DISPLAY_EQUALIZER) !=
-                             (mode == SONY_DISPLAY_EQUALIZER)))) {
+          (visualization && (sony_display_mode_graphical(selected) !=
+                             sony_display_mode_graphical(mode)))) {
         cJSON_Delete(root);
         return httpd_resp_send_err(req, HTTPD_400_BAD_REQUEST,
                                    "Choose a valid display_mode on a radio Timing scan");
       }
       mode = selected;
     }
-    bool spectrum = mode == SONY_DISPLAY_EQUALIZER;
+    bool spectrum = sony_display_mode_graphical(mode);
     if (radio && (!cJSON_IsBool(radio) || !timed)) {
       cJSON_Delete(root);
       return httpd_resp_send_err(req, HTTPD_400_BAD_REQUEST,
@@ -1074,12 +1330,18 @@ static esp_err_t control_handler(httpd_req_t *req) {
       bool leaving_spectrum = follow_spectrum && !spectrum;
       scrolling_text.active = false;
       follow_radio = cJSON_IsTrue(radio);
+      if (!follow_radio)
+        preset_overlay.active = false;
       follow_spectrum = spectrum;
       radio_display_mode = mode;
       display_dim = true;
       memcpy(words, frame, sizeof(words));
       if (leaving_spectrum && follow_radio)
         sony_radio_status_apply_view(words, &last_radio_status, false);
+      if (follow_radio && mode == SONY_DISPLAY_EQUALIZER) {
+        words[0] &= ~0x3FFFULL;
+        words[24] &= ~0x80CULL;
+      }
       if (timed) {
         display_timing = timing;
         atomic_fetch_add(&timing_revision, 1);
@@ -1096,11 +1358,16 @@ static esp_err_t control_handler(httpd_req_t *req) {
     }
     portENTER_CRITICAL(&frame_lock);
     scrolling_text.active = false;
+    preset_overlay.active = false;
     follow_radio = cJSON_IsTrue(radio);
     follow_spectrum = spectrum;
     radio_display_mode = mode;
     display_dim = true;
     memcpy(words, frame, sizeof(words));
+    if (follow_radio && mode == SONY_DISPLAY_EQUALIZER) {
+      words[0] &= ~0x3FFFULL;
+      words[24] &= ~0x80CULL;
+    }
     if (timed) {
       display_timing = timing;
       atomic_fetch_add(&timing_revision, 1);
@@ -1164,6 +1431,13 @@ static esp_err_t control_handler(httpd_req_t *req) {
                                "Cannot start scan");
   }
   return status_handler(req);
+}
+
+static esp_err_t control_handler(httpd_req_t *req) {
+  xSemaphoreTake(control_lock, portMAX_DELAY);
+  esp_err_t err = control_handler_unlocked(req);
+  xSemaphoreGive(control_lock);
+  return err;
 }
 
 esp_err_t sony_screen_register_http(httpd_handle_t server) {

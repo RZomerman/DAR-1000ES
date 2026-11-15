@@ -74,6 +74,8 @@ static int radio_channels;
 static rtsp_metadata_t airplay_metadata;
 static int selected;
 static char custom_url[URL_SIZE];
+static char preset_url[URL_SIZE];
+static char preset_name[64];
 static char stream_url[URL_SIZE];
 static char error_text[160];
 
@@ -377,7 +379,7 @@ static void decode_task(void *unused) {
     atomic_store(&ready, false);
     atomic_fetch_add(&sessions, 1);
     xSemaphoreTake(lock, portMAX_DELAY);
-    strlcpy(stream_url, selected == 4 ? custom_url : urls[selected], sizeof(stream_url));
+    strlcpy(stream_url, selected == 5 ? preset_url : selected == 4 ? custom_url : urls[selected], sizeof(stream_url));
     error_text[0] = 0;
     radio_title[0] = 0;
     stream_genre[0] = stream_bitrate[0] = 0;
@@ -412,13 +414,14 @@ static void display_task(void *unused) {
   (void)unused;
   for (;;) {
     char text[768];
+    char station_id[sizeof(stream_name)] = "";
     char ip[16] = "";
     if (wifi_is_connected())
       wifi_get_ip_str(ip, sizeof(ip));
     sony_display_mode_t mode = sony_screen_display_mode();
     xSemaphoreTake(lock, portMAX_DELAY);
     const char *station = *stream_name ? stream_name :
-                          selected == 4 ? "Custom stream" : names[selected];
+                          selected == 5 ? preset_name : selected == 4 ? "Custom stream" : names[selected];
     sony_display_metadata_t metadata = {
         .title = radio_title, .station = station, .source = "Radio",
         .codec = atomic_load(&codec) == ESP_AUDIO_SIMPLE_DEC_TYPE_MP3 ? "MP3" :
@@ -430,9 +433,20 @@ static void display_task(void *unused) {
     sony_radio_status_t status = sony_radio_status(
         atomic_load(&decoding) && !atomic_load(&airplay) && !error_text[0],
         radio_channels, stream_bitrate, stream_genre);
+    status.searching = !atomic_load(&airplay) && !atomic_load(&decoding) &&
+                       !error_text[0];
+    status.generation = atomic_load(&generation);
+    bool preset_connected = selected == 5 && !atomic_load(&airplay) &&
+        atomic_load(&decoding) && !error_text[0] &&
+        atomic_load(&stream_generation) == status.generation &&
+        (radio_channels == 1 || radio_channels == 2);
+    if (preset_connected)
+      strlcpy(station_id, station, sizeof(station_id));
     xSemaphoreGive(lock);
     sony_vfd_show_radio_mode(text, &status, mode);
-    vTaskDelay(pdMS_TO_TICKS(500));
+    if (preset_connected)
+      sony_vfd_preset_connected(status.generation, station_id);
+    vTaskDelay(pdMS_TO_TICKS(status.searching ? 100 : 500));
   }
 }
 #endif
@@ -480,6 +494,155 @@ static bool valid_url(const char *url) {
   return true;
 }
 
+typedef struct {
+  char name[64];
+  char url[URL_SIZE];
+} radio_preset_t;
+
+static void preset_key(unsigned number, char key[8]) {
+  snprintf(key, 8, "p%02u", number);
+}
+
+static esp_err_t read_preset(unsigned number, radio_preset_t *preset) {
+  if (number < 1 || number > 16) return ESP_ERR_INVALID_ARG;
+  memset(preset, 0, sizeof(*preset));
+  nvs_handle_t nvs;
+  esp_err_t err = nvs_open("presets", NVS_READONLY, &nvs);
+  if (err == ESP_ERR_NVS_NOT_FOUND) return ESP_OK;
+  if (err != ESP_OK) return err;
+  char key[8], data[sizeof(*preset) + 1];
+  preset_key(number, key);
+  size_t size = sizeof(data);
+  err = nvs_get_blob(nvs, key, data, &size);
+  nvs_close(nvs);
+  if (err == ESP_ERR_NVS_NOT_FOUND) return ESP_OK;
+  if (err != ESP_OK) return err;
+  char *end = memchr(data, 0, size);
+  if (!end || end == data || (size_t)(end - data) >= sizeof(preset->name) ||
+      size < (size_t)(end - data) + 2 ||
+      data[size - 1] != 0 || strlen(end + 1) != size - (size_t)(end - data) - 2 ||
+      !valid_url(end + 1))
+    return ESP_ERR_INVALID_RESPONSE;
+  strlcpy(preset->name, data, sizeof(preset->name));
+  strlcpy(preset->url, end + 1, sizeof(preset->url));
+  return ESP_OK;
+}
+
+static void selection_changed(void) {
+  error_text[0] = 0;
+  radio_title[0] = stream_name[0] = stream_content_type[0] = stream_bitrate[0] =
+      stream_genre[0] = 0;
+  stream_url[0] = 0;
+  metadata_interval = 0;
+  radio_rate = 0;
+  radio_channels = 0;
+  atomic_store(&decoding, false);
+  atomic_fetch_add(&generation, 1);
+}
+
+esp_err_t radio_select_preset(unsigned number) {
+  radio_preset_t preset;
+  esp_err_t err = read_preset(number, &preset);
+  if (err != ESP_OK) return err;
+  if (!preset.url[0]) {
+#ifdef CONFIG_SONY_SCREEN_BENCH
+    sony_vfd_preset_start(number, atomic_load(&generation), false);
+#endif
+    return ESP_ERR_NOT_FOUND;
+  }
+  xSemaphoreTake(lock, portMAX_DELAY);
+  strlcpy(preset_name, preset.name, sizeof(preset_name));
+  strlcpy(preset_url, preset.url, sizeof(preset_url));
+  selected = 5;
+  selection_changed();
+#ifdef CONFIG_SONY_SCREEN_BENCH
+  uint32_t selected_generation = atomic_load(&generation);
+#endif
+  xSemaphoreGive(lock);
+#ifdef CONFIG_SONY_SCREEN_BENCH
+  sony_vfd_preset_start(number, selected_generation, true);
+#endif
+  return ESP_OK;
+}
+
+static esp_err_t presets_get_handler(httpd_req_t *req) {
+  cJSON *array = cJSON_CreateArray();
+  if (!array) return httpd_resp_send_err(req, HTTPD_500_INTERNAL_SERVER_ERROR, "Out of memory");
+  for (unsigned i = 1; i <= 16; ++i) {
+    radio_preset_t preset;
+    if (read_preset(i, &preset) != ESP_OK) {
+      cJSON_Delete(array);
+      return httpd_resp_send_err(req, HTTPD_500_INTERNAL_SERVER_ERROR, "Cannot read presets");
+    }
+    cJSON *item = cJSON_CreateObject();
+    if (!item) {
+      cJSON_Delete(array);
+      return httpd_resp_send_err(req, HTTPD_500_INTERNAL_SERVER_ERROR, "Out of memory");
+    }
+    cJSON_AddNumberToObject(item, "number", i);
+    cJSON_AddStringToObject(item, "name", preset.name);
+    cJSON_AddStringToObject(item, "url", preset.url);
+    cJSON_AddItemToArray(array, item);
+  }
+  char *json = cJSON_PrintUnformatted(array);
+  cJSON_Delete(array);
+  if (!json) return httpd_resp_send_err(req, HTTPD_500_INTERNAL_SERVER_ERROR, "Out of memory");
+  httpd_resp_set_type(req, "application/json");
+  httpd_resp_set_hdr(req, "Cache-Control", "no-store");
+  esp_err_t err = httpd_resp_sendstr(req, json);
+  free(json);
+  return err;
+}
+
+static esp_err_t presets_post_handler(httpd_req_t *req) {
+  char body[1024];
+  if (!req->content_len || req->content_len >= sizeof(body))
+    return httpd_resp_send_err(req, HTTPD_400_BAD_REQUEST, "Invalid request size");
+  size_t used = 0;
+  while (used < req->content_len) {
+    int n = httpd_req_recv(req, body + used, req->content_len - used);
+    if (n <= 0) return httpd_resp_send_err(req, HTTPD_400_BAD_REQUEST, "Incomplete request");
+    used += n;
+  }
+  body[used] = 0;
+  cJSON *root = cJSON_Parse(body);
+  cJSON *number = cJSON_GetObjectItemCaseSensitive(root, "number");
+  cJSON *name = cJSON_GetObjectItemCaseSensitive(root, "name");
+  cJSON *url = cJSON_GetObjectItemCaseSensitive(root, "url");
+  bool valid = cJSON_IsNumber(number) && number->valuedouble == number->valueint &&
+      number->valueint >= 1 && number->valueint <= 16 && cJSON_IsString(name) &&
+      cJSON_IsString(url) && strlen(name->valuestring) < sizeof(preset_name) &&
+      ((!name->valuestring[0] && !url->valuestring[0]) ||
+       (name->valuestring[0] && valid_url(url->valuestring)));
+  if (!valid) {
+    cJSON_Delete(root);
+    return httpd_resp_send_err(req, HTTPD_400_BAD_REQUEST, "Enter a name and direct HTTP/HTTPS URL, or clear both");
+  }
+  char key[8];
+  preset_key((unsigned)number->valueint, key);
+  nvs_handle_t nvs;
+  esp_err_t err = nvs_open("presets", NVS_READWRITE, &nvs);
+  if (err == ESP_OK) {
+    if (!name->valuestring[0]) {
+      err = nvs_erase_key(nvs, key);
+      if (err == ESP_ERR_NVS_NOT_FOUND) err = ESP_OK;
+    } else {
+      char data[sizeof(radio_preset_t)];
+      size_t name_len = strlen(name->valuestring) + 1;
+      size_t url_len = strlen(url->valuestring) + 1;
+      memcpy(data, name->valuestring, name_len);
+      memcpy(data + name_len, url->valuestring, url_len);
+      err = nvs_set_blob(nvs, key, data, name_len + url_len);
+    }
+    if (err == ESP_OK) err = nvs_commit(nvs);
+    nvs_close(nvs);
+  }
+  cJSON_Delete(root);
+  if (err != ESP_OK)
+    return httpd_resp_send_err(req, HTTPD_500_INTERNAL_SERVER_ERROR, "Cannot save preset");
+  return httpd_resp_sendstr(req, "Saved");
+}
+
 static esp_err_t status_handler(httpd_req_t *req) {
   cJSON *root = cJSON_CreateObject();
   if (!root) return httpd_resp_send_err(req, HTTPD_500_INTERNAL_SERVER_ERROR, "Out of memory");
@@ -489,7 +652,7 @@ static esp_err_t status_handler(httpd_req_t *req) {
 #endif
   xSemaphoreTake(lock, portMAX_DELAY);
   cJSON_AddNumberToObject(root, "selected", selected);
-  cJSON_AddStringToObject(root, "station", selected == 4 ? "Custom stream" : names[selected]);
+  cJSON_AddStringToObject(root, "station", selected == 5 ? preset_name : selected == 4 ? "Custom stream" : names[selected]);
   cJSON_AddStringToObject(root, "custom_url", custom_url);
   cJSON_AddStringToObject(root, "error", error_text);
   bool ap = atomic_load(&airplay);
@@ -620,16 +783,14 @@ static esp_err_t select_handler(httpd_req_t *req) {
   xSemaphoreTake(lock, portMAX_DELAY);
   selected = id->valueint;
   if (selected == 4) strlcpy(custom_url, url->valuestring, sizeof(custom_url));
-  error_text[0] = 0;
-  radio_title[0] = stream_name[0] = stream_content_type[0] = stream_bitrate[0] =
-      stream_genre[0] = 0;
-  stream_url[0] = 0;
-  metadata_interval = 0;
-  radio_rate = 0;
-  radio_channels = 0;
-  atomic_store(&decoding, false);
-  atomic_fetch_add(&generation, 1);
+  selection_changed();
+#ifdef CONFIG_SONY_SCREEN_BENCH
+  uint32_t selected_generation = atomic_load(&generation);
+#endif
   xSemaphoreGive(lock);
+#ifdef CONFIG_SONY_SCREEN_BENCH
+  if (!atomic_load(&airplay)) sony_vfd_radio_search(selected_generation);
+#endif
   cJSON_Delete(json);
   return status_handler(req);
 }
@@ -687,6 +848,13 @@ esp_err_t radio_register_http(httpd_handle_t server) {
   httpd_uri_t select = {.uri = "/api/radio", .method = HTTP_POST, .handler = select_handler};
   esp_err_t result = httpd_register_uri_handler(server, &status);
   if (result == ESP_OK) result = httpd_register_uri_handler(server, &select);
+  if (result == ESP_OK) {
+    httpd_uri_t presets = {.uri = "/api/radio/presets", .method = HTTP_GET, .handler = presets_get_handler};
+    result = httpd_register_uri_handler(server, &presets);
+    presets.method = HTTP_POST;
+    presets.handler = presets_post_handler;
+    if (result == ESP_OK) result = httpd_register_uri_handler(server, &presets);
+  }
 #ifdef CONFIG_SONY_MANUAL_CONTROLS
   if (result == ESP_OK) {
     httpd_uri_t control = {.uri = "/api/sony-control", .method = HTTP_POST,
@@ -725,7 +893,7 @@ esp_err_t radio_init(void) {
       xTaskCreatePinnedToCore(decode_task, "radio_dec", 8192, NULL, 4,
                              NULL, 1) != pdPASS) return ESP_ERR_NO_MEM;
 #ifdef CONFIG_SONY_SCREEN_BENCH
-  if (xTaskCreatePinnedToCore(display_task, "radio_vfd", 4096, NULL, 2,
+  if (xTaskCreatePinnedToCore(display_task, "radio_vfd", 8192, NULL, 2,
                              NULL, 0) != pdPASS) return ESP_ERR_NO_MEM;
 #endif
   return ESP_OK;

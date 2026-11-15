@@ -100,6 +100,7 @@ dd { margin: 0; overflow-wrap: anywhere; }
 <main>
 <h1 id="page-title">Internet Radio &amp; AirPlay</h1>
 <p><a href="/screen">Sony display editor / timing laboratory</a></p>
+<p><a href="/screen?demo=1#travel-demo">Travel demo / virtual DAR-1000ES front panel</a></p>
 <p class="muted" id="output-pin">Optical S/PDIF &middot; 48 kHz stereo</p>
 <p class="muted" id="i2s-output" hidden></p>
 <section class="card" aria-label="Playback status" aria-live="polite">
@@ -187,23 +188,33 @@ dd { margin: 0; overflow-wrap: anywhere; }
     <option value="bitrate">BitRate</option>
     <option value="station_genre">Station Genre</option>
     <option value="stream_url">StreamURL</option>
-    <option value="equalizer">Equalizer &mdash; stereo spectrum, 11 bands per channel</option>
     <option value="esp_ip">ESP IP address</option>
+    <option value="equalizer">Equalizer &mdash; stereo spectrum, 11 bands per channel</option>
+    <option value="vu_stereo">Stereo VU &mdash; upper LEFT / lower RIGHT</option>
+    <option value="vu_center">Center-out VU &mdash; LEFT / RIGHT</option>
   </select>
   <p class="muted">Spectrum uses actual decoded audio: left 11 matrices are LEFT,
     right 11 are RIGHT, each bass to treble (20 Hz&ndash;20 kHz).
-    On the Sony, MONO 1 labels LEFT and MONO 2 labels RIGHT;
-    STEREO still indicates an actual two-channel source.
+    STEREO indicates an actual two-channel source; Equalizer hides the
+    signal bars.
     Seven-row bars attack quickly and decay smoothly. It replaces the title
     on the Sony, not the sound: this is a visualization, not an audio equalizer.</p>
+  <p class="muted">Both VU modes show 300 ms decoded RMS levels with 0 dB at −3 dBFS.
+    In stereo VU, digits 1/2 indicate left/right peaks over 0 dB; in center-out VU,
+    the tuning arrows indicate over 0 dB. The last two dots show the
+    peak marker. Full blocks are five dots wide; the marker holds for 0.3 s,
+    then falls toward the bar. These warnings are not clipping indicators.</p>
   <label for="grid-duty">Brightness per grid</label>
   <select id="grid-duty">
-    <option value="0.25">Low dim: 0.25% per grid / 6.5% total</option>
-    <option value="0.5" selected>Working dim: 0.5% per grid / 13% total</option>
-    <option value="0.75">Medium: 0.75% per grid / 19.5% total</option>
+    <option value="1.6">Experimental: approximately 1.6% per grid / 41.6% total</option>
+    <option value="1.4">Extra bright: approximately 1.4% per grid / 36.4% total</option>
+    <option value="1.2" selected>Standard: approximately 1.2% per grid / 31.2% total</option>
+    <option value="1">Medium: 1% per grid / 26% total</option>
+    <option value="0.75">Dim: 0.75% per grid / 19.5% total</option>
   </select>
   <p>All 26 slots stay scanned, even with one character. Do not divide brightness
-    by the number of lit characters. Current limits are not measured.</p>
+    by the number of lit characters. Current and thermal limits are not measured;
+    1.6% is experimental and not electrically certified.</p>
   <p class="muted">STEREO / left MONO follow source channels. Bars show reported
     bitrate up to 320 kbps; dots mean buffering or unknown bitrate.
     TUNED means decoded playback. MUSIC / SPEECH use station genre, not song analysis.</p>
@@ -216,10 +227,13 @@ dd { margin: 0; overflow-wrap: anywhere; }
     <button id="vfd-next-dim" type="button" disabled>DIM &mdash; long press</button>
     <button id="vfd-stop" type="button">Stop display / CLEAR LOW</button>
   </div>
-  <p class="muted">Short press cycles the eight modes in the order above.
-    Long press cycles 0.25%, 0.5%, 0.75% per-grid duty without changing the mode.
+  <p class="muted">Short press cycles the display modes in the order above.
+    Holding DISPLAY cycles 1.2%, 1.4%, 1.6%, 1%, 0.75% per-grid duty once per press.
     These controls require an already running, authorized radio display.
-    Physical button wiring and press detection will be added later.</p>
+    With matrix scanning enabled, Display Mode starts Now Playing when stopped,
+    then cycles the modes and OFF; CHECK starts Stereo VU when stopped.
+    They restore the brightness used before OFF (initially 1.2% after reboot).
+    Only start after the Sony is powered and the isolated display outputs are ready.</p>
   <p id="vfd-error" role="alert" hidden></p>
 </section>
 <section class="card">
@@ -231,6 +245,17 @@ dd { margin: 0; overflow-wrap: anywhere; }
     <button type="button" data-station="3" aria-pressed="false">SLAM! FM</button>
   </div>
   <p class="muted" id="airplay-selection">While AirPlay is connected, your selection is queued for when you disconnect.</p>
+</section>
+<section class="card">
+  <h2>Buttons 1–16</h2>
+  <p class="muted">Assign a name and a direct HTTP/HTTPS MP3 or AAC stream URL to each
+    physical button. Clear both fields and save to unassign a button. Keypad
+    scanning must be enabled on the <a href="/keypad">keypad page</a>.</p>
+  <div style="overflow-x:auto"><table>
+    <thead><tr><th>Button</th><th>Station</th><th>Stream URL</th><th></th></tr></thead>
+    <tbody id="presets"></tbody>
+  </table></div>
+  <p id="preset-status" role="status"></p>
 </section>
 <section class="card">
   <h2>Your own stream</h2>
@@ -261,6 +286,43 @@ const controlButtons = [...document.querySelectorAll("[data-control]")];
 const replayButton = document.getElementById("replay-startup");
 let busy = false;
 let urlLoaded = false;
+const presetRows = document.getElementById("presets");
+presetRows.innerHTML = Array.from({length:16}, (_, index) => {
+  const n = index + 1;
+  return `<tr><th scope="row">${n}</th><td><input id="preset-name-${n}" aria-label="Button ${n} station name" maxlength="63"></td>` +
+    `<td><input id="preset-url-${n}" aria-label="Button ${n} stream URL" maxlength="511" placeholder="https://example.com/live.mp3"></td>` +
+    `<td><button type="button" id="preset-save-${n}">Save</button></td></tr>`;
+}).join("");
+async function loadPresets() {
+  try {
+    const response = await fetch("/api/radio/presets", {cache:"no-store", signal:AbortSignal.timeout(8000)});
+    if (!response.ok) throw new Error(await response.text());
+    const presets = await response.json();
+    if (!Array.isArray(presets) || presets.length !== 16) throw new Error("Invalid preset response");
+    for (const preset of presets) {
+      document.getElementById("preset-name-" + preset.number).value = preset.name;
+      document.getElementById("preset-url-" + preset.number).value = preset.url;
+    }
+  } catch (err) { document.getElementById("preset-status").textContent = err.message; }
+}
+async function savePreset(n) {
+  const status = document.getElementById("preset-status");
+  const button = document.getElementById("preset-save-" + n);
+  button.disabled = true;
+  try {
+    const response = await fetch("/api/radio/presets", {
+      method:"POST", headers:{"Content-Type":"application/json"}, signal:AbortSignal.timeout(8000),
+      body:JSON.stringify({number:n, name:document.getElementById("preset-name-" + n).value.trim(),
+        url:document.getElementById("preset-url-" + n).value.trim()})
+    });
+    if (!response.ok) throw new Error(await response.text());
+    status.textContent = "Button " + n + " saved.";
+  } catch (err) { status.textContent = err.message; }
+  finally { button.disabled = false; }
+}
+for (let n = 1; n <= 16; ++n)
+  document.getElementById("preset-save-" + n).addEventListener("click", () => savePreset(n));
+loadPresets();
 function showError(message) {
   error.textContent = message;
   error.hidden = !message;
@@ -399,9 +461,9 @@ document.getElementById("custom").addEventListener("submit", event => {
   select(4, urlInput.value.trim());
 });
 function screenTiming(percent) {
-  if (![0.25, 0.5, 0.75].includes(percent))
-    throw new Error("Choose a tested per-grid brightness");
-  const on = Math.round(26 * 300000 * percent / 100);
+  if (![1.2, 1.4, 1.6, 1, 0.75].includes(percent))
+    throw new Error("Choose an available per-grid brightness");
+  const on = Math.round(26 * 300000 * percent / 100 / 125) * 125;
   return {setup_ns:500, clock_low_ns:1000, clock_high_ns:1000,
     strobe_ns:5000, latch_guard_ns:10000, blank_before_ns:10000,
     blank_after_ns:10000, on_ns:on, off_ns:162500-on,
@@ -416,7 +478,8 @@ const vfdConfirm = document.getElementById("vfd-confirm");
 const vfdNextMode = document.getElementById("vfd-next-mode");
 const vfdNextDim = document.getElementById("vfd-next-dim");
 const displayModes = ["now_playing", "stream_source", "audio_format", "bitrate",
-  "station_genre", "stream_url", "equalizer", "esp_ip"];
+  "station_genre", "stream_url", "esp_ip", "equalizer", "vu_stereo", "vu_center"];
+const graphicalModes = ["equalizer", "vu_stereo", "vu_center"];
 function renderScreen(state) {
   if (screenState && screenState.pin_profile !== state.pin_profile)
     vfdConfirm.checked = false;
@@ -425,14 +488,14 @@ function renderScreen(state) {
   if (displayModes.includes(state.display_mode) &&
       state.display_mode !== previous?.display_mode)
     document.getElementById("vfd-mode").value = state.display_mode;
-  if (state.dim_level >= 0 && state.dim_level < 3 &&
+  if (state.running && state.dim_level >= 0 && state.dim_level < 5 &&
       state.timing_grid_duty !== previous?.timing_grid_duty)
-    document.getElementById("grid-duty").value = String([0.25, 0.5, 0.75][state.dim_level]);
+    document.getElementById("grid-duty").value = String([1.2, 1.4, 1.6, 1, 0.75][state.dim_level]);
   document.getElementById("vfd-controls").hidden = false;
   document.getElementById("vfd-status").textContent =
     state.pin_profile_name + " \u00b7 " +
     (state.running ? (state.now_playing ?
-      (state.visualization === "spectrum" ? "Equalizer: 11 LEFT + 11 RIGHT" :
+      (state.display_mode === "equalizer" ? "Equalizer: 11 LEFT + 11 RIGHT" :
         (state.display_mode_label || "Following radio metadata")) : "Manual display scan") :
       "Stopped") +
     (state.running ? " \u00b7 " + (state.timing_grid_duty * 100).toFixed(3) + "% per grid" : "") +
@@ -465,14 +528,14 @@ async function screenCommand(stop, action) {
   try {
     const mode = document.getElementById("vfd-mode").value;
     if (!stop && !displayModes.includes(mode))
-      throw new Error("Choose one of the eight display modes");
+      throw new Error("Choose a display mode");
     if (action && !["short_press", "long_press"].includes(action))
       throw new Error("Unknown display button action");
     const body = stop ? {sample:"stop"} : action ?
       {display_action:action, live_confirmed:true} :
       {sample:"Timing", live_confirmed:true,
       bench_confirmed:false, now_playing:true, display_mode:mode,
-      visualization:mode === "equalizer" ? "spectrum" : "now_playing",
+      visualization:graphicalModes.includes(mode) ? "spectrum" : "now_playing",
       words:Array(26).fill("0000000000"),
       timing:screenTiming(Number(document.getElementById("grid-duty").value))};
     renderScreen(await screenRequest(body));

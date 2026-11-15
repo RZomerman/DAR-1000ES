@@ -1,4 +1,18 @@
 menu "Airplay ESP Configuration"
+    config SONY_UART_LINK
+        bool "DAR-1000ES controller/audio UART bench link"
+        depends on IDF_TARGET_ESP32S3
+        default n
+
+    config SONY_UART_AUDIO_NODE
+        bool "Build isolated audio UART bench responder only"
+        depends on SONY_UART_LINK
+        default n
+        help
+            Replaces the application with a UART responder. No radio or Wi-Fi
+            starts. Chip4 GPIO5 /OE is held HIGH except during requested,
+            finite mapping tests with Sony-side wires disconnected.
+
     # Board configuration is now in components/boards/Kconfig.projbuild
 
     config SONY_SCREEN_BENCH

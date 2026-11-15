@@ -1,4 +1,5 @@
 #include "sony_spectrum.h"
+#include "sony_screen.h"
 #include "sony_vfd.h"
 
 #include "esp_heap_caps.h"
@@ -33,6 +34,8 @@ static void clear_levels(void) {
   memset(latest.levels, 0, sizeof(latest.levels));
   portEXIT_CRITICAL(&status_lock);
   sony_vfd_show_spectrum(zeros);
+  const uint32_t silence[2] = {0, 0};
+  sony_vfd_show_vu(silence, silence, silence);
 }
 
 static void spectrum_task(void *unused) {
@@ -40,22 +43,28 @@ static void spectrum_task(void *unused) {
   int16_t chunk[512];
   size_t cursor = 0, filled = 0;
   unsigned current_epoch = 0;
+  sony_display_mode_t current_mode = SONY_DISPLAY_MODE_COUNT;
+  sony_vu_state_t vu;
+  sony_vu_reset(&vu);
   bool active = false;
   int64_t last_analysis = 0;
   int64_t last_input = 0;
   for (;;) {
     bool on = atomic_load(&enabled);
     unsigned next_epoch = atomic_load(&epoch);
-    if (!on || !active || current_epoch != next_epoch) {
+    sony_display_mode_t mode = sony_screen_display_mode();
+    if (!on || !active || current_epoch != next_epoch || mode != current_mode) {
       while (xStreamBufferReceive(input, chunk, sizeof(chunk), 0)) {
       }
       cursor = filled = 0;
       last_analysis = 0;
       last_input = 0;
+      sony_vu_reset(&vu);
       if (active || on)
         clear_levels();
       active = on;
       current_epoch = next_epoch;
+      current_mode = mode;
     }
     if (on) {
       size_t bytes;
@@ -63,23 +72,33 @@ static void spectrum_task(void *unused) {
       while ((bytes = xStreamBufferReceive(input, chunk, sizeof(chunk), 0))) {
         size_t frames = bytes / 4;
         received += frames;
-        size_t first = SONY_SPECTRUM_SIZE - cursor;
-        if (first > frames)
-          first = frames;
-        memcpy(history + cursor * 2, chunk, first * 4);
-        memcpy(history, chunk + first * 2, (frames - first) * 4);
-        cursor = (cursor + frames) % SONY_SPECTRUM_SIZE;
-        filled += frames;
-        if (filled > SONY_SPECTRUM_SIZE)
-          filled = SONY_SPECTRUM_SIZE;
+        if (mode == SONY_DISPLAY_EQUALIZER) {
+          size_t first = SONY_SPECTRUM_SIZE - cursor;
+          if (first > frames)
+            first = frames;
+          memcpy(history + cursor * 2, chunk, first * 4);
+          memcpy(history, chunk + first * 2, (frames - first) * 4);
+          cursor = (cursor + frames) % SONY_SPECTRUM_SIZE;
+          filled += frames;
+          if (filled > SONY_SPECTRUM_SIZE)
+            filled = SONY_SPECTRUM_SIZE;
+        } else {
+          uint32_t rms[2], peak[2], held[2];
+          if (sony_vu_analyze(&vu, chunk, frames, rms, peak, held) &&
+              atomic_load(&enabled) && current_epoch == atomic_load(&epoch))
+            sony_vfd_show_vu(rms, peak, held);
+        }
       }
       int64_t now = esp_timer_get_time();
       if (received)
         last_input = now;
-      if (filled && now - last_input > 250000) {
+      if (last_input && now - last_input > 250000) {
         clear_levels();
         cursor = filled = 0;
-      } else if (received && filled == SONY_SPECTRUM_SIZE &&
+        sony_vu_reset(&vu);
+        last_input = 0;
+      } else if (received && mode == SONY_DISPLAY_EQUALIZER &&
+                 filled == SONY_SPECTRUM_SIZE &&
                  now - last_analysis >= 100000) {
         uint8_t levels[SONY_SPECTRUM_COLUMNS];
         last_analysis = now;

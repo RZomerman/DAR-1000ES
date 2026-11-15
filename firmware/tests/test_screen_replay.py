@@ -417,7 +417,7 @@ class ScreenRadioStatusTests(unittest.TestCase):
 
 
 class ScreenDisplayModeTests(unittest.TestCase):
-    def test_metadata_views_fallbacks_and_exact_dim_cycle(self):
+    def test_metadata_views_fallbacks_and_quantized_dim_cycle(self):
         with tempfile.TemporaryDirectory() as temp:
             binary = Path(temp) / "display-modes"
             subprocess.run(["cc", "-Wall", "-Wextra", "-Werror",
@@ -504,6 +504,182 @@ int main(void) {
             subprocess.run([str(binary)], check=True)
 
 
+class ScreenCheckStartTests(unittest.TestCase):
+    def test_check_start_is_guarded_and_uses_standard_radio_scan(self):
+        source = (ROOT / "main/sony_screen.c").read_text()
+        ready = source[source.index("static bool radio_controls_ready("):
+                       source.index("void sony_vfd_radio_search(")]
+        function = source[source.index("static esp_err_t start_radio_display_locked("):
+                          source.index("static esp_err_t release_profile(")]
+        harness = r"""
+#include <assert.h>
+#include <stdatomic.h>
+#include <stdbool.h>
+#include <stdint.h>
+#include <string.h>
+#include "sony_display_modes.h"
+typedef int esp_err_t;
+enum { ESP_OK = 0, ESP_ERR_INVALID_STATE = 1, ESP_ERR_INVALID_ARG = 2,
+       ESP_ERR_NO_MEM = 3, pdPASS = 1, portMAX_DELAY = 0 };
+static int control_lock, frame_lock, task_result = pdPASS, init_result;
+static atomic_bool running, display_requested, timing_requested, stop_requested;
+static atomic_uint pin_profile_index, timing_revision, completed_frames;
+static atomic_uint held_switches, held_last_interval_us;
+static atomic_int last_error;
+static bool follow_radio, follow_spectrum, display_dim, analyzer_enabled;
+static struct { bool active; } preset_overlay;
+static struct { bool active; } scrolling_text;
+static sony_display_mode_t radio_display_mode;
+static sony_timing_t display_timing, remembered_radio_timing;
+static bool remembered_radio_timing_valid;
+static uint64_t words[26];
+static void xSemaphoreTake(int lock, int timeout) { (void)lock; (void)timeout; }
+static void xSemaphoreGive(int lock) { (void)lock; }
+#define portENTER_CRITICAL(p) ((void)(p))
+#define portEXIT_CRITICAL(p) ((void)(p))
+static esp_err_t sony_spectrum_init(void) { return init_result; }
+static void sony_spectrum_enable(bool on) { analyzer_enabled = on; }
+static esp_err_t sony_screen_display_mode_press(bool is_long) {
+    (void)is_long; return ESP_ERR_INVALID_STATE;
+}
+bool sony_display_mode_graphical(sony_display_mode_t mode) {
+    return mode == SONY_DISPLAY_VU_STEREO || mode == SONY_DISPLAY_VU_CENTER ||
+           mode == SONY_DISPLAY_EQUALIZER;
+}
+static void scan_task(void *p) { (void)p; }
+static int xTaskCreatePinnedToCore(void (*fn)(void *), const char *name,
+    int stack, void *arg, int priority, void *handle, int core) {
+    assert(fn == scan_task && !strcmp(name, "screen_display"));
+    (void)stack; (void)arg; (void)priority; (void)handle; (void)core;
+    return task_result;
+}
+""" + ready + function + r"""
+int main(void) {
+    assert(sony_screen_start_from_check() == ESP_ERR_INVALID_STATE);
+    control_lock = 1;
+    assert(sony_screen_start_from_check() == ESP_ERR_INVALID_STATE);
+    atomic_store(&pin_profile_index, 1);
+    atomic_store(&running, true);
+    assert(sony_screen_start_from_check() == ESP_ERR_INVALID_STATE);
+    atomic_store(&running, false);
+    init_result = ESP_ERR_NO_MEM;
+    assert(sony_screen_start_from_check() == ESP_ERR_NO_MEM);
+    assert(!running && !analyzer_enabled);
+    init_result = ESP_OK;
+    task_result = 0;
+    assert(sony_screen_start_from_check() == ESP_ERR_NO_MEM);
+    assert(!running && !display_requested && !timing_requested &&
+           stop_requested && !follow_radio && !analyzer_enabled);
+    task_result = pdPASS;
+    memset(words, 0xff, sizeof(words));
+    assert(sony_screen_start_from_check() == ESP_OK);
+    assert(running && display_requested && timing_requested && !stop_requested);
+    assert(follow_radio && follow_spectrum && analyzer_enabled && display_dim);
+    assert(radio_display_mode == SONY_DISPLAY_VU_STEREO);
+    assert(display_timing.on_ns == 93625 && display_timing.off_ns == 68875);
+    assert(!sony_timing_validate(&display_timing));
+    for (unsigned i = 0; i < 26; ++i) assert(!words[i]);
+    assert(sony_screen_start_from_check() == ESP_ERR_INVALID_STATE);
+    assert(running && analyzer_enabled);
+    display_timing.on_ns = 109250;
+    display_timing.off_ns = 53250;
+    radio_display_mode = SONY_DISPLAY_VU_CENTER;
+    assert(sony_screen_display_button_press(false) == ESP_OK);
+    assert(stop_requested && remembered_radio_timing_valid);
+    running = false;
+    assert(sony_screen_start_from_check() == ESP_OK);
+    assert(display_timing.on_ns == 109250 && display_timing.off_ns == 53250);
+    display_timing.on_ns = 110000;
+    display_timing.off_ns = 52500;
+    radio_display_mode = SONY_DISPLAY_VU_CENTER;
+    assert(sony_screen_display_button_press(false) == ESP_OK);
+    running = false;
+    assert(sony_screen_display_button_press(false) == ESP_OK);
+    assert(radio_display_mode == SONY_DISPLAY_NOW_PLAYING);
+    assert(display_timing.on_ns == 110000 && display_timing.off_ns == 52500);
+    return 0;
+}
+"""
+        with tempfile.TemporaryDirectory() as temp:
+            path = Path(temp) / "check.c"
+            path.write_text(harness)
+            binary = Path(temp) / "check"
+            subprocess.run(["cc", "-Wall", "-Wextra", "-Werror",
+                            "-I", str(ROOT / "main"), str(path),
+                            str(ROOT / "main/sony_timing.c"), "-o", str(binary)],
+                           check=True)
+            subprocess.run([str(binary)], check=True)
+
+    def test_display_button_starts_cycles_off_and_restarts(self):
+        source = (ROOT / "main/sony_screen.c").read_text()
+        function = source[source.index("static esp_err_t display_button_action_locked("):
+                          source.index("static esp_err_t release_profile(")]
+        harness = r"""
+#include <assert.h>
+#include <stdatomic.h>
+#include <stdbool.h>
+#include "sony_display_modes.h"
+typedef int esp_err_t;
+enum { ESP_OK = 0, ESP_ERR_INVALID_STATE = 1, portMAX_DELAY = 0 };
+static int control_lock = 1, frame_lock, long_presses, starts;
+static atomic_bool running, stop_requested;
+static bool follow_radio, follow_spectrum, analyzer_enabled;
+static sony_display_mode_t radio_display_mode;
+#define portENTER_CRITICAL(p) ((void)(p))
+#define portEXIT_CRITICAL(p) ((void)(p))
+static void xSemaphoreTake(int l, int t) { (void)l; (void)t; }
+static void xSemaphoreGive(int l) { (void)l; }
+static bool radio_controls_ready(void) {
+    return running && follow_radio && !stop_requested;
+}
+static void remember_radio_timing_locked(void) {}
+static void sony_spectrum_enable(bool on) { analyzer_enabled = on; }
+static esp_err_t start_radio_display_locked(sony_display_mode_t mode) {
+    ++starts;
+    running = follow_radio = true;
+    stop_requested = false;
+    radio_display_mode = mode;
+    return ESP_OK;
+}
+static esp_err_t sony_screen_display_mode_press(bool is_long) {
+    if (!radio_controls_ready()) return ESP_ERR_INVALID_STATE;
+    if (is_long) ++long_presses;
+    else ++radio_display_mode;
+    return ESP_OK;
+}
+""" + function + r"""
+int main(void) {
+    assert(sony_screen_display_button_press(true) == ESP_ERR_INVALID_STATE);
+    assert(sony_screen_display_button_press(false) == ESP_OK);
+    assert(starts == 1 && running && radio_display_mode == SONY_DISPLAY_NOW_PLAYING);
+    assert(sony_screen_display_button_press(true) == ESP_OK && long_presses == 1);
+    for (unsigned i = 1; i < SONY_DISPLAY_MODE_COUNT; ++i) {
+        assert(sony_screen_display_button_press(false) == ESP_OK);
+        assert(radio_display_mode == i && !stop_requested);
+    }
+    follow_spectrum = analyzer_enabled = true;
+    assert(sony_screen_display_button_press(false) == ESP_OK);
+    assert(stop_requested && !follow_radio && !follow_spectrum && !analyzer_enabled);
+    assert(sony_screen_display_button_press(false) == ESP_ERR_INVALID_STATE);
+    running = false;
+    assert(sony_screen_display_button_press(false) == ESP_OK);
+    assert(starts == 2 && radio_display_mode == SONY_DISPLAY_NOW_PLAYING);
+    follow_radio = false;
+    assert(sony_screen_display_button_press(false) == ESP_ERR_INVALID_STATE);
+    assert(running && !stop_requested);
+    return 0;
+}
+"""
+        with tempfile.TemporaryDirectory() as temp:
+            path = Path(temp) / "display.c"
+            path.write_text(harness)
+            binary = Path(temp) / "display"
+            subprocess.run(["cc", "-Wall", "-Wextra", "-Werror",
+                            "-I", str(ROOT / "main"), str(path),
+                            "-o", str(binary)], check=True)
+            subprocess.run([str(binary)], check=True)
+
+
 class ScreenRadioOwnershipTests(unittest.TestCase):
     def test_metadata_cannot_start_output_or_override_manual_control(self):
         source = (ROOT / "main/sony_screen.c").read_text()
@@ -512,6 +688,7 @@ class ScreenRadioOwnershipTests(unittest.TestCase):
         harness = r"""
 #include <assert.h>
 #include <stdatomic.h>
+#include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include "sony_text.h"
@@ -522,11 +699,20 @@ typedef int esp_err_t;
 enum { ESP_OK, ESP_ERR_INVALID_STATE, ESP_ERR_NO_MEM, ESP_ERR_INVALID_ARG };
 static atomic_bool running, display_requested, stop_requested, timing_requested;
 static sony_timing_t display_timing;
+static sony_timing_t remembered_radio_timing;
+static bool remembered_radio_timing_valid;
 static atomic_uint timing_revision;
 static sony_display_mode_t radio_display_mode;
 sony_display_mode_t sony_screen_display_mode(void);
 static bool follow_radio, follow_spectrum, display_dim, analyzer_enabled;
 static sony_radio_status_t last_radio_status;
+static struct {
+    uint64_t preset[22], result[22];
+    int64_t started_us, result_started_us;
+    uint32_t generation;
+    bool active, assigned, result_ready;
+} preset_overlay;
+static int64_t search_started_us;
 static void sony_spectrum_enable(bool on) { analyzer_enabled = on; }
 static esp_err_t sony_spectrum_init(void) { return ESP_OK; }
 static unsigned scrolling_width = 9;
@@ -541,6 +727,8 @@ static int64_t esp_timer_get_time(void) { return now; }
         harness += functions + r"""
 int main(void) {
     sony_radio_status_t status = sony_radio_status(true, 2, "192", "Pop");
+    remember_radio_timing_locked();
+    assert(!remembered_radio_timing_valid);
     uint8_t bars[22];
     memset(bars, 3, sizeof(bars));
     assert(sony_vfd_show_spectrum(bars) == ESP_ERR_INVALID_STATE);
@@ -553,6 +741,9 @@ int main(void) {
     atomic_store(&timing_requested, true);
     assert(sony_vfd_show_radio("Song", &status) == ESP_ERR_INVALID_STATE);
     follow_radio = true;
+    display_timing.on_ns = 123;
+    remember_radio_timing_locked();
+    assert(remembered_radio_timing_valid && remembered_radio_timing.on_ns == 123);
     now = 1234;
     assert(sony_vfd_show_radio("A long title that needs to scroll", &status) == ESP_OK);
     assert(scrolling_width == 22 && scrolling_text.started_us == 1234);
@@ -564,19 +755,24 @@ int main(void) {
     assert(words[0] == 0x3F && words[24] == 0x2011 && words[25] == 0);
     follow_spectrum = true;
     analyzer_enabled = true;
+    radio_display_mode = SONY_DISPLAY_EQUALIZER;
     assert(sony_vfd_show_spectrum(bars) == ESP_OK);
     uint64_t spectrum_words[26];
     memcpy(spectrum_words, words, sizeof(words));
     assert(sony_vfd_show_radio("New title", &status) == ESP_OK);
     for (unsigned i = 1; i <= 22; ++i)
         assert(spectrum_words[i] == words[i]);
-    assert(words[24] == 0x2819 && words[25] == 0);
+    assert(words[0] == 0 && words[24] == 0x2011 && words[25] == 0);
     status = sony_radio_status(true, 2, "192", "Mixed");
     assert(sony_vfd_show_radio("New title", &status) == ESP_OK);
-    assert(words[24] == 0x2818 && words[25] == 1);
+    assert(words[0] == 0 && words[24] == 0x2000 && words[25] == 1);
+    assert(sony_screen_set_display_mode(SONY_DISPLAY_VU_STEREO) == ESP_OK);
+    assert(words[0] == 0xff && words[24] == 0x2000 && words[25] == 1);
+    assert(sony_screen_set_display_mode(SONY_DISPLAY_EQUALIZER) == ESP_OK);
+    assert(words[0] == 0 && words[24] == 0x2000 && words[25] == 1);
     status = sony_radio_status(false, 2, "192", "Mixed");
     assert(sony_vfd_show_radio("New title", &status) == ESP_OK);
-    assert(words[24] == 0x818 && words[25] == 0);
+    assert(words[0] == 0x4000 && words[24] == 0 && words[25] == 0);
     assert(show_text("New title", true, true, 22, NULL, SONY_DISPLAY_MODE_COUNT) == ESP_OK);
     assert(!follow_spectrum && !analyzer_enabled);
     assert(words[24] == 0 && words[25] == 0);
@@ -602,13 +798,39 @@ int main(void) {
     for (unsigned i = 1; i <= SONY_DISPLAY_MODE_COUNT; ++i) {
         assert(sony_screen_display_mode_press(false) == ESP_OK);
         assert(sony_screen_display_mode() == i % SONY_DISPLAY_MODE_COUNT);
-        assert(follow_spectrum == (i == SONY_DISPLAY_EQUALIZER));
+        assert(follow_spectrum == sony_display_mode_graphical(i % SONY_DISPLAY_MODE_COUNT));
         assert(analyzer_enabled == follow_spectrum);
         assert(!scrolling_text.active);
         for (unsigned slot = 1; slot <= 22; ++slot)
             assert(words[slot] == 0);
         assert(display_timing.on_ns == 58500);
     }
+    uint32_t peak[] = {23199, 0};
+    assert(sony_screen_set_display_mode(SONY_DISPLAY_VU_STEREO) == ESP_OK);
+    assert(sony_vfd_show_vu(peak, peak, peak) == ESP_OK);
+    assert(words[22] == 0x7fff && (words[24] & 0x1c0) == 0x80);
+    assert(sony_vfd_show_spectrum(bars) == ESP_ERR_INVALID_STATE);
+    assert(sony_screen_set_display_mode(SONY_DISPLAY_VU_CENTER) == ESP_OK);
+    assert(!(words[24] & 0x51c0));
+    assert(sony_vfd_show_vu(peak, peak, peak) == ESP_OK);
+    assert(words[22] == 0x7ffffffffULL && (words[24] & 0x5000) == 0x4000);
+    assert(sony_screen_set_display_mode(SONY_DISPLAY_NOW_PLAYING) == ESP_OK);
+    assert(!(words[24] & 0x51c0));
+    assert(sony_vfd_show_vu(peak, peak, peak) == ESP_ERR_INVALID_STATE);
+    status.searching = true;
+    status.generation = 1;
+    now = 3000;
+    assert(sony_vfd_show_radio("Searching", &status) == ESP_OK);
+    assert(search_started_us == 3000);
+    now = 4000;
+    assert(sony_vfd_show_radio("Searching", &status) == ESP_OK);
+    assert(search_started_us == 3000);
+    status.generation = 2;
+    assert(sony_vfd_show_radio("Searching", &status) == ESP_OK);
+    assert(search_started_us == 4000);
+    sony_vfd_radio_search(3);
+    assert(sony_vfd_show_radio("stale", &status) == ESP_ERR_INVALID_STATE);
+    status.generation = 3;
     assert(sony_screen_set_display_mode(SONY_DISPLAY_MODE_COUNT) == ESP_ERR_INVALID_ARG);
     assert(sony_screen_set_display_mode(SONY_DISPLAY_AUDIO_FORMAT) == ESP_OK);
     assert(sony_vfd_show_radio_mode("stale title", &status,
@@ -618,12 +840,14 @@ int main(void) {
     int64_t started = scrolling_text.started_us;
     assert(sony_screen_set_display_mode(SONY_DISPLAY_AUDIO_FORMAT) == ESP_OK);
     assert(scrolling_text.active && scrolling_text.started_us == started);
-    for (unsigned level = 0; level < 3; ++level) {
+    for (unsigned level = 0; level < 5; ++level) {
         assert(sony_screen_display_mode_press(true) == ESP_OK);
         assert(sony_display_dim_level(&display_timing) == (int)level);
+        const unsigned on[] = {93625, 109250, 124750, 78000, 58500};
+        assert(display_timing.on_ns == on[level]);
         assert(radio_display_mode == SONY_DISPLAY_AUDIO_FORMAT);
     }
-    assert(atomic_load(&timing_revision) == 3);
+    assert(atomic_load(&timing_revision) == 5);
     memcpy(before, words, sizeof(words));
     follow_radio = true;
     display_timing.hold = true;
@@ -641,6 +865,58 @@ int main(void) {
     assert(sony_screen_display_mode_press(false) == ESP_ERR_INVALID_STATE);
     assert(sony_screen_display_mode_press(true) == ESP_ERR_INVALID_STATE);
     assert(!memcmp(before, words, sizeof(words)));
+    atomic_store(&stop_requested, false);
+    now = 1000000;
+    sony_vfd_preset_start(12, 3, true);
+    assert(preset_overlay.active && preset_overlay.assigned);
+    uint64_t output[26] = {0};
+    output[0] = 123;
+    output[24] = 456;
+    assert(preset_overlay_frame(now, output));
+    sony_text_t label;
+    assert(sony_text_parse(&label, "   Preset 12", now));
+    for (unsigned i = 0; i < 22; ++i)
+        assert(output[22 - i] == (i < label.length ? label.glyphs[i] : 0));
+    assert(output[14] == label.glyphs[8] && output[12] == label.glyphs[10] &&
+           output[11] == label.glyphs[11]);
+    assert(output[0] == 123 && output[24] == 456);
+    memset(output + 1, 0, 22 * sizeof(*output));
+    assert(preset_overlay_frame(now + 1000000, output));
+    assert(output[2] == 0x7ffffffffULL);
+    assert(preset_overlay_frame(now + 61000000, output));
+    assert(preset_overlay.active && !preset_overlay.result_ready);
+    sony_vfd_preset_start(5, 4, true);
+    sony_vfd_preset_connected(3, "Old station");
+    assert(!preset_overlay.result_ready);
+    sony_vfd_preset_connected(4, "Example FM");
+    assert(preset_overlay.result_ready);
+    assert(sony_screen_set_display_mode(SONY_DISPLAY_VU_STEREO) == ESP_OK);
+    assert(preset_overlay_frame(now + 1050000, output));
+    assert(output[2] == 0x7ffffffffULL);
+    assert(preset_overlay_frame(now + 1100000, output));
+    assert(sony_text_parse(&label, "Example FM", now));
+    for (unsigned i = 0; i < 22; ++i)
+        assert(output[22 - i] == (i < label.length ? label.glyphs[i] : 0));
+    assert(preset_overlay_frame(now + 3099999, output));
+    assert(!preset_overlay_frame(now + 3100000, output));
+    assert(!preset_overlay.active && radio_display_mode == SONY_DISPLAY_VU_STEREO);
+    now = 9000000;
+    sony_vfd_preset_start(2, 4, false);
+    assert(preset_overlay.active && !preset_overlay.assigned);
+    assert(preset_overlay_frame(now + 1000000, output));
+    assert(sony_text_parse(&label, "Unassigned", now));
+    for (unsigned i = 0; i < 22; ++i)
+        assert(output[22 - i] == (i < label.length ? label.glyphs[i] : 0));
+    assert(!preset_overlay_frame(now + 3000000, output));
+    sony_vfd_preset_start(1, 4, true);
+    assert(preset_overlay.active);
+    sony_vfd_radio_search(5);
+    assert(!preset_overlay.active);
+    sony_vfd_preset_start(1, 4, true);
+    assert(!preset_overlay.active);
+    follow_radio = false;
+    sony_vfd_preset_start(1, 5, true);
+    assert(!preset_overlay.active);
     return 0;
 }
 """

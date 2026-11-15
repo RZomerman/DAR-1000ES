@@ -4,6 +4,11 @@ This is the current operating guide for the ESP32-S3/SN74AHCT125 display
 driver. It supersedes the older experimental operating advice, not the
 historical measurements, in chapters 6, 11 and 12.
 
+For the two-ESP target, audio wiring and browser-only portable front-panel
+simulator, see [Split-setup architecture](15-split-setup-architecture.md).
+The 0.3.47 travel demo is independent of physical keypad/display hardware;
+it does not yet migrate radio decoding or telemetry to the audio ESP.
+
 On 2026-11-13, firmware 0.3.25 produced clean held characters, mixed text
 across all 22 matrices and an ESP-local marquee. The decisive wiring
 correction was connecting **STB to both TD62C950RF chips**, not just one.
@@ -101,6 +106,17 @@ backfeed an unpowered TD input.
 Do not reset or unplug the ESP while connected: a fixed boot GPIO map does
 not guarantee safe signals during reset or power transitions. Software Stop is not a hardware fail-safe
 for a stalled CPU, floating inputs, power loss or incorrect wiring.
+
+With firmware 0.3.42 and confirmed keypad scanning enabled, a short press of
+DISPLAY starts a stopped display in Now Playing, cycles the modes,
+and stops at OFF after Center-out VU. The next short press starts again at
+Now Playing. CHECK starts a stopped display in Stereo VU and does not change
+a running scan. Both restore the radio scan's brightness from before OFF;
+the initial default after reboot is 1.2%. Brightness memory is not persistent
+across reboot. Either start requires the AHCT v2 profile. Press
+these buttons to start only after completing the hardware readiness steps
+above; neither Sony power nor AHCT `/OE` is sensed. Startup after reset
+remains disabled without a verified hardware interlock.
 
 Idle, in analyser order D0..D5, is `0,1,0,1,0,0` (`0x0A`):
 DATA LOW, clocks HIGH, CLEAR LOW, STB LOW.
@@ -292,38 +308,40 @@ The radio webpage offers these modes in short-press cycle order:
 | BitRate | `bitrate` | Station-reported ICY kbps, or unavailable; not measured audio quality |
 | Station Genre | `station_genre` | Station-provided genre, or unknown |
 | StreamURL | `stream_url` | Configured stream URL, not the final redirect destination |
-| Equalizer | `equalizer` | Existing Option 1 real stereo spectrum; visualization only |
 | ESP IP address | `esp_ip` | Current Wi-Fi station IPv4 address, or disconnected |
+| Equalizer | `equalizer` | Existing Option 1 real stereo spectrum; visualization only |
+| Stereo VU | `vu_stereo` | Horizontal stereo level bars |
+| Center-out VU | `vu_center` | Left and right bars grow from the center |
+| OFF | Stop output | Ends the active display scan |
 
 All text modes use the existing 22-matrix scrolling renderer and source-status
 indicators. Metadata refresh does not restart an unchanged scroll. Text is
 normalized and bounded to 200 codepoints, without splitting UTF-8; unusually
 long URLs are therefore truncated. Unknown values use explicit fallbacks.
-Equalizer alone shows MONO 1/2 bank legends and enables FFT input/analysis.
-Leaving it clears bank labels and bars before the next metadata update.
+Equalizer enables FFT input/analysis. Leaving it clears the matrix bars
+before the next metadata update.
 The bridge refreshes every 500 ms; DMA queueing adds the existing update latency.
 
-**Short press** advances once, wrapping ESP IP address back to Now Playing.
-**Long press** advances DIM through 0.25%, 0.5%, 0.75%, then 0.25%, leaving
-the mode unchanged. With the guarded 300 us slots, ON is respectively
-19,500 / 39,000 / 58,500 ns; OFF is 143,000 / 123,500 / 104,000 ns.
-Only ON/OFF changes; transfer timing, slot duration, 26-slot scan and refresh
-rate are preserved. A custom duty enters the cycle at 0.25%. Nonstandard
+**Short press** advances once, with OFF after Center-out VU and Now Playing
+on the next press. **Long press** advances DIM through 1.2%, 1.4%, 1.6%,
+1%, and 0.75%, leaving the mode unchanged. The long-press action
+fires once while the button is still held; release causes no second action.
+Only ON/OFF changes; transfer timing,
+slot duration, 26-slot scan and refresh rate are preserved. Nonstandard
 timings that cannot represent the target duty exactly in 125 ns ticks,
 or cannot retain valid ON/OFF limits, are rejected without changes.
-The radio page now offers these three levels; the timing laboratory retains
+The radio page offers these levels; the timing laboratory retains
 its separate diagnostic settings.
 
-No physical GPIO, debounce interval or long-press threshold is assigned yet.
-The eventual debounced button task calls
-`sony_screen_display_mode_press(false)` once for a short press or
-`sony_screen_display_mode_press(true)` once for a long press. Do not call from
-an ISR and do not also emit a short press after handling a long press.
+The physical button uses the debounced keypad scanner. A short press starts or
+cycles through OFF; a long press changes DIM. Do not invoke these task-context
+controls from an ISR or also emit a short press after handling a long press.
 `sony_screen_set_display_mode()` selects a mode directly.
 
-These task-context functions and their HTTP equivalents require an already
-running, authorized, radio-owned full scan. They reject stopped, stopping,
-manual, held and pair scans; neither metadata nor a button can start output.
+Direct mode selection and DIM require a running, authorized, radio-owned full
+scan. They reject stopped, stopping, manual, held and pair scans; metadata
+cannot start output. DISPLAY and CHECK can manually start as described in
+section 2; the HTTP short-press action also requires explicit confirmation.
 The hardware wiring/enable precautions still apply. Mode and DIM selections
 are not restored across reboot; boot remains AHCT v2 with output stopped.
 
@@ -343,12 +361,9 @@ LEFT uses slots22..12; RIGHT uses slots11..1. Band edges, in Hz:
 20 | 37 | 70 | 132 | 247 | 462 | 866 | 1622 | 3040 | 5696 | 10673 | 20000
 ```
 
-In 0.3.30, the fixed **left MONO + 1** legend marks the LEFT bank and the
-separate **right MONO + 2** legend marks the RIGHT bank. These are bank labels,
-not claims that the audio is mono. The left index 2 is kept off. They clear
-when returning to NOW PLAYING or taking over with manual text. **STEREO still
-follows actual decoded two-channel playback** and clears for mono/buffering;
-it is never forced on by the spectrum. In text mode, the left MONO legend
+From 0.3.41, Equalizer does not show the old MONO 1/2 bank labels or signal
+bars. **STEREO follows actual decoded two-channel playback** and clears for
+mono/buffering; it is never forced on by the spectrum. The left MONO legend
 continues to indicate an actual mono source.
 
 The source is actual decoded stereo PCM **after resampling to 48 kHz**, not
@@ -392,9 +407,8 @@ scan duty.
 | Indicator | Meaning |
 |---|---|
 | STEREO | Decoded source has two channels |
-| Left MONO label | In text mode: actual mono source; in spectrum: MONO 1 labels LEFT |
-| Right MONO + 2 | Spectrum mode only: labels RIGHT, not a mono-source claim |
-| 14 signal bars | Station-reported ICY bitrate, scaled to 320 kbps |
+| Left MONO label | Actual mono source |
+| 14 signal bars | Station-reported ICY bitrate, scaled to 320 kbps; hidden in Equalizer |
 | Bottom dots | Buffering, reconnecting, or bitrate unavailable; bars are off |
 | TUNED | Decoding is active with valid source channels and no reported stream error |
 | Left MUSIC / SPEECH | Recognized station genre; unknown/mixed genres leave both off |
@@ -424,8 +438,45 @@ The radio display view additionally owns slot-24 mask `0x80C` for left indices
 1/2 and the separate right MONO/2; combined slot-24 ownership is `0x281F`.
 Spectrum sets left MONO/1 and right MONO/2 (`0x818`); text mode clears the
 bank indices/right legend and restores source-based left MONO.
-Other fixed fields, PROGRAM, MEMORY and red segments are preserved.
+Other fixed fields, PROGRAM, MEMORY and red segments are preserved in text
+and spectrum modes.
 Manual control and Stop still take ownership away from the radio.
+
+### VU meters and station search (0.3.39)
+
+The Display Mode cycle also includes Stereo VU and Center-out VU. Both use
+300 ms decoded stereo RMS windows with a 0 dB reference of **−3 dBFS**,
+not the Sony's analogue output level. In Stereo VU, the upper three rows are
+LEFT and the lower three are RIGHT, separated by a blank row. Grid 20 is
+0 dB; grids 21–22 and the separate PROGRAM 1/2 digits indicate above that
+reference. In Center-out VU, each channel fills eleven full grids from the
+center outwards; the left and right tuning triangles indicate over-reference.
+Warnings use 100 ms sample peaks, independently of the RMS bars; they are
+not digital-clipping indicators. From 0.3.40, active blocks are fully
+five dots wide. A two-column marker follows the highest RMS bar level,
+holds for 0.3 seconds and then falls toward the current level. The marker
+is hidden within a fully lit block when it coincides with the bar.
+Brightness defaults to 1.2% per grid; the DIM cycle additionally offers 1.4%,
+1.6%, 1% and 0.75%. At 1.6% the nominal aggregate CLEAR duty is about 41.6%.
+Current and temperature limits are unmeasured; 1.6% is experimental and
+not electrically certified.
+
+While a station connects, the character matrices temporarily show scan slots
+2 and 6 for 300 ms each, then slots 10, 12, 13 and 14 for 100 ms each,
+followed by 500 ms blank. The scan repeats until playback or an error; the
+selected display mode is retained underneath. Physical transition times are
+quantized by the existing DMA batches and need isolated hardware measurement.
+Slots increase right-to-left. Output authorization, timing and brightness do
+not change. Full grids can increase aggregate current; electrical and thermal
+limits have not been verified.
+
+From 0.3.44, a physical preset press temporarily replaces the matrices with
+"Preset X" for one second: "Preset" occupies the fourth through ninth cells
+from the left, followed by a blank and the number. Assigned presets then use
+the search animation until playback connects, show the broadcast station
+name (or configured preset name) for two seconds, and return to the selected
+mode. An unassigned preset instead shows "Unassigned" for two seconds and
+does not change stations. These overlays never start stopped output.
 
 S/PDIF is 48 kHz stereo on GPIO42. This is a **3.3 V logic output**, not an
 analogue speaker/headphone output. Use a compatible optical/transmitter
@@ -479,9 +530,10 @@ On an already authorized radio full scan, change only the mode or DIM with:
 Send each as a separate POST to `/api/screen`; disconnected tests can use
 `bench_confirmed:true` instead. Do not combine these controls with Start,
 profile, GPIO, word or timing changes. Status adds `display_mode`,
-`display_mode_label` and zero-based `dim_level` (0/1/2 for the three levels,
--1 for a custom/noncompatible duty). Existing `visualization` remains
-`now_playing` for every text mode and `spectrum` for Equalizer.
+`display_mode_label` and zero-based `dim_level` (0 through 4 for 1.2%, 1.4%,
+1.6%, 1% and 0.75%; -1 for a custom/noncompatible duty). Existing
+`visualization` remains `now_playing` for text and `spectrum` for the
+Equalizer and VU modes.
 
 For a manual T, slot22 is `"010842109F"`; all other words can be
 `"0000000000"`. Starting NOW PLAYING can use all-zero words; the bridge

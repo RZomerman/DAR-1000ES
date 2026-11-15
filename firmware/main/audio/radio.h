@@ -11,3 +11,5 @@ bool radio_airplay_active(void);
 uint32_t radio_generation(void);
 size_t radio_read(int16_t *pcm, size_t frames, uint32_t *rate);
 esp_err_t radio_register_http(httpd_handle_t server);
+/* Selects a configured physical preset, numbered 1-16. */
+esp_err_t radio_select_preset(unsigned number);

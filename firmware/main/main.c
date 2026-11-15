@@ -9,6 +9,9 @@
 #include "hap.h"
 #include "mdns_airplay.h"
 #include "nvs_flash.h"
+#ifdef CONFIG_SONY_SCREEN_BENCH
+#include "sony_keypad.h"
+#endif
 #include "playback_control.h"
 #include "ptp_clock.h"
 #include "rtsp_server.h"
@@ -18,6 +21,9 @@
 #include "wifi.h"
 #include "spiffs_storage.h"
 #include "radio.h"
+#ifdef CONFIG_SONY_UART_LINK
+#include "sony_uart_link.h"
+#endif
 
 #ifdef CONFIG_SONY_SCREEN_BENCH
 #include "sony_screen.h"
@@ -221,6 +227,10 @@ static void on_airplay_client_event(rtsp_event_t event,
 void app_main(void) {
   ESP_LOGW(TAG, "Boot: reset reason %d", (int)esp_reset_reason());
 
+#ifdef CONFIG_SONY_UART_LINK
+  ESP_ERROR_CHECK(sony_uart_link_init());
+#endif
+
 #ifdef CONFIG_SONY_SCREEN_BENCH
   ESP_ERROR_CHECK(sony_screen_init());
 #endif
@@ -253,6 +263,9 @@ void app_main(void) {
     }
   }
   ESP_ERROR_CHECK(radio_init());
+#ifdef CONFIG_SONY_SCREEN_BENCH
+  ESP_ERROR_CHECK(sony_keypad_init());
+#endif
 #ifdef CONFIG_DAC_TAS57XX
   // Load persisted sub level offset (pre-init safe; applied on first volume).
   float sub_off;

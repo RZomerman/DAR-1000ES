@@ -15,3 +15,8 @@ esp_err_t sony_vfd_show_radio_mode(const char *utf8,
                                   const sony_radio_status_t *status,
                                   sony_display_mode_t mode);
 esp_err_t sony_vfd_show_spectrum(const uint8_t levels[22]);
+esp_err_t sony_vfd_show_vu(const uint32_t rms[2], const uint32_t peak[2],
+                           const uint32_t held[2]);
+void sony_vfd_radio_search(uint32_t generation);
+void sony_vfd_preset_start(unsigned number, uint32_t generation, bool assigned);
+void sony_vfd_preset_connected(uint32_t generation, const char *station);

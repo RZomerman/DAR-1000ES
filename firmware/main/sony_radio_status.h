@@ -7,6 +7,8 @@ typedef struct {
   uint64_t meter;
   uint64_t audio;
   uint64_t stereo;
+  bool searching;
+  uint32_t generation;
 } sony_radio_status_t;
 
 sony_radio_status_t sony_radio_status(bool playing, unsigned channels,
@@ -15,4 +17,4 @@ void sony_radio_status_apply(uint64_t words[26],
                              const sony_radio_status_t *status);
 void sony_radio_status_apply_view(uint64_t words[26],
                                   const sony_radio_status_t *status,
-                                  bool spectrum);
+                                  bool equalizer);

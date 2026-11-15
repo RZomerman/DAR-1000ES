@@ -88,6 +88,94 @@ int main(void) {
   assert(words[1] == 0x7FFFFFFFFULL);
   assert(words[0] == 0xABC && words[23] == 0xABC && words[24] == 0xABC &&
          words[25] == 0xABC);
+  memset(words, 0, sizeof(words));
+  uint32_t rms[] = {23198, 0}, peak[] = {23198, 0}, held[] = {0, 0};
+  sony_vu_frame(rms, peak, held, false, words);
+  for (unsigned i = 0; i < 22; ++i)
+    assert(words[22 - i] == (i < 20 ? 0x7fff : 0));
+  assert(!(words[24] & 0x51c0));
+  rms[0] = peak[0] = 23199;
+  rms[1] = peak[1] = 27571;
+  held[0] = peak[0]; held[1] = peak[1];
+  sony_vu_frame(rms, peak, held, false, words);
+  assert(words[2] == (0x7fffULL | (0x7fffULL << 20)));
+  assert(words[1] == (0x7fffULL << 20));
+  assert((words[24] & 0x1c0) == 0xc0);
+  sony_vu_frame(rms, peak, held, true, words);
+  for (unsigned i = 1; i <= 22; ++i)
+    assert(words[i] == 0x7ffffffffULL);
+  assert((words[24] & 0x51c0) == 0x5000);
+  rms[0] = peak[0] = held[0] = 0;
+  rms[1] = peak[1] = held[1] = 23198;
+  sony_vu_frame(rms, peak, held, true, words);
+  for (unsigned i = 12; i <= 22; ++i) assert(!words[i]);
+  for (unsigned i = 1; i <= 11; ++i)
+    assert(words[i] == 0x7ffffffffULL);
+  assert(!(words[24] & 0x51c0));
+  rms[0] = 1000;
+  peak[0] = held[0] = 30000;
+  sony_vu_frame(rms, peak, held, false, words);
+  assert((words[22] & 0x7fff) == 0x7fff);
+  assert((words[1] & 0x7fff) == 0x6318);
+  assert((words[24] & 0x1c0) == 0x80);
+  sony_vu_frame(rms, peak, held, true, words);
+  uint64_t marker_dots = 0;
+  for (unsigned row = 0; row < 7; ++row)
+    marker_dots |= 24ULL << (row * 5);
+  assert(words[12] == 0x7ffffffffULL && words[22] == marker_dots);
+  sony_vu_state_t vu;
+  sony_vu_reset(&vu);
+  int16_t *samples = calloc(4800 * 2, sizeof(*samples));
+  assert(samples);
+  for (unsigned i = 0; i < 4800; ++i) {
+    samples[2 * i] = 1000;
+    samples[2 * i + 1] = -2000;
+  }
+  assert(!sony_vu_analyze(&vu, samples, 4799, rms, peak, held));
+  assert(sony_vu_analyze(&vu, samples + 4799 * 2, 1, rms, peak, held));
+  assert(rms[0] == 1000 && rms[1] == 2000 &&
+         peak[0] == 1000 && peak[1] == 2000);
+  assert(sony_vu_analyze(&vu, samples, 4800, rms, peak, held));
+  samples[0] = 32767;
+  samples[1] = -32768;
+  assert(sony_vu_analyze(&vu, samples, 4800, rms, peak, held));
+  assert(rms[0] > 1000 && rms[0] < 1100 && rms[1] > 2000 && rms[1] < 2100);
+  assert(peak[0] == 32767 && peak[1] == 32768);
+  sony_vu_reset(&vu);
+  for (unsigned i = 0; i < 4800; ++i) {
+    samples[2 * i] = 12000;
+    samples[2 * i + 1] = 6000;
+  }
+  for (unsigned i = 0; i < 3; ++i)
+    assert(sony_vu_analyze(&vu, samples, 4800, rms, peak, held));
+  assert(held[0] == 12000 && held[1] == 6000);
+  for (unsigned i = 0; i < 4800; ++i) samples[2 * i] = 0;
+  for (unsigned i = 0; i < 2; ++i) {
+    assert(sony_vu_analyze(&vu, samples, 4800, rms, peak, held));
+    assert(held[0] == 12000 && held[1] == 6000);
+  }
+  assert(sony_vu_analyze(&vu, samples, 4800, rms, peak, held));
+  assert(held[0] == 9528 && held[1] == 6000 && rms[0] == 0);
+  assert(sony_vu_analyze(&vu, samples, 4800, rms, peak, held));
+  assert(held[0] == 7565 && held[1] == 6000);
+  memset(samples, 0, 4800 * 2 * sizeof(*samples));
+  for (unsigned i = 0; i < 100; ++i) {
+    assert(sony_vu_analyze(&vu, samples, 4800, rms, peak, held));
+    assert(held[0] >= rms[0] && held[1] >= rms[1]);
+  }
+  assert(!held[0] && !held[1]);
+  free(samples);
+  const int64_t times[] = {0, 299999, 300000, 599999, 600000, 700000,
+                           800000, 900000, 1000000, 1499999, 1500000};
+  const unsigned slots[] = {2, 2, 6, 6, 10, 12, 13, 14, 0, 0, 2};
+  words[0] = 0x123;
+  words[24] = 0x456;
+  for (unsigned i = 0; i < sizeof(times) / sizeof(times[0]); ++i) {
+    sony_search_frame(times[i], words);
+    for (unsigned slot = 1; slot <= 22; ++slot)
+      assert(words[slot] == (slot == slots[i] ? 0x7ffffffffULL : 0));
+    assert(words[0] == 0x123 && words[24] == 0x456);
+  }
   free(dsp);
   free(pcm);
   return 0;

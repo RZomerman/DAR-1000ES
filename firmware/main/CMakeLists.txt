@@ -1,3 +1,11 @@
+if(CONFIG_SONY_UART_AUDIO_NODE)
+    idf_component_register(
+        SRCS "sony_uart_audio_main.c" "sony_uart_link.c" "sony_uart_protocol.c"
+        INCLUDE_DIRS "."
+        PRIV_REQUIRES driver esp_timer)
+    return()
+endif()
+
 set( SRC_FILES
     "main.c"
     "alac_magic_cookie.c"
@@ -53,8 +61,12 @@ set( SRC_FILES
 # carries weak defaults for the optional entry points, so a backend only has
 # to implement what it actually supports.
 list(APPEND SRC_FILES "audio/audio_output_common.c")
+if(CONFIG_SONY_UART_LINK)
+    list(APPEND SRC_FILES "sony_uart_link.c" "sony_uart_protocol.c")
+endif()
 if(CONFIG_SONY_SCREEN_BENCH)
     list(APPEND SRC_FILES "sony_screen.c")
+    list(APPEND SRC_FILES "sony_keypad.c")
     list(APPEND SRC_FILES "sony_capture_replay.c")
     list(APPEND SRC_FILES "sony_display_frame.c")
     list(APPEND SRC_FILES "sony_text.c")

@@ -128,9 +128,62 @@ pre { white-space: pre-wrap; }
 .meter-dots button { background: #233c30; }
 .letter-matrix button { background: #45231f; }
 .glass .seven-digit button { background: #45231f; }
+.demo-scroll { overflow-x: auto; }
+.demo-panel { display: grid; grid-template-columns: 100px 90px 420px 120px 420px 130px;
+  grid-template-rows: 145px auto; gap: 14px; min-width: 1350px; padding: 24px;
+  color: #eee; background: linear-gradient(#292b2e,#101113); border-radius: 8px; }
+.demo-panel canvas { grid-column: 3 / 6; width: 100%; height: 145px; border: 2px solid #050505; }
+.demo-panel button { padding: 7px 2px; margin: 0; font: 10px system-ui;
+  color: #ddd; background: linear-gradient(#393b40,#18191c); border: 1px solid #080808;
+  border-radius: 3px; min-height: 29px; touch-action: none; }
+.demo-panel button.pressed { background: #54595d; box-shadow: inset 0 2px 5px #000; }
+.demo-panel button:focus-visible { outline: 2px solid #9cf7c5; }
+#demo-power { grid-column: 1; grid-row: 1 / 3; display: grid; align-content: start; gap: 16px; }
+#demo-display { grid-column: 2; grid-row: 1; align-self: center; }
+#demo-link { grid-column: 6; grid-row: 1; display: grid; grid-template-columns: repeat(2,1fr); align-content: center; }
+#demo-category { grid-column: 3; display: grid; grid-template-columns: repeat(6,1fr); gap: 3px; }
+#demo-block { grid-column: 4; display: grid; grid-template-columns: repeat(2,1fr); gap: 3px; align-content: center; }
+#demo-block button:first-child { grid-column: 1 / 3; }
+#demo-presets { grid-column: 5; display: grid; grid-template-columns: repeat(6,1fr); gap: 3px; }
+#demo-fine { grid-column: 6; display: grid; grid-template-columns: repeat(2,1fr); align-content: center; }
+#demo-fixture label { display: inline-block; margin: 8px; }
+#demo-fixture input { max-width: 18rem; }
+#demo-state { font-size: 13px; }
 </style>
 <h1>Sony screen control - logic bench</h1>
 <p><a href="/">Internet radio / NOW PLAYING</a></p>
+<section id="travel-demo">
+<h2>DAR-1000ES travel front panel</h2>
+<label><input id="demo-enabled" type="checkbox"> Enable browser-only travel demo</label>
+<p id="demo-notice" role="status"></p>
+<div class="demo-scroll">
+<div id="demo-panel" class="demo-panel">
+ <div id="demo-power"></div><div id="demo-display"></div>
+ <canvas id="demo-canvas" width="1320" height="160" role="img"
+   aria-label="Sony 22-cell 5 by 7 pixel display preview"></canvas>
+ <div id="demo-link"></div><div id="demo-category"></div>
+ <div id="demo-block"></div><div id="demo-presets"></div><div id="demo-fine"></div>
+</div></div>
+<p id="demo-state" aria-live="polite"></p>
+<details id="demo-fixture"><summary>Dummy station / AirPlay metadata and preset assignments</summary>
+ <p>Dummy VU and equalizer bars are animated, not measured audio. LINK switches
+ to AirPlay; an empty song title shows &lt;&lt;AirPlay&gt;&gt;. Display Mode cycles
+ views and OFF; hold it for DIM. CHECK starts Stereo VU from OFF.
+ MEMORY followed by a number saves a browser-local preset.</p>
+ <label>Source <select id="demo-source"><option>Radio</option><option>AirPlay</option></select></label>
+ <label>Station <input id="demo-station" maxlength="160"></label>
+ <label>Song <input id="demo-title" maxlength="160"></label>
+ <label>Artist <input id="demo-artist" maxlength="160"></label>
+ <label>Source device, if known <input id="demo-device" maxlength="64"></label>
+ <button id="demo-apply" type="button">Apply dummy metadata</button><br>
+ <label>Preset <input id="demo-preset" type="number" min="1" max="16" value="1"></label>
+ <label>Name (blank = unassigned) <input id="demo-preset-name" maxlength="64"></label>
+ <button id="demo-assign" type="button">Save dummy preset</button>
+ <p>Country/category/browse controls simulate the proposed interaction; they
+ do not search a real radio directory or operate the real firmware keypad.</p>
+</details>
+</section>
+<div id="hardware-bench">
 <h2>Hardware / GPIO profile</h2>
 <label>Pin profile <select id="pin-profile" disabled>
  <option value="original">V1 original / TXS0108E</option>
@@ -361,6 +414,7 @@ Sony command; it uses the same initialization and CLEAR LOW stopping.</p>
 <button data-sample="stop">Stop</button>
 <pre id="status" aria-live="polite">Connecting...</pre>
 <a href="/settings">Wi-Fi settings</a>
+</div>
 <script>
 const status = document.getElementById("status");
 const names = ["FLGDATA", "FLGCLK", "FLCLEAR", "FLSTB", "FLSDATA", "FLSCLK"];
@@ -414,6 +468,7 @@ async function request(options) {
     signal: AbortSignal.timeout(5000)});
   if (!response.ok) throw new Error(await response.text());
   const state = await response.json();
+  if (window.sonyFrontPanel) window.sonyFrontPanel.observe(state);
   renderPinControls(state);
   status.textContent = (state.running ? "Scanning" : "Idle / outputs held safe") +
     "\nPin profile: " + (state.pin_profile_name || "Original") +
@@ -598,4 +653,5 @@ document.getElementById("timing-load").onclick = () => {
 timingEstimate();
 </script>
 <script src="/display-editor.js"></script>
+<script src="/front-panel.js"></script>
 </html>

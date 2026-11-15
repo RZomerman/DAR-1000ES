@@ -5,7 +5,7 @@ const html = fs.readFileSync("data/www/radio.html", "utf8");
 class Element {
   constructor() {
     this.events = {};
-    this.value = "0.5";
+    this.value = "1.2";
     this.checked = false;
     this.disabled = false;
   }
@@ -31,6 +31,8 @@ const context = vm.createContext({document, console, AbortSignal,
   fetch: async (url, options) => {
     requests.push({url, options});
     return {ok:true, json:async () => url === "/api/screen" ? {...state} :
+      url === "/api/radio/presets" ? Array.from({length:16}, (_, i) =>
+        ({number:i + 1, name:i === 0 ? "Test station" : "", url:i === 0 ? "https://example.com/a" : ""})) :
       {source:"Radio", station:"Station", airplay_available:false}};
   }
 });
@@ -42,16 +44,34 @@ vm.runInContext(scripts.at(-1)[1], context);
   assert.equal(requests.filter(r => r.options?.method === "POST").length, 0,
     "Loading the webpage must never start outputs");
   assert.equal(elements["airplay-help"].hidden, true);
-  for (const percent of [0.25, 0.5, 0.75]) {
+  assert.equal(elements["preset-name-1"].value, "Test station");
+  assert.equal(elements["preset-url-1"].value, "https://example.com/a");
+  elements["preset-name-16"].value = "Sixteen";
+  elements["preset-url-16"].value = "https://example.com/live";
+  await vm.runInContext("savePreset(16)", context);
+  assert.deepEqual(JSON.parse(requests.at(-1).options.body),
+    {number:16, name:"Sixteen", url:"https://example.com/live"});
+  elements["preset-name-16"].value = "";
+  elements["preset-url-16"].value = "";
+  await vm.runInContext("savePreset(16)", context);
+  assert.deepEqual(JSON.parse(requests.at(-1).options.body),
+    {number:16, name:"", url:""});
+  requests.length = 0;
+  assert.match(html, /<option value="1\.2" selected>/);
+  for (const percent of [1.2, 1.4, 1.6, 1, 0.75]) {
     const timing = vm.runInContext(`screenTiming(${percent})`, context);
     const transfer = timing.blank_before_ns + 41 * (
       timing.setup_ns + timing.clock_low_ns + timing.clock_high_ns) +
       timing.strobe_ns + timing.latch_guard_ns + timing.blank_after_ns;
     const slot = transfer + timing.on_ns + timing.off_ns;
     assert.equal(slot, 300000);
-    assert.equal(timing.on_ns / (26 * slot), percent / 100);
+    assert.ok(Math.abs(timing.on_ns / (26 * slot) - percent / 100) <= 62.5 / (26 * slot));
+    assert.equal(timing.on_ns % 125, 0);
   }
-  for (const invalid of [-1, 0, 1, 3.75, NaN, Infinity])
+  assert.equal(vm.runInContext("screenTiming(1.2).on_ns", context), 93625);
+  assert.equal(vm.runInContext("screenTiming(1.4).on_ns", context), 109250);
+  assert.equal(vm.runInContext("screenTiming(1.6).on_ns", context), 124750);
+  for (const invalid of [-1, 0, 0.25, 0.5, 3.75, NaN, Infinity])
     assert.throws(() => vm.runInContext(`screenTiming(${invalid})`, context));
   await vm.runInContext("screenCommand(false)", context);
   assert.equal(requests.filter(r => r.options?.method === "POST").length, 0);
@@ -64,14 +84,14 @@ vm.runInContext(scripts.at(-1)[1], context);
   assert.equal(command.visualization, "now_playing");
   assert.equal(command.display_mode, "now_playing");
   assert.equal(command.live_confirmed, true);
-  assert.equal(command.timing.on_ns, 39000);
+  assert.equal(command.timing.on_ns, 93625);
   assert.equal(command.words.length, 26);
   elements["vfd-mode"].value = "equalizer";
   assert.equal(requests.filter(r => r.options?.method === "POST").length, 1,
     "Selecting a mode must not start output");
   await vm.runInContext("screenCommand(false)", context);
   assert.equal(JSON.parse(requests.at(-1).options.body).visualization, "spectrum");
-  vm.runInContext('renderScreen({...screenState,running:true,now_playing:true,visualization:"spectrum"})', context);
+  vm.runInContext('renderScreen({...screenState,running:true,now_playing:true,visualization:"spectrum",display_mode:"equalizer"})', context);
   assert.match(elements["vfd-status"].textContent, /11 LEFT \+ 11 RIGHT/);
   elements["vfd-mode"].value = "invalid";
   const beforeInvalid = requests.length;
@@ -97,7 +117,7 @@ vm.runInContext(scripts.at(-1)[1], context);
     ["Timing", "stop"], "Stop during a pending start must not be discarded");
   context.fetch = normalFetch;
   const modes = ["now_playing", "stream_source", "audio_format", "bitrate",
-    "station_genre", "stream_url", "equalizer", "esp_ip"];
+    "station_genre", "stream_url", "equalizer", "esp_ip", "vu_stereo", "vu_center"];
   for (const mode of modes) {
     elements["vfd-mode"].value = mode;
     const before = requests.length;
@@ -105,15 +125,17 @@ vm.runInContext(scripts.at(-1)[1], context);
     assert.equal(requests.length, before + 1);
     const body = JSON.parse(requests.at(-1).options.body);
     assert.equal(body.display_mode, mode);
-    assert.equal(body.visualization, mode === "equalizer" ? "spectrum" : "now_playing");
+    assert.equal(body.visualization, ["equalizer", "vu_stereo", "vu_center"].includes(mode) ? "spectrum" : "now_playing");
   }
   const beforeStoppedButton = requests.length;
   await vm.runInContext('screenCommand(false, "short_press")', context);
   await vm.runInContext('screenCommand(false, "long_press")', context);
   assert.equal(requests.length, beforeStoppedButton, "Button controls must not start stopped output");
-  vm.runInContext('renderScreen({...screenState,running:true,now_playing:true,display_mode:"stream_source",display_mode_label:"Stream Source",dim_level:2,timing_grid_duty:0.0075})', context);
+  vm.runInContext('renderScreen({...screenState,running:true,now_playing:true,display_mode:"stream_source",display_mode_label:"Stream Source",dim_level:4,timing_grid_duty:0.0075})', context);
   assert.equal(elements["vfd-mode"].value, "stream_source");
   assert.equal(elements["grid-duty"].value, "0.75");
+  vm.runInContext('renderScreen({...screenState,dim_level:2,timing_grid_duty:124750/7800000})', context);
+  assert.equal(elements["grid-duty"].value, "1.6");
   assert.equal(elements["vfd-next-mode"].disabled, false);
   assert.match(elements["vfd-status"].textContent, /Stream Source/);
   for (const action of ["short_press", "long_press"]) {

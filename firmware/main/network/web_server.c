@@ -21,8 +21,12 @@
 #include "rtsp_server.h"
 #include "audio_output.h"
 #include "radio.h"
+#ifdef CONFIG_SONY_UART_LINK
+#include "sony_uart_link.h"
+#endif
 #ifdef CONFIG_SONY_SCREEN_BENCH
 #include "sony_screen.h"
+#include "sony_keypad.h"
 #endif
 #include "esp_app_desc.h"
 #include "esp_timer.h"
@@ -102,8 +106,15 @@ static esp_err_t root_handler(httpd_req_t *req) {
 static esp_err_t screen_page_handler(httpd_req_t *req) {
   return serve_spiffs_file(req, "/spiffs/www/screen.html", "text/html");
 }
+static esp_err_t keypad_page_handler(httpd_req_t *req) {
+  return serve_spiffs_file(req, "/spiffs/www/keypad.html", "text/html");
+}
 static esp_err_t display_editor_handler(httpd_req_t *req) {
   return serve_spiffs_file(req, "/spiffs/www/display-editor.js",
+                           "application/javascript");
+}
+static esp_err_t front_panel_handler(httpd_req_t *req) {
+  return serve_spiffs_file(req, "/spiffs/www/front-panel.js",
                            "application/javascript");
 }
 static esp_err_t display_reference_handler(httpd_req_t *req) {
@@ -1328,7 +1339,13 @@ esp_err_t web_server_start(uint16_t port) {
 #endif
   config.lru_purge_enable = true; // Reclaim stale sockets when all are in use
   config.max_uri_handlers =
-      34; // Includes radio controls and the original settings page.
+      36; // Includes radio controls and the original settings page.
+#ifdef CONFIG_SONY_UART_LINK
+  config.max_uri_handlers += 2;
+#endif
+#ifdef CONFIG_SONY_SCREEN_BENCH
+  config.max_uri_handlers += 4;
+#endif
 #ifdef CONFIG_SONY_MANUAL_CONTROLS
   config.max_uri_handlers += 1;
 #endif
@@ -1349,6 +1366,11 @@ esp_err_t web_server_start(uint16_t port) {
   }
 
   // Register handlers
+#ifdef CONFIG_SONY_UART_LINK
+  err = sony_uart_link_register_http(s_server);
+  if (err != ESP_OK)
+    return err;
+#endif
   httpd_uri_t root_uri = {
       .uri = "/", .method = HTTP_GET, .handler = root_handler};
   httpd_register_uri_handler(s_server, &root_uri);
@@ -1364,6 +1386,12 @@ esp_err_t web_server_start(uint16_t port) {
   err = httpd_register_uri_handler(s_server, &display_editor_uri);
   if (err != ESP_OK)
     return err;
+  httpd_uri_t front_panel_uri = {.uri = "/front-panel.js",
+                                 .method = HTTP_GET,
+                                 .handler = front_panel_handler};
+  err = httpd_register_uri_handler(s_server, &front_panel_uri);
+  if (err != ESP_OK)
+    return err;
   httpd_uri_t display_reference_uri = {.uri = "/display-reference.png",
                                        .method = HTTP_GET,
                                        .handler = display_reference_handler};
@@ -1371,6 +1399,14 @@ esp_err_t web_server_start(uint16_t port) {
   if (err != ESP_OK)
     return err;
   err = sony_screen_register_http(s_server);
+  if (err != ESP_OK)
+    return err;
+  httpd_uri_t keypad_page_uri = {.uri = "/keypad", .method = HTTP_GET,
+                                 .handler = keypad_page_handler};
+  err = httpd_register_uri_handler(s_server, &keypad_page_uri);
+  if (err != ESP_OK)
+    return err;
+  err = sony_keypad_register_http(s_server);
   if (err != ESP_OK)
     return err;
 #endif

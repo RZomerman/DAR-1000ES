@@ -51,6 +51,8 @@ digits, punctuation, a music note and seven level bars.
 11. [Live ESP32 Display Driver and Validation](11-live-display-driver-and-validation.md)
 12. [TD62C950RF Timing Revalidation](12-td62c950rf-timing-revalidation.md)
 13. [Screen Driver Operating Guide](13-screen-driver-operating-guide.md)
+14. [Keypad Mapping](14-keypad-mapping.md)
+15. [Split-setup Architecture and Travel Demo](15-split-setup-architecture.md)
 
 Images used by the chapters are stored in [`media/`](media/).
 

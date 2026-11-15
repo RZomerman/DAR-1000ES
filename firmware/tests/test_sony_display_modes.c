@@ -15,7 +15,7 @@ int main(void) {
   const char *expected[] = {
       metadata.title, "Radio - Example FM", "MP3 44.1 kHz STEREO",
       "192 kbps", "Genre: Mixed", "URL: https://example.com/live.mp3",
-      "", "ESP IP: 172.16.5.207"};
+      "ESP IP: 172.16.5.207", "", "", ""};
   for (unsigned mode = 0; mode < SONY_DISPLAY_MODE_COUNT; ++mode) {
     sony_display_mode_text((sony_display_mode_t)mode, text, sizeof(text), &metadata);
     assert(!strcmp(text, expected[mode]));
@@ -61,6 +61,8 @@ int main(void) {
   assert(sony_text_parse(&parsed, small, 0));
 
   sony_display_mode_t mode;
+  assert(SONY_DISPLAY_VU_STEREO == SONY_DISPLAY_EQUALIZER + 1);
+  assert(SONY_DISPLAY_VU_CENTER == SONY_DISPLAY_VU_STEREO + 1);
   assert(sony_display_mode_parse("spectrum", &mode) && mode == SONY_DISPLAY_EQUALIZER);
   assert(!sony_display_mode_parse("unknown", &mode));
   assert(!sony_display_mode_parse(NULL, &mode));
@@ -71,28 +73,29 @@ int main(void) {
       .blank_before_ns=10000, .blank_after_ns=10000,
       .on_ns=58500, .off_ns=104000, .pulses=1};
   sony_timing_t original = timing;
+  const unsigned on[] = {93625, 109250, 124750, 78000, 58500};
   size_t slot_samples = sony_timing_info(&timing).slot_samples;
-  for (unsigned i = 0; i < 6; ++i) {
+  for (unsigned i = 0; i < 10; ++i) {
     assert(sony_display_dim_next(&timing));
-    assert(sony_display_dim_level(&timing) == (int)(i % 3));
+    assert(sony_display_dim_level(&timing) == (int)(i % 5));
     assert(sony_timing_info(&timing).slot_samples == slot_samples);
-    assert(timing.on_ns == 19500 * (i % 3 + 1));
+    assert(timing.on_ns == on[i % 5]);
     assert(timing.on_ns + timing.off_ns == 162500);
     sony_timing_t edges = timing;
     edges.on_ns = original.on_ns;
     edges.off_ns = original.off_ns;
     assert(!memcmp(&edges, &original, sizeof(edges)));
   }
-  timing.on_ns = 78000;
-  timing.off_ns = 84500;
+  timing.on_ns = 39000;
+  timing.off_ns = 123500;
   assert(sony_display_dim_level(&timing) == -1);
-  assert(sony_display_dim_next(&timing) && timing.on_ns == 19500);
+  assert(sony_display_dim_next(&timing) && timing.on_ns == 93625);
   for (unsigned i = 0; i < 4; ++i) {
     sony_timing_t invalid = original;
     if (i == 0) invalid.hold = 1;
     if (i == 1) { invalid.pair = 1; invalid.slot = 1; }
     if (i == 2) invalid.pulses = 2;
-    if (i == 3) invalid.off_ns += 125;
+    if (i == 3) { invalid.on_ns = 250; invalid.off_ns = 2000; }
     sony_timing_t before = invalid;
     assert(!sony_display_dim_next(&invalid));
     assert(!memcmp(&invalid, &before, sizeof(invalid)));

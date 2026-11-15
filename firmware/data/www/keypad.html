@@ -1,0 +1,97 @@
+<!doctype html>
+<html lang="en">
+<head><meta charset="utf-8"><meta name="viewport" content="width=device-width">
+<title>TCA8418 keypad diagnostics</title>
+<style>
+body { max-width: 52rem; margin: 2rem auto; padding: 0 1rem; font: 16px system-ui; }
+label { display: block; margin: .8rem 0; } input[type=number] { width: 4rem; }
+button { padding: .5rem; } #events { white-space: pre-wrap; }
+</style></head>
+<body>
+<h1>TCA8418 keypad diagnostics</h1>
+<p><a href="/">Radio</a> | <a href="/screen">Screen</a></p>
+<p>GPIO9 SCL, GPIO10 SDA; INT and RST unconnected; I²C address 0x34. Detection is
+read-only. Scanning is restored on boot only when the isolated 6 × 9 matrix
+has been explicitly remembered below. Disabling scanning clears that setting.</p>
+<p id="status">Connecting...</p>
+<h2>Matrix scan</h2>
+<p><strong>Scanning drives selected row/column pins.</strong> Enable only if
+they connect exclusively to isolated passive switches—not to the original
+Sony controller or another powered circuit. Pin counts use consecutive
+ROW0 onward and COL0 onward. Unknown wiring: leave scanning off.</p>
+<label>Rows (1–8) <input id="rows" type="number" min="1" max="8" value="1"></label>
+<label>Columns (1–10) <input id="columns" type="number" min="1" max="10" value="1"></label>
+<label><input id="confirm" type="checkbox"> I verified these matrix lines
+connect only to isolated passive switches.</label>
+<label><input id="remember" type="checkbox"> Remember this isolated 6 × 9
+matrix and automatically resume scanning after reboot. Uncheck or disable
+scanning before changing the wiring.</label>
+<button id="enable">Enable matrix scan</button>
+<button id="disable">Disable scan</button>
+<p id="error" role="alert"></p>
+<h2>Recent press/release events</h2>
+<p>Rows and columns are zero-based. The last 32 events are retained until reboot;
+overflow indicates events were lost. A short press of Display Mode (R5–C7)
+starts a stopped display in Now Playing, then cycles display modes and OFF.
+A long press changes DIM once while DISPLAY is still held; a short press
+acts after release.</p>
+<p>CHECK (R2–C4) starts a stopped display in Stereo VU. DISPLAY and CHECK
+restore the brightness from before OFF, initially 1.2% after reboot.
+Neither button can sense Sony power or buffer /OE: use either start action
+only after the Sony is powered, the original drivers are isolated and outputs are ready.
+It does not replace a running scan.</p>
+<p>Preset buttons 1–16 briefly show the preset number, then the search
+animation and connected station name, before returning to the selected mode.
+An unassigned button shows “Unassigned” without changing station.</p>
+<pre id="events">No events.</pre>
+<script>
+const $ = id => document.getElementById(id);
+let busy = false;
+async function request(body) {
+  const response = await fetch('/api/keypad', {
+    cache: 'no-store', ...(body ? {method:'POST',
+      headers:{'Content-Type':'application/json'}, body:JSON.stringify(body)} : {})
+  });
+  if (!response.ok) throw new Error(await response.text());
+  return response.json();
+}
+function render(state) {
+  $('status').textContent = (state.present ? 'TCA8418 responding' : 'TCA8418 not detected') +
+    ' · managed scan ' + (state.scanning ? 'ON (' + state.rows + ' × ' + state.columns + ')' : 'OFF') +
+    ' · auto-resume ' + (state.restore_on_boot ? 'ON' : 'off') +
+    ' · hardware scan ' + (state.present ? (state.hardware_scan_active ? 'ACTIVE' : 'off') : 'unknown') +
+    ' · I²C errors ' + state.errors +
+    ' · FIFO overflows ' + state.overflows + ' · ' + state.last_error;
+  $('events').textContent = state.events.length ? state.events.map(event =>
+    '#' + event.sequence + '  ' + (event.pressed ? 'PRESS' : 'RELEASE') +
+    (event.row === undefined ? '  code ' + event.code :
+      '  ROW' + event.row + ' COL' + event.column + '  code ' + event.code)
+  ).join('\n') : 'No events.';
+}
+async function command(enable) {
+  if (busy) return;
+  if (enable && !$('confirm').checked) {
+    $('error').textContent = 'Confirm isolated passive switch wiring first.';
+    return;
+  }
+  busy = true;
+  try {
+    $('error').textContent = '';
+    const body = enable ? {enable:true, rows:Number($('rows').value),
+      columns:Number($('columns').value), isolated_matrix_confirmed:true} : {enable:false};
+    if (enable && $('remember').checked) body.remember = true;
+    render(await request(body));
+  } catch (error) { $('error').textContent = error.message; }
+  finally { busy = false; }
+}
+$('enable').addEventListener('click', () => command(true));
+$('disable').addEventListener('click', () => command(false));
+async function poll() {
+  if (!busy) {
+    try { render(await request()); }
+    catch (error) { $('status').textContent = 'Keypad status unavailable: ' + error.message; }
+  }
+  setTimeout(poll, 500);
+}
+poll();
+</script></body></html>
