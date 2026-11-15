@@ -58,6 +58,9 @@ static const uint64_t no_dsr[] = {0x045257C62FULL,
                                   0,
                                   0};
 static uint64_t words[26];
+static uint64_t output_words[26];
+static bool output_valid;
+static int64_t output_frame_us;
 static sony_text_t scrolling_text;
 static bool display_dim = true;
 static atomic_bool running;
@@ -537,9 +540,20 @@ static esp_err_t gpio_pair_cycle(uint8_t *wave, const uint64_t frame[26],
   return err == ESP_OK ? blank : err;
 }
 
+static void record_output_frame(const uint64_t frame[26]) {
+  portENTER_CRITICAL(&frame_lock);
+  memcpy(output_words, frame, sizeof(output_words));
+  output_valid = true;
+  output_frame_us = esp_timer_get_time();
+  portEXIT_CRITICAL(&frame_lock);
+}
+
 static void scan_task(void *unused) {
   (void)unused;
   if (atomic_load(&display_requested)) {
+    portENTER_CRITICAL(&frame_lock);
+    output_valid = false;
+    portEXIT_CRITICAL(&frame_lock);
     sony_scan_engine_t *engine = NULL;
     bool timed = atomic_load(&timing_requested);
     bool engine_held = false;
@@ -648,6 +662,7 @@ static void scan_task(void *unused) {
       err = timed ? sony_scan_submit_timed(engine, frame, &timing)
                   : sony_scan_submit(engine, frame, dim);
       if (err == ESP_OK) {
+        record_output_frame(frame);
         engine_blanked = false;
         if (timed && timing.hold) {
           if (prior_held_slot != (int)timing.slot) {
@@ -830,6 +845,27 @@ esp_err_t sony_screen_display_button_press(bool long_press) {
   return err;
 }
 
+bool sony_screen_is_running(void) { return atomic_load(&running); }
+
+static void stop_display_locked(void) {
+  portENTER_CRITICAL(&frame_lock);
+  remember_radio_timing_locked();
+  atomic_store(&stop_requested, true);
+  follow_radio = follow_spectrum = false;
+  portEXIT_CRITICAL(&frame_lock);
+  sony_spectrum_enable(false);
+  if (!atomic_load(&running))
+    restore_idle_outputs();
+}
+
+void sony_screen_stop(void) {
+  if (!control_lock)
+    return;
+  xSemaphoreTake(control_lock, portMAX_DELAY);
+  stop_display_locked();
+  xSemaphoreGive(control_lock);
+}
+
 static esp_err_t release_profile(const sony_pin_profile_t *profile) {
   uint64_t mask = 0;
   for (unsigned i = 0; i < 6; ++i)
@@ -897,13 +933,20 @@ static esp_err_t status_handler(httpd_req_t *req) {
                         atomic_load(&running) &&
                             atomic_load(&display_requested));
   cJSON *frame_words = cJSON_AddArrayToObject(root, "words");
-  if (!frame_words) {
+  cJSON *submitted_words = cJSON_AddArrayToObject(root, "output_words");
+  if (!frame_words || !submitted_words) {
     cJSON_Delete(root);
     return httpd_resp_send_err(req, HTTPD_500_INTERNAL_SERVER_ERROR,
                                "Out of memory");
   }
   uint64_t frame[26];
+  uint64_t output[26] = {0};
   portENTER_CRITICAL(&frame_lock);
+  bool valid_output = output_valid && atomic_load(&running) &&
+      atomic_load(&display_requested) && !atomic_load(&stop_requested);
+  if (valid_output)
+    memcpy(output, output_words, sizeof(output));
+  int64_t output_age = valid_output ? esp_timer_get_time() - output_frame_us : -1;
   memcpy(frame, words, sizeof(frame));
   if (follow_radio && atomic_load(&running))
     preset_overlay_frame(esp_timer_get_time(), frame);
@@ -912,6 +955,13 @@ static esp_err_t status_handler(httpd_req_t *req) {
                    scrolling_text.scroll && scrolling_text.length > scrolling_width;
   sony_timing_t timing = display_timing;
   portEXIT_CRITICAL(&frame_lock);
+  cJSON_AddBoolToObject(root, "output_frame_valid", valid_output);
+  cJSON_AddNumberToObject(root, "output_frame_age_ms", output_age < 0 ? -1 : output_age / 1000);
+  for (unsigned i = 0; i < 26; ++i) {
+    char hex[11];
+    snprintf(hex, sizeof(hex), "%010llX", (unsigned long long)output[i]);
+    cJSON_AddItemToArray(submitted_words, cJSON_CreateString(hex));
+  }
   cJSON_AddStringToObject(root, "brightness", dim ? "dim" : "bright");
   cJSON_AddBoolToObject(root, "scrolling", scrolling);
   cJSON_AddBoolToObject(root, "timing_running",
@@ -1140,15 +1190,7 @@ static esp_err_t control_handler_unlocked(httpd_req_t *req) {
     return status_handler(req);
   }
   if (cJSON_IsString(sample) && strcmp(sample->valuestring, "stop") == 0) {
-    portENTER_CRITICAL(&frame_lock);
-    remember_radio_timing_locked();
-    atomic_store(&stop_requested, true);
-    follow_radio = false;
-    follow_spectrum = false;
-    portEXIT_CRITICAL(&frame_lock);
-    sony_spectrum_enable(false);
-    if (!atomic_load(&running))
-      restore_idle_outputs();
+    stop_display_locked();
     cJSON_Delete(root);
     return status_handler(req);
   }

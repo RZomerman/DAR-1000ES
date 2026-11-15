@@ -13,3 +13,5 @@ esp_err_t sony_screen_display_mode_press(bool long_press);
 esp_err_t sony_screen_display_button_press(bool long_press);
 /* CHECK is an explicit manual authorization; it never replaces a running scan. */
 esp_err_t sony_screen_start_from_check(void);
+bool sony_screen_is_running(void);
+void sony_screen_stop(void);

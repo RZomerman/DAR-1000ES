@@ -7,6 +7,87 @@ ROOT = Path(__file__).resolve().parents[1]
 
 
 class KeypadConfigurationTests(unittest.TestCase):
+    def test_virtual_and_physical_events_share_actions_and_lost_lease_cancels(self):
+        source = (ROOT / "main/sony_keypad.c").read_text()
+        decoder = source[source.index("enum { DISPLAY_KEY_CODE"):
+                         source.index("static void bus_delay(void)")]
+        dispatch = source[source.index("static void record_key("):
+                          source.index("static esp_err_t disable_scan(void)")]
+        harness = r"""
+#include <assert.h>
+#include <stdbool.h>
+#include <stdint.h>
+#include <string.h>
+enum { EVENT_CAPACITY = 32 };
+typedef struct {
+    uint32_t sequence;
+    uint8_t raw;
+    int64_t time_ms;
+    bool virtual_input;
+} key_event_t;
+static key_event_t events[EVENT_CAPACITY];
+static uint32_t sequence;
+static bool virtual_enabled;
+static int64_t virtual_seen_ms;
+static int actions[16], count, stops;
+static int sony_screen_start_from_check(void) { actions[count++] = 18; return 0; }
+static int radio_select_preset(unsigned number) { actions[count++] = number + 1; return 0; }
+static int sony_screen_display_button_press(bool long_press) {
+    actions[count++] = long_press; return 0;
+}
+static void sony_screen_stop(void) { ++stops; }
+""" + decoder + dispatch + r"""
+static void tick(bool virtual_input, int64_t now) {
+    if (virtual_input) poll_virtual(now);
+    else dispatch_button(display_button_poll(&display_button, now));
+}
+int main(void) {
+    for (unsigned source = 0; source < 2; ++source) {
+        count = 0;
+        virtual_enabled = source;
+        virtual_seen_ms = 0;
+        display_button_reset(&display_button, 0);
+        tick(source, 200);
+        record_key(0xba, 300, source, true);
+        tick(source, 360);
+        tick(source, 1500);
+        record_key(0x3a, 1600, source, true);
+        tick(source, 1660);
+        assert(count == 1 && actions[0] == 1);
+        record_key(0x99, 2500, source, true);
+        tick(source, 2560);
+        record_key(0x19, 2600, source, true);
+        tick(source, 2660);
+        assert(count == 2 && actions[1] == 18);
+        record_key(0x89, 3500, source, true);
+        tick(source, 3560);
+        record_key(0x09, 3700, source, true);
+        tick(source, 3760);
+        assert(count == 3 && actions[2] == 9);
+        record_key(0xa3, 4000, source, true);
+        tick(source, 4060);
+        record_key(0x23, 4200, source, true);
+        tick(source, 4260);
+        assert(count == 3);
+        assert(events[(sequence - 1) % EVENT_CAPACITY].virtual_input == (bool)source);
+    }
+    record_key(0xba, 5000, true, true);
+    virtual_seen_ms = 5000;
+    virtual_enabled = true;
+    poll_virtual(11001);
+    assert(!virtual_enabled && stops == 1 && count == 3);
+    assert(!display_button.down[0] && !display_button.down[1]);
+    return 0;
+}
+"""
+        with tempfile.TemporaryDirectory() as temp:
+            path = Path(temp) / "virtual.c"
+            path.write_text(harness)
+            binary = Path(temp) / "virtual"
+            subprocess.run(["cc", "-Wall", "-Wextra", "-Werror",
+                            str(path), "-o", str(binary)], check=True)
+            subprocess.run([str(binary)], check=True)
+
     def test_matrix_selection_and_failure_cleanup(self):
         source = (ROOT / "main/sony_keypad.c").read_text()
         functions = source[source.index("static esp_err_t disable_scan(void)"):

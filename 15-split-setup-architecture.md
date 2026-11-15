@@ -7,7 +7,8 @@ and an audio receiver. The controller must also support portable interface
 development without the Sony, keypad or audio ESP.
 
 **Keep implemented behavior separate from the target architecture.**
-Firmware 0.3.47 adds the browser-only travel front panel. The existing
+Firmware 0.3.48 replaces the browser-only simulator with a hardware-backed
+virtual front panel. The existing
 controller still runs its original local radio decoder; audio playback has
 not yet been migrated to the second ESP. The UART firmware currently provides
 a diagnostic heartbeat and isolated GPIO mapping, not station commands or
@@ -31,7 +32,7 @@ validation remain pending.
 | --- | --- |
 | Sony display scanning, brightness and display modes | Wi-Fi radio stream connection and MP3/AAC decoding |
 | Physical keypad, presets and navigation | Optional AirPlay receiver |
-| Front-panel web interface and travel simulator | Source arbitration between radio and AirPlay |
+| Front-panel web interface and virtual keypad | Source arbitration between radio and AirPlay |
 | Select a station and request playback over UART | Actual PCM playback and 48 kHz S/PDIF generation |
 | Render received source/song information | Send station/song/source-device information |
 | Render received VU and equalizer levels | Measure stereo VU and 11 frequency bands per channel |
@@ -166,53 +167,56 @@ front panel**, or go directly to:
 http://<controller-ip>/screen?demo=1#travel-demo
 ```
 
-All scripts/fonts are served by the controller; no Internet connection,
-audio board or Sony keypad is required. Use the controller's setup access
-point if the usual Wi-Fi network is unavailable.
+All scripts are served by the controller; an audio board and Sony keypad
+are not required. Use the controller's setup access point if the usual Wi-Fi
+network is unavailable. Actual radio playback still requires network access;
+the virtual panel does not invent stations, metadata or VU/spectrum levels.
 
-The simulator uses the existing bitmap encoder and all **22 physical 5x7
-cells**: 770 independently rendered matrix pixels. Slot 22 is the leftmost
-cell and slot 1 the rightmost; pixel bit numbering matches the
+The canvas renders all **22 physical 5x7 cells**: 770 matrix pixels from the
+last frame successfully submitted to the real display scan driver, not from
+browser-generated text. Slot 22 is the leftmost cell and slot 1 the rightmost;
+pixel bit numbering matches the
 [bitmap catalogue](10-display-bitmap-catalogue.md). The front-panel button
 groups follow the Sony reference photograph: left power/program/check,
 Display Mode beside the glass, category block below left, central
 memory/block keys, the 6-column numeric block, and right Direct/Link/Fine keys.
-This is an interface simulator, not a voltage/current or flicker simulator.
+This is a driver-frame preview, not a voltage/current, instantaneous grid
+state or optical/flicker measurement. The canvas draws matrix pixels; all
+26 raw output words, including fixed indicators and meter fields, are shown
+below it. Captured waveform replay and manual pair probes are not recorded
+as generated full-frame output.
 
-Enable **browser-only travel demo** to operate its controls. Real hardware
-controls are hidden in that mode. With demo disabled, the canvas is a
-read-only preview of the controller's actual frame.
+First disconnect all Sony-side signal wires, disable buffer outputs and stop
+physical screen/keypad scans. Confirm isolation, then select **Arm virtual
+keypad input**. Page load and the `demo=1` URL never arm inputs automatically.
+Real bench controls are hidden while this page owns an armed virtual session.
 
-| Virtual control | Demo behavior |
+| Virtual control | Actual firmware behavior |
 | --- | --- |
 | DISPLAY MODE | Cycle information/VU/equalizer modes and OFF |
-| Hold DISPLAY MODE | Change DIM once while held; no extra short press |
+| Hold DISPLAY MODE for 1.2 seconds | Change DIM once while held; no extra short press |
 | CHECK | Start Stereo VU only from OFF |
-| Presets 1-16 | Preset label, dummy loading, station announcement, selected mode |
-| MEMORY then number | Save the current dummy station to a browser-local preset |
-| MHz/CLEAR | Cancel the pending demo notice/memory action |
-| MONO MODE | Toggle the dummy mono state |
-| Category/Music/Speech | Select/cycle dummy categories |
-| UNDEFINED | Cycle dummy countries |
-| BLOCK/FINE +/- | Browse synthetic stations, with large/single steps |
-| LINK | Toggle dummy radio/AirPlay source |
-| POWER/PROGRAM/DIRECT | Toggle their local demo state |
+| Presets 1-16 | Select real saved presets using the same announcement/loading rules as physical keys |
+| Categories, MUSIC/SPEECH, MEMORY, BLOCK, MHz/CLEAR, MONO MODE | Log mapped raw events; no firmware action is implemented yet |
+| POWER, PROGRAM, DIRECT, LINK, FINE +/- | Disabled until physical mappings are verified |
 
-The **Dummy station / AirPlay metadata and preset assignments** section lets
-you supply station, song, artist and optional device name. An empty AirPlay
-song title displays `<<AirPlay>>`; Station/Source shows the supplied device
-name. Clearing a dummy preset's name makes it unassigned.
+Buttons resolve their TCA8418 codes from firmware `/api/keypad` bindings;
+tooltips show the code and matrix row/column. Each switch sends a raw press
+and release through the same debounce/hold dispatcher as the physical FIFO.
+Quick clicks provide a minimum 120 ms pulse; debounce remains 60 ms. The
+virtual input path skips physical I2C keypad polling while armed.
 
-VU/equalizer animation is synthetic and explicitly marked DEMO. The dummy
-loading interval is fixed; it is not a real network connection. Country,
-category, browse and memory interactions prototype the proposed interface,
-not currently implemented physical-keypad radio-directory functionality.
+**DISPLAY/CHECK start real display GPIO scanning on the disconnected pins.**
+The page shows the actual GPIO map reported by firmware: GDATA 2, GCLK 1,
+CLEAR 40, STB 38, SDATA 21 and SCLK 39 for the current AHCT v2 profile.
+Preset clicks can tune the real controller-local radio. No browser-local
+dummy preset assignments or synthetic source state remain.
 
-**Virtual buttons send no POST requests, GPIO, UART or keypad commands.**
-They do not tune real audio or change the real station/preset configuration.
-Dummy preset assignments and the demo-mode preference are stored in browser
-local storage for that controller origin, not in ESP NVS; another browser
-or controller address has a separate copy.
+Virtual requests carry the current arm-session number. Physical keypad
+configuration is rejected while virtual inputs are armed. Cancelling a
+pointer or losing browser focus releases the switch without a short action.
+**STOP / disarm**, explicitly disarming, or losing the heartbeat for more
+than six seconds resets pending keys and stops the real display driver.
 
 ## Safety and deployment
 
@@ -227,8 +231,10 @@ rail's spare current and the development board's power path still need
 verification. Do not parallel ordinary USB VBUS and external Sony 5 V without
 verified isolation/ORing. Never put 5 V on an ESP GPIO.
 
-The 0.3.47 controller image is 3,140,416 bytes, leaving 5,312 bytes in its
-3 MiB application slot. Its application slot and web filesystem were backed
-up before installing the travel interface. NVS and OTA metadata are preserved.
+The 0.3.48 controller image is 3,143,040 bytes, leaving 2,688 bytes in its
+3 MiB application slot. The installed 0.3.47 application slot and web
+filesystem were backed up before installation; application/filesystem writes
+preserved NVS and OTA metadata. A subsequent front-panel web fix was uploaded
+through the existing filesystem API without another flash/reset.
 The replacement audio factory backup is separate from the earlier audio
 board's backup; do not restore one board's full flash blindly onto the other.

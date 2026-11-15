@@ -27,6 +27,7 @@ typedef struct {
   uint32_t sequence;
   uint8_t raw;
   int64_t time_ms;
+  bool virtual_input;
 } key_event_t;
 
 static SemaphoreHandle_t lock;
@@ -37,6 +38,9 @@ static uint8_t chip_cfg, chip_status, chip_count, chip_gpio[3];
 static esp_err_t last_error;
 static uint32_t sequence;
 static key_event_t events[EVENT_CAPACITY];
+static bool virtual_enabled;
+static uint32_t virtual_session;
+static int64_t virtual_seen_ms;
 
 enum { DISPLAY_KEY_CODE = 58, CHECK_KEY_CODE = 25, BUTTON_CHECK_ACTION = 18,
        BUTTON_DEBOUNCE_MS = 60,
@@ -51,11 +55,23 @@ typedef struct {
 
 static display_button_t display_button;
 
+static const struct {
+  const char *name;
+  uint8_t code;
+} key_bindings[] = {
+    {"1",5}, {"2",6}, {"3",7}, {"4",8}, {"5",1}, {"6",2}, {"7",3}, {"8",9},
+    {"9",15}, {"10",16}, {"11",17}, {"12",18}, {"13",11}, {"14",12},
+    {"15",13}, {"16",19}, {"CHECK",25}, {"DISPLAY MODE",58},
+    {"NEWS",35}, {"AFFAIRS",36}, {"INFO",37}, {"SPORT",38}, {"EDUCATE",31},
+    {"DRAMA",32}, {"CULTURE",33}, {"SCIENCE",39}, {"VARIED",45},
+    {"POP M",46}, {"ROCK M",47}, {"M.O.R. M",48}, {"MUSIC",28}, {"SPEECH",21},
+    {"LIGHT M",41}, {"CLASSICS",42}, {"OTHER M",43}, {"UNDEFINED",49},
+    {"MEMORY",51}, {"MHz/CLEAR",52}, {"MONO MODE",29}, {"BLOCK -",59}, {"BLOCK +",53},
+};
+
 static int preset_number(unsigned code) {
-  static const uint8_t codes[] = {5, 6, 7, 8, 1, 2, 3, 9,
-                                  15, 16, 17, 18, 11, 12, 13, 19};
-  for (unsigned i = 0; i < sizeof(codes); ++i)
-    if (codes[i] == code) return (int)i + 1;
+  for (unsigned i = 0; i < 16; ++i)
+    if (key_bindings[i].code == code) return (int)i + 1;
   return 0;
 }
 
@@ -229,6 +245,33 @@ static esp_err_t write_reg(uint8_t reg, uint8_t value) {
   return err;
 }
 
+static void record_key(uint8_t raw, int64_t now, bool virtual_input, bool feed) {
+  ++sequence;
+  events[(sequence - 1) % EVENT_CAPACITY] =
+      (key_event_t){sequence, raw, now, virtual_input};
+  if (feed)
+    display_button_event(&display_button, raw, now);
+}
+
+static void dispatch_button(int action) {
+  if (action == BUTTON_CHECK_ACTION)
+    (void)sony_screen_start_from_check();
+  else if (action >= 2)
+    (void)radio_select_preset((unsigned)action - 1);
+  else if (action >= 0)
+    (void)sony_screen_display_button_press(action == 1);
+}
+
+static void poll_virtual(int64_t now) {
+  if (now - virtual_seen_ms > 6000) {
+    virtual_enabled = false;
+    display_button_reset(&display_button, now);
+    sony_screen_stop();
+  } else {
+    dispatch_button(display_button_poll(&display_button, now));
+  }
+}
+
 static esp_err_t disable_scan(void) {
   esp_err_t err = write_reg(REG_KP_ROW, 0);
   esp_err_t next = write_reg(REG_KP_COL, 0);
@@ -272,6 +315,12 @@ static void keypad_task(void *unused) {
   for (;;) {
     int button_action = -1;
     xSemaphoreTake(lock, portMAX_DELAY);
+    if (virtual_enabled) {
+      poll_virtual(esp_timer_get_time() / 1000);
+      xSemaphoreGive(lock);
+      vTaskDelay(pdMS_TO_TICKS(40));
+      continue;
+    }
     uint8_t cfg;
     esp_err_t err = read_reg(REG_CFG, &cfg);
     if (err == ESP_OK)
@@ -300,11 +349,7 @@ static void keypad_task(void *unused) {
         uint8_t raw;
         err = read_reg(REG_EVENT, &raw);
         if (err == ESP_OK && raw) {
-          ++sequence;
-          events[(sequence - 1) % EVENT_CAPACITY] =
-              (key_event_t){sequence, raw, esp_timer_get_time() / 1000};
-          if (!(status & 0x08))
-            display_button_event(&display_button, raw, esp_timer_get_time() / 1000);
+          record_key(raw, esp_timer_get_time() / 1000, false, !(status & 0x08));
         }
       }
       if (err == ESP_OK && (status & 0x08))
@@ -330,13 +375,8 @@ static void keypad_task(void *unused) {
         button_action = display_button_poll(&display_button, esp_timer_get_time() / 1000);
     }
     last_error = err;
+    dispatch_button(button_action);
     xSemaphoreGive(lock);
-    if (button_action == BUTTON_CHECK_ACTION)
-      (void)sony_screen_start_from_check();
-    else if (button_action >= 2)
-      (void)radio_select_preset((unsigned)button_action - 1);
-    else if (button_action >= 0)
-      (void)sony_screen_display_button_press(button_action == 1);
     vTaskDelay(pdMS_TO_TICKS(40));
   }
 }
@@ -375,6 +415,23 @@ static esp_err_t status_handler(httpd_req_t *req) {
   xSemaphoreTake(lock, portMAX_DELAY);
   cJSON_AddBoolToObject(root, "present", present);
   cJSON_AddBoolToObject(root, "scanning", scanning);
+  cJSON_AddBoolToObject(root, "virtual_enabled", virtual_enabled);
+  cJSON_AddNumberToObject(root, "virtual_session", virtual_session);
+  cJSON_AddNumberToObject(root, "button_debounce_ms", BUTTON_DEBOUNCE_MS);
+  cJSON_AddNumberToObject(root, "button_hold_ms", BUTTON_LONG_MS);
+  cJSON *bindings = cJSON_AddArrayToObject(root, "bindings");
+  if (bindings) {
+    for (unsigned i = 0; i < sizeof(key_bindings) / sizeof(key_bindings[0]); ++i) {
+      cJSON *binding = cJSON_CreateObject();
+      if (!binding) break;
+      cJSON_AddStringToObject(binding, "name", key_bindings[i].name);
+      cJSON_AddNumberToObject(binding, "code", key_bindings[i].code);
+      cJSON_AddBoolToObject(binding, "action",
+          i < 16 || key_bindings[i].code == CHECK_KEY_CODE ||
+          key_bindings[i].code == DISPLAY_KEY_CODE);
+      cJSON_AddItemToArray(bindings, binding);
+    }
+  }
   cJSON_AddBoolToObject(root, "restore_on_boot", restore_on_boot);
   cJSON_AddBoolToObject(root, "hardware_scan_active", present &&
       hardware_rows && (hardware_columns || (hardware_columns_hi & 3)));
@@ -406,6 +463,7 @@ static esp_err_t status_handler(httpd_req_t *req) {
       cJSON_AddNumberToObject(item, "raw", event.raw);
       cJSON_AddNumberToObject(item, "code", code);
       cJSON_AddBoolToObject(item, "pressed", (event.raw & 0x80) != 0);
+      cJSON_AddBoolToObject(item, "virtual", event.virtual_input);
       if (code >= 1 && code <= 80) {
         cJSON_AddNumberToObject(item, "row", (code - 1) / 10);
         cJSON_AddNumberToObject(item, "column", (code - 1) % 10);
@@ -442,6 +500,63 @@ static esp_err_t control_handler(httpd_req_t *req) {
   }
   body[used] = 0;
   cJSON *root = cJSON_Parse(body);
+  cJSON *virtual_enable = cJSON_GetObjectItemCaseSensitive(root, "virtual_enable");
+  cJSON *virtual_key = cJSON_GetObjectItemCaseSensitive(root, "virtual_key");
+  cJSON *keepalive = cJSON_GetObjectItemCaseSensitive(root, "virtual_keepalive");
+  if (virtual_enable || virtual_key || keepalive) {
+    cJSON *confirmed = cJSON_GetObjectItemCaseSensitive(root, "outputs_disconnected_confirmed");
+    cJSON *session = cJSON_GetObjectItemCaseSensitive(root, "session");
+    cJSON *pressed = cJSON_GetObjectItemCaseSensitive(root, "pressed");
+    cJSON *cancel = cJSON_GetObjectItemCaseSensitive(root, "cancel");
+    bool session_valid = cJSON_IsNumber(session) && session->valuedouble >= 1 &&
+        session->valuedouble <= UINT32_MAX &&
+        session->valuedouble == (uint32_t)session->valuedouble;
+    bool known = false;
+    if (cJSON_IsNumber(virtual_key))
+      for (unsigned i = 0; i < sizeof(key_bindings) / sizeof(key_bindings[0]); ++i)
+        if (virtual_key->valuedouble == key_bindings[i].code) known = true;
+    bool valid = !cJSON_GetObjectItemCaseSensitive(root, "enable") &&
+        (virtual_enable ? cJSON_IsBool(virtual_enable) && !virtual_key && !keepalive :
+         virtual_key ? known && cJSON_IsBool(pressed) && !keepalive &&
+             (!cancel || cJSON_IsBool(cancel)) && (!cJSON_IsTrue(cancel) || cJSON_IsFalse(pressed)) :
+         cJSON_IsTrue(keepalive));
+    if (!valid || (cJSON_IsTrue(virtual_enable) ? !cJSON_IsTrue(confirmed) : !session_valid)) {
+      cJSON_Delete(root);
+      return httpd_resp_send_err(req, HTTPD_400_BAD_REQUEST,
+          "Confirm disconnected outputs to arm; use session and mapped press/release codes");
+    }
+    xSemaphoreTake(lock, portMAX_DELAY);
+    bool accepted;
+    int64_t now = esp_timer_get_time() / 1000;
+    if (cJSON_IsTrue(virtual_enable)) {
+      accepted = !virtual_enabled && !scanning && !sony_screen_is_running();
+      if (accepted) {
+        virtual_enabled = true;
+        if (++virtual_session == 0) ++virtual_session;
+        display_button_reset(&display_button, now);
+      }
+    } else {
+      accepted = virtual_enabled && session->valuedouble == virtual_session;
+      if (accepted && cJSON_IsFalse(virtual_enable)) {
+        virtual_enabled = false;
+        display_button_reset(&display_button, now);
+        sony_screen_stop();
+      } else if (accepted && virtual_key) {
+        uint8_t raw = (uint8_t)virtual_key->valueint | (cJSON_IsTrue(pressed) ? 0x80 : 0);
+        record_key(raw, now, true, true);
+        if (cJSON_IsTrue(cancel))
+          display_button_reset(&display_button, now);
+      }
+    }
+    if (accepted) virtual_seen_ms = now;
+    xSemaphoreGive(lock);
+    cJSON_Delete(root);
+    if (!accepted) {
+      httpd_resp_set_status(req, "409 Conflict");
+      return httpd_resp_sendstr(req, "Stop physical scans before arming; virtual session must be current");
+    }
+    return status_handler(req);
+  }
   cJSON *enabled = cJSON_GetObjectItemCaseSensitive(root, "enable");
   cJSON *r = cJSON_GetObjectItemCaseSensitive(root, "rows");
   cJSON *c = cJSON_GetObjectItemCaseSensitive(root, "columns");
@@ -462,6 +577,12 @@ static esp_err_t control_handler(httpd_req_t *req) {
         "Confirm electrically isolated passive switches and specify 1-8 rows, 1-10 columns");
   }
   xSemaphoreTake(lock, portMAX_DELAY);
+  if (virtual_enabled) {
+    xSemaphoreGive(lock);
+    cJSON_Delete(root);
+    httpd_resp_set_status(req, "409 Conflict");
+    return httpd_resp_sendstr(req, "Disarm virtual keys before configuring the physical matrix");
+  }
   esp_err_t err = start && !present ? ESP_ERR_NOT_FOUND : ESP_OK;
   if (!start && present)
     err = disable_scan();

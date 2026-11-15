@@ -510,7 +510,7 @@ class ScreenCheckStartTests(unittest.TestCase):
         ready = source[source.index("static bool radio_controls_ready("):
                        source.index("void sony_vfd_radio_search(")]
         function = source[source.index("static esp_err_t start_radio_display_locked("):
-                          source.index("static esp_err_t release_profile(")]
+                          source.index("bool sony_screen_is_running(")]
         harness = r"""
 #include <assert.h>
 #include <stdatomic.h>
@@ -613,7 +613,7 @@ int main(void) {
     def test_display_button_starts_cycles_off_and_restarts(self):
         source = (ROOT / "main/sony_screen.c").read_text()
         function = source[source.index("static esp_err_t display_button_action_locked("):
-                          source.index("static esp_err_t release_profile(")]
+                          source.index("bool sony_screen_is_running(")]
         harness = r"""
 #include <assert.h>
 #include <stdatomic.h>
@@ -1314,7 +1314,7 @@ int main(void) {
     def test_gpio_pair_executor_blanking_stop_and_write_failure(self):
         source = (ROOT / "main/sony_screen.c").read_text()
         function = source[source.index("static esp_err_t gpio_pair_cycle("):
-                          source.index("static void scan_task(")]
+                          source.index("static void record_output_frame(")]
         harness = r"""
 #include <stdatomic.h>
 #include "sony_timing.h"

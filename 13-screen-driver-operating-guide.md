@@ -4,10 +4,12 @@ This is the current operating guide for the ESP32-S3/SN74AHCT125 display
 driver. It supersedes the older experimental operating advice, not the
 historical measurements, in chapters 6, 11 and 12.
 
-For the two-ESP target, audio wiring and browser-only portable front-panel
-simulator, see [Split-setup architecture](15-split-setup-architecture.md).
-The 0.3.47 travel demo is independent of physical keypad/display hardware;
-it does not yet migrate radio decoding or telemetry to the audio ESP.
+For the two-ESP target, audio wiring and portable virtual front panel,
+see [Split-setup architecture](15-split-setup-architecture.md).
+The 0.3.48 front panel feeds the real keypad decoder and previews submitted
+display-driver frames. Its DISPLAY/CHECK controls drive actual GPIOs:
+disconnect Sony-side signals and disable buffers before travel use.
+Radio decoding and telemetry have not yet migrated to the audio ESP.
 
 On 2026-11-13, firmware 0.3.25 produced clean held characters, mixed text
 across all 22 matrices and an ESP-local marquee. The decisive wiring

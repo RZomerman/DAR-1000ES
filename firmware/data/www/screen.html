@@ -154,8 +154,15 @@ pre { white-space: pre-wrap; }
 <p><a href="/">Internet radio / NOW PLAYING</a></p>
 <section id="travel-demo">
 <h2>DAR-1000ES travel front panel</h2>
-<label><input id="demo-enabled" type="checkbox"> Enable browser-only travel demo</label>
-<p id="demo-notice" role="status"></p>
+<p><strong>Hardware-backed front panel:</strong> buttons inject actual TCA8418
+press/release codes. DISPLAY/CHECK run the real display driver and GPIO timing.
+The canvas shows the last frame queued to that driver, not fabricated pixels.</p>
+<label><input id="demo-confirm" type="checkbox"> All Sony-side signal wires are
+disconnected and buffers disabled; GPIOs may run on unconnected pins.</label><br>
+<label><input id="demo-enabled" type="checkbox" disabled> Arm virtual keypad input</label>
+<button id="demo-stop" type="button">STOP output / disarm</button>
+<p id="demo-notice" role="status">Read-only preview. No inputs are armed on page load.</p>
+<p id="demo-pins"></p>
 <div class="demo-scroll">
 <div id="demo-panel" class="demo-panel">
  <div id="demo-power"></div><div id="demo-display"></div>
@@ -165,22 +172,16 @@ pre { white-space: pre-wrap; }
  <div id="demo-block"></div><div id="demo-presets"></div><div id="demo-fine"></div>
 </div></div>
 <p id="demo-state" aria-live="polite"></p>
-<details id="demo-fixture"><summary>Dummy station / AirPlay metadata and preset assignments</summary>
- <p>Dummy VU and equalizer bars are animated, not measured audio. LINK switches
- to AirPlay; an empty song title shows &lt;&lt;AirPlay&gt;&gt;. Display Mode cycles
- views and OFF; hold it for DIM. CHECK starts Stereo VU from OFF.
- MEMORY followed by a number saves a browser-local preset.</p>
- <label>Source <select id="demo-source"><option>Radio</option><option>AirPlay</option></select></label>
- <label>Station <input id="demo-station" maxlength="160"></label>
- <label>Song <input id="demo-title" maxlength="160"></label>
- <label>Artist <input id="demo-artist" maxlength="160"></label>
- <label>Source device, if known <input id="demo-device" maxlength="64"></label>
- <button id="demo-apply" type="button">Apply dummy metadata</button><br>
- <label>Preset <input id="demo-preset" type="number" min="1" max="16" value="1"></label>
- <label>Name (blank = unassigned) <input id="demo-preset-name" maxlength="64"></label>
- <button id="demo-assign" type="button">Save dummy preset</button>
- <p>Country/category/browse controls simulate the proposed interaction; they
- do not search a real radio directory or operate the real firmware keypad.</p>
+<details id="demo-fixture"><summary>Real inputs and output words</summary>
+ <p>Presets use the <a href="/">real radio configuration</a>. Hold DISPLAY for
+ the firmware's 1.2-second DIM action. Mapped buttons without an assigned
+ action are logged, exactly like physical switches; unmapped buttons are disabled.
+ VU/spectrum use actual decoded audio, so silence/disconnection does not invent bars.
+ Losing the virtual-input heartbeat stops output after six seconds.</p>
+ <p>The canvas renders the 770 matrix dots. All 26 queued words, including
+ fixed indicators and red/meter fields, are shown below. This is driver data,
+ not a measurement of GPIO voltage or Sony brightness.</p>
+ <pre id="demo-raw"></pre>
 </details>
 </section>
 <div id="hardware-bench">
@@ -522,7 +523,7 @@ document.querySelectorAll("[data-sample]").forEach(button => {
 });
 async function poll() {
   try { await request(); } catch (err) { status.textContent = err.message; }
-  setTimeout(poll, 1000);
+  setTimeout(poll, window.sonyFrontPanel ? window.sonyFrontPanel.pollInterval : 1000);
 }
 poll();
 
