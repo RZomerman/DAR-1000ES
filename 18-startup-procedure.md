@@ -236,19 +236,22 @@ prerequisites, not conditions established by the animation.
 ### Proposed automatic protection, not a wiring prescription
 
 Investigate a hardware supervisor/sequencer and independent enable gate.
-Conceptually, permission requires **all** relevant Sony rails valid,
-buffer supplies valid, reset/fault state clear, original-driver isolation
-established and physical disable released. A software-ready request may
-permit output only within that hardware permission; it cannot override it.
+Conceptually, permission requires verified input-power conditions and
+blanking/scan protection, reset/fault state clear, original-driver isolation
+established and physical disable released. Which rails need sensing depends
+on the verified circuit and timing; monitoring every VFD rail is not assumed
+mandatory. A software-ready request may permit output only within independent
+hardware permission; it cannot override it.
 Consider an independent watchdog if loss of scan/software service can leave
 unsafe sustained outputs. Failures must inhibit/blank without depending on
 the controller servicing an interrupt.
 
-Sense actual Sony logic/TD driver supplies at suitable verified points, and
-determine from the schematic whether VFD drive/filament rails also constrain
-safe enable/disable order. Do not equate front-button state, standby indication,
-ESP power or a network response with these rails. Candidate supervisor,
-comparator, isolated sense, buffer supply-switching or partial-power-tolerant
+Investigate sensing actual Sony logic/TD driver supplies at suitable verified
+points, and determine from the schematic whether VFD drive/filament rails need
+monitoring or whether independently enforced blanking and a qualified scan
+handoff can cover their power transitions. Do not equate front-button state,
+standby indication, ESP power or a network response with these rails. Candidate
+supervisor, comparator, isolated sense, buffer supply-switching or partial-power-tolerant
 interface options all require schematic, exact part-datasheet and rail
 confirmation. This chapter assigns **no** sensing GPIO, voltage threshold,
 polarity, resistor size or voltage-tolerance guarantee.
@@ -262,6 +265,72 @@ all other connected signal paths. Determine whether supply switching,
 different buffering or isolation is needed; do not assume an unpowered
 buffer is safe. Disabled high-impedance outputs do not guarantee safe TD
 input levels: validate required bias/blanking and reset transients.
+
+### Preferred enable direction: default disabled, qualified active enable
+
+The user's proposed direction is active-LOW buffer `/OE` default HIGH, with
+the ESP requesting LOW only after boot readiness. Treat that as a **resistor
+pull-up plus a controlled pull-down**, never a hard connection to a supply
+rail that an output then drives against. Boot completion alone is not the
+qualified hardware permission described above.
+
+A proposed pull-up to 3.3 V requires the exact AHCT part's `/OE` input-HIGH
+specification to be checked at its actual buffer supply and operating
+conditions; do not assume compatibility. It also loses its source when the
+ESP's 3.3 V rail disappears while buffer 5 V remains. That partial-power
+state must not accidentally enable the buffers.
+
+The more robust **proposed** default to investigate is a pull-up referenced
+to the buffer's own supply, with a suitable transistor/open-drain,
+level-isolated control path that permits a qualified enable request and
+lets the independent gate veto it. Never expose an ESP GPIO to 5 V, including
+through a pull-up on a directly shared `/OE` net; “open-drain” alone does not
+provide voltage isolation. Component choice, resistor values, connections
+and control pins require schematic/datasheet validation. This is a preferred
+design direction, not verified circuitry or a wiring instruction.
+
+### Input safety versus emission safety: candidate forced-blank handoff
+
+These are separate questions, not a requirement that every supply be present
+before any serial signal can exist:
+
+- **Input electrical/backfeed safety:** with actual TD logic powered, suitable
+  referenced grounds and confirmed input ratings/timing, 5 V CLK/DATA/STB are
+  not inherently problematic merely because the nominal -30 V display rail
+  is absent. This is conditional on the actual schematic, parts and power
+  paths; it is not permission to drive unpowered TD inputs.
+- **VFD emission/scan safety:** an absent display supply generally prevents
+  normal emission at that moment, but says nothing about the latched pattern
+  or grid duty when it returns. Reset/high-impedance ESP outputs may leave
+  arbitrary latched grid/segment data. Disabling `/OE` leaves buffer outputs
+  high-impedance; it does **not** force the external CLEAR signal LOW.
+
+Chapter 13 establishes that **external CLEAR LOW blanks** the grid outputs.
+Investigate whether an independent hardware-forced blank through boot/reset,
+brownout, fault and physical Stop can protect the display, with a qualified
+handoff only after input power is valid and the scan/timing path is ready.
+The proposed order is: establish actual target-side CLEAR LOW and defined
+other signal states; enable the buffers under that enforced blank; transmit
+a known blank/latch initialization to the TD devices; then allow controlled
+scan illumination only after qualification. Initializing MCU RAM while
+`/OE` is disabled does **not** clear the TD shift registers or output latches.
+Target-side CLEAR must independently default LOW through the relevant
+disabled-buffer states, using a circuit verified for those power conditions.
+Hardware must be able to reassert blanking without software cooperation;
+neither a one-time software
+“ready” flag nor a released high-impedance output demonstrates that capability.
+The forcing/arbitration circuit must avoid opposing driven outputs; no
+particular circuit or new pin assignment is authorized here.
+
+This is an **unverified, schematic- and timing-dependent alternative** to
+requiring every VFD rail to be monitored. Establish whether CLEAR remains
+effective throughout relevant partial-power states and whether it preserves
+protection during handoff, scan stall, stop/restart and display-rail return.
+Measure rail restoration both while scanning and while inhibited, including
+the first unblanked grid interval and latched content. If those cases cannot
+be bounded safely by the blanking design, add the necessary rail supervision
+or other independent protection. Neither missing -30 V nor powered TD logic
+alone proves the complete startup path safe.
 
 Original IC701 display outputs must remain physically isolated, including
 both STB routes, or use a separately verified contention-free ownership
@@ -303,8 +372,8 @@ disconnection precautions for reset/programming/rewiring.
 | Stage | Investigation/evidence needed | Exit criterion |
 | --- | --- | --- |
 | 1. Establish power/ownership model | Trace actual Sony logic/driver and relevant VFD supplies, standby behavior, ESP/buffer/USB paths, original-driver disconnection and exact buffer parts. Measure rail ramps/decay and idle/reset pin behavior with appropriate equipment. | Reviewed schematic and power-state table identify every path that could drive or backfeed a powered-off device; sensing points and unresolved limits recorded. Manual confirmation stays. |
-| 2. Design independent protection | Select rail supervision, stable-ready qualification, fault response, safe `/OE` defaults, TD blanking/bias, physical disable and any watchdog. Check datasheet partial-power/injection behavior for all connected parts. | Reviewed circuit defines permission and fault truth tables, justified thresholds/delays from measured rails and part limits; software cannot force enable against a fault. Manual confirmation stays. |
-| 3. Verify abnormal power states | Controlled tests of Sony-only, ESP/USB-only, buffer-only and relevant partial rails; different power orders; controller/audio reset, brownout, abrupt loss, crash/stalled scan, missing sense and link loss. Include slow rail ramps, repeated starts and physical disable during queued output. | Captured enable/blanking/signal/rail behavior demonstrates required inhibition before unsafe rail conditions, no contention/backfeed outside confirmed limits, and independent physical disable. Define recovery without reset loops or unintended restart. Manual confirmation stays. |
+| 2. Design independent protection | Select necessary rail supervision, independent forced blanking and qualified scan-ready handoff, stable-ready qualification, fault response, safe `/OE` defaults, TD input bias, physical disable and any watchdog. Check datasheet partial-power/injection behavior for all connected parts. | Reviewed circuit justifies which rails require sensing and which transitions are protected by blanking; defines permission/fault truth tables and measured/datasheet-based limits; software cannot force enable against a fault. Manual confirmation stays. |
+| 3. Verify abnormal power states | Controlled tests of Sony-only, ESP/USB-only, buffer-only and relevant partial rails; different power orders; controller/audio reset, brownout, abrupt loss, crash/stalled scan, missing sense and link loss. Include slow ramps, display-rail loss/return with TD logic still powered, forced-blank handoff, stop/restart, repeated starts and physical disable during queued output. | Captured enable/CLEAR/signal/rail behavior demonstrates required inhibition, bounded first unblanked grid duty and known latched content, no contention/backfeed outside confirmed limits, and independent physical disable. Define recovery without reset loops or unintended restart. Manual confirmation stays. |
 | 4. Validate display load | Measure all-matrix snow/full-fill aggregate current, supplies, thermal behavior and scan timing at candidate brightness/duty limits, not only text or one held grid. Test worst-case queued/stalled content and Stop behavior. | Documented applicable current/thermal/electrical margins and enforced startup brightness/duty guards; existing scan/blanking protections retained. If full fill fails, do not enable it. |
 | 5. Integrate and retire UI confirmation | Test authorization epochs, saved OFF, missing settings, separate audio readiness, nonblocking deadlines, stale generations, fault reporting and no restart from retries/page reloads. Preserve manual stop and service/diagnostic restrictions. | Reviewed evidence for stages 1-4 plus software tests and measured integrated power-cycle/fault results supports a specifically versioned automatic-start release. Only then replace the manual checkbox with monitored interlock status. |
 
@@ -350,7 +419,8 @@ Sound timing and any optional skip gesture are not yet finalized.
 
 - Hardware sensing points, rail limits, independent gate/sequencer, physical
   disable, watchdog need and reset/recovery policy; evidence for partial-power
-  protection and original-driver isolation.
+  protection and original-driver isolation; whether verified forced blanking
+  and scan-ready handoff can cover VFD rail transitions without sensing each rail.
 - Validated full-snow brightness/duty/current limits; brightness persistence.
 - Saved OFF versus the one-time artwork; first-use/invalid-record behavior
   and restoration after preset edits/deletion.
