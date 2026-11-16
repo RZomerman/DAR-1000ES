@@ -55,7 +55,7 @@ digits, punctuation, a music note and seven level bars.
 15. [Split-setup Architecture and Travel Demo](15-split-setup-architecture.md)
 
 Proposed behavior: [Chapter 18: Startup Procedure](18-startup-procedure.md)
-specifies the snow/title sequence, last-station/display recovery and the
+specifies the snow/title sequence, saved station/brightness/display recovery and the
 verification needed before automatic hardware-ready authorization can replace
 manual confirmation. It is not implemented startup behavior.
 

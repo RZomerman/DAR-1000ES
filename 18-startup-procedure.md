@@ -16,20 +16,21 @@ The requested experience is:
    matrix area.
 3. Snow falls away to reveal `Sony DAR-1000ES`.
 4. That title drops down/off the display, revealing `Elevated Performance`.
-5. Resume the last intentionally selected radio station and display mode.
+5. Restore the last used radio station, brightness and selected display mode
+   from a persistent status file; do not reset playback to NPO Radio 2.
 
-The sequence/content above is the user-set narrative. Timings, density,
-brightness, skip controls and when sound starts are recommendations or open
-decisions below, not agreed requirements.
+The sequence/content and persistence of all three selections above are user
+requirements. Timings, density, startup-artwork brightness limits, skip
+controls and when sound starts remain recommendations or open decisions.
 
 ### Current implementation versus target
 
 | Area | Current repository behavior | Proposed target |
 | --- | --- | --- |
 | Display boot | AHCT-v2 GPIO profile, output stopped; no Sony power or display-buffer `/OE` sensing/control | Automatic sequence only after verified independent hardware protection and software readiness |
-| Radio boot | Controller-local radio defaults to NPO Radio 2 | Restore the saved intentional radio selection |
-| Display memory | Mode/DIM not restored across reboot; initial radio brightness is 1.2% per-grid duty; pre-OFF brightness is remembered only in RAM | Restore selected mode, including OFF; brightness policy still to be decided and electrically validated |
-| Saved radio data | Custom URL and assigned preset records are stored in NVS; this is not last-station restore | Separate validated last-selection record; never rewrite presets during startup |
+| Radio boot | Controller-local radio defaults to NPO Radio 2 | Restore the last used station from the status file, not the hardcoded boot station |
+| Display memory | Mode/DIM not restored across reboot; initial radio brightness is 1.2% per-grid duty; pre-OFF brightness is remembered only in RAM | Restore saved brightness and selected mode, including OFF, from the status file; artwork load limits still need electrical validation |
+| Saved radio data | Custom URL and assigned preset records are stored in NVS; this is not last-station restore | Persistent status file containing station identity/name/direct stream URL, brightness and display mode; never rewrite presets during startup |
 | Two ESPs | Controller still decodes radio locally; UART is diagnostic PING/PONG/MAP/ACK, not playback control | Controller renders/keypad/UI; audio ESP eventually connects, decodes and reports actual playback |
 | Power button | POWER mapping unverified/disabled in the 0.3.48 virtual panel | Verified power-event detection/coordination remains to be designed |
 | Startup artwork | No sequence specified here is implemented | Temporary, bounded matrix overlay; no persistent “startup display mode” |
@@ -183,15 +184,20 @@ power-hold or mute-polarity sequence.
 
 ## Restore, persistence and errors
 
-- Save only intentional station and display selections, not frames,
+- **Required:** persist the last used radio station, brightness and selected
+  display mode in a **status file**, and restore all three on normal boot.
+  Do not substitute generic NVS-only storage or reset playback to NPO Radio 2.
+  Current firmware does not implement this requirement.
+- Save intentional station, brightness/DIM and display-mode changes, not frames,
   animation phases, transient status, metadata changes or retry events.
   Keep the saved preference separate from the active temporary overlay.
   Persist selections with bounded/coalesced writes and validated,
   versioned records resilient to interrupted writes.
-- Retain a stable station identity plus validated name/URL information
-  sufficient to restore the intended stream, including custom selections.
-  Define how edits/deletion of a referenced preset affect restoration;
-  never guess another preset or silently tune a different station.
+- Retain stable station identity, name and a direct playable HTTP/HTTPS stream
+  URL, including custom selections, sufficient to restore independently of
+  directory availability or preset numbering. A directory lookup or preset
+  index alone is insufficient. Editing/deleting a preset must not silently
+  replace the saved station; explicit deletion/replacement policy is open.
 - Loading preferences must not assign/erase presets, change their numbering,
   replay a physical preset announcement as though a key was pressed, or
   overwrite the country filter. Country-filter persistence is not agreed.
@@ -204,14 +210,73 @@ power-hold or mute-polarity sequence.
   unresolved and blocks final automatic-start behavior; no override is
   authorized by this specification. Any permitted artwork must still end
   in OFF, without status or metadata restarting output.
-- Brightness is separate from display selection. Reboot brightness
-  persistence, the startup brightness limit and whether a previous DIM
-  value can be restored require decisions and load validation; do not claim
-  today's RAM-only memory restores it.
+- **Restore saved brightness as well as mode.** Brightness persistence is now
+  required, not an open decision; today's RAM-only brightness memory does not
+  satisfy it. Store the intended normal-display brightness separately from
+  any temporary artwork load limit. Electrical guard validation still applies:
+  if a saved value is invalid/unsupported, report it and keep output inhibited
+  rather than silently overwrite the preference or bypass a safety limit.
+
+### Proposed status-file contract, not an existing implementation
+
+Use the existing `/spiffs` mount convention. A suitable **proposed** canonical
+path is `/spiffs/startup-status.json`, separate from web assets and presets.
+It is runtime user data, not a factory-default file to ship in `firmware/data/`.
+The controller owns it in the target split setup and sends its restored station
+to the audio ESP; the audio ESP must not independently choose a boot station.
+
+Proposed version-1 JSON schema:
+
+| Required field | Type / meaning |
+| --- | --- |
+| `version` | Integer `1`; reject unsupported schema versions explicitly |
+| `station.id` | Bounded nonempty stable identity, independent of list position; support locally assigned identities for custom URLs |
+| `station.name` | Bounded station display name from the selected record |
+| `station.url` | Validated direct playable HTTP/HTTPS stream URL, not a directory/search/page URL |
+| `brightness.per_grid_duty_ppm` | Integer normal-display per-grid duty in parts per million; validate against supported, electrically qualified settings |
+| `display_mode` | Supported display-mode identifier from chapter 13, or explicit `off` |
+
+For unit clarity, 0.75% is 7,500 ppm; this is a conversion example, not a new
+brightness recommendation or full-snow load approval. OFF does not discard
+the saved brightness. Never write `startup`, connection status or animation
+frames as the selected mode. Bound record/string sizes before allocation,
+validate all fields together, and reject malformed/partial records explicitly.
+
+Filesystem evidence:
+[`spiffs_storage.c`](firmware/components/spiffs_storage/spiffs_storage.c)
+mounts partition `storage` at `/spiffs` and currently enables formatting on
+mount failure. The [filesystem guide](firmware/docs/reference/spiffs.md) and
+[`web_server.c`](firmware/main/network/web_server.c) document/implement file
+access and ESP log/HTTP error reporting. The upload handler opens its
+destination directly with `wb`; it is **not an atomic status-file replacement
+helper**, and no such existing helper was found in the inspected storage code.
+
+Required save behavior is atomic replacement of a complete validated snapshot:
+serialize changes through a shared storage helper; write a sibling candidate
+file, check every write/flush/close result, then commit a replacement while
+retaining the last good record on failure. Verify the actual SPIFFS/VFS
+replacement and power-loss guarantees before selecting rename/commit details;
+do not assume POSIX-style atomicity or durability. If those guarantees are
+insufficient, design a recoverable generation/last-good scheme before release.
+Do not truncate the canonical file in place or use the generic upload endpoint
+as the runtime save path.
+
+Follow repository error-reporting conventions: return an `esp_err_t` failure,
+log the cause with `ESP_LOGE`, and expose persistence errors through the relevant
+UI/API rather than acknowledge unsaved state as durable. An accepted in-memory
+selection may remain usable after a write failure, but must be marked unsaved;
+retain the last durable file and retry without frame-by-frame writes. Check
+space/exhaustion, interrupted writes and concurrent user changes; an older save
+must not replace a newer snapshot. Review mount-failure autoformat and filesystem
+image update behavior so status loss is not silent. First boot, missing/corrupt
+file, unsupported schema and irrecoverable storage failure require explicit
+restore/setup status; their fallback policy remains open, **never a silent
+default to NPO Radio 2**.
 
 | Condition | Required target response |
 | --- | --- |
-| Missing/corrupt saved record or deleted station | Explicit setup/restore-unavailable status; do not claim last station restored. First-use default choice is open, not permission for silent fallback. |
+| Missing/corrupt status file, invalid fields or unavailable saved station | Explicit setup/restore-unavailable status; do not claim all three settings restored. First-use fallback remains open; never silently default to NPO Radio 2 or another station. |
+| Status-file save failure | Expose unsaved state/error, preserve the last durable snapshot and avoid claiming reboot persistence succeeded. |
 | No Wi-Fi, DNS/stream failure, unsupported stream | Connecting/retrying/offline or explicit stream error; bounded attempts/backoff, keep chosen station identity, no automatic alternate station. |
 | Connection later succeeds | Replace status with the selected mode using current valid data; do not repeat artwork or enable stopped output. |
 | Missing title/format/bitrate | Show actual available station/status or unavailable value; do not fabricate song, codec or playback state. |
@@ -317,9 +382,11 @@ scan illumination only after qualification. Initializing MCU RAM while
 Target-side CLEAR must independently default LOW through the relevant
 disabled-buffer states, using a circuit verified for those power conditions.
 
-The user reports an **existing 10 kΩ CLEAR-to-ground pull-down**. This is
-reported hardware, not a newly proposed component or an electrically verified
-measurement; do not add a duplicate resistor on the basis of this chapter.
+The user reports a **10 kΩ CLEAR-to-ground pull-down**, but may have desoldered
+it: its current physical presence and location are **pending confirmation**.
+This is a report of previously fitted hardware, not a newly proposed component
+or an electrically verified measurement; do not add a duplicate resistor on
+the basis of this chapter.
 Confirm that it is physically on the **TD-side CLEAR net, downstream of the
 tri-state buffer**. An ESP-side pull-down cannot hold the target net LOW
 through a disabled buffer. With proposed default-HIGH `/OE`, that target-side
@@ -417,7 +484,8 @@ do not sense Sony power or buffer readiness.
    **Sony DAR-1000ES**.
 3. The title drops out through the bottom of the seven-pixel-high display,
    revealing **Elevated Performance**.
-4. Your last radio station is requested and your chosen display returns.
+4. Your last radio station, brightness and display mode are restored from the
+   status file; playback does not reset to the hardcoded NPO Radio 2 station.
    If connection is not ready, you see an honest connecting/retrying/offline
    message first, not an old song presented as playing.
 5. A stopped display stays stopped after a stop action; connection retries
@@ -434,7 +502,8 @@ Sound timing and any optional skip gesture are not yet finalized.
   disable, watchdog need and reset/recovery policy; evidence for partial-power
   protection and original-driver isolation; whether verified forced blanking
   and scan-ready handoff can cover VFD rail transitions without sensing each rail.
-- Validated full-snow brightness/duty/current limits; brightness persistence.
+- Validated full-snow brightness/duty/current limits; normal-display brightness
+  persistence itself is required.
 - Saved OFF versus the one-time artwork; first-use/invalid-record behavior
   and restoration after preset edits/deletion.
 - Snow density, exact timing/dwell and optional skip input without changing
