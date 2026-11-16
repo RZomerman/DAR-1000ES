@@ -316,9 +316,22 @@ scan illumination only after qualification. Initializing MCU RAM while
 `/OE` is disabled does **not** clear the TD shift registers or output latches.
 Target-side CLEAR must independently default LOW through the relevant
 disabled-buffer states, using a circuit verified for those power conditions.
+
+The user reports an **existing 10 kΩ CLEAR-to-ground pull-down**. This is
+reported hardware, not a newly proposed component or an electrically verified
+measurement; do not add a duplicate resistor on the basis of this chapter.
+Confirm that it is physically on the **TD-side CLEAR net, downstream of the
+tri-state buffer**. An ESP-side pull-down cannot hold the target net LOW
+through a disabled buffer. With proposed default-HIGH `/OE`, that target-side
+pull-down is intended to provide the boot/reset blank state. Verify its
+actual location, measured target-side CLEAR level and power/reset sequencing
+before calling that state validated. A passive pull-down while the buffer is
+disabled also does not by itself prove fault blanking while an enabled output
+drives CLEAR.
+
 Hardware must be able to reassert blanking without software cooperation;
-neither a one-time software
-“ready” flag nor a released high-impedance output demonstrates that capability.
+neither a one-time software “ready” flag nor a released high-impedance output
+demonstrates that capability.
 The forcing/arbitration circuit must avoid opposing driven outputs; no
 particular circuit or new pin assignment is authorized here.
 
