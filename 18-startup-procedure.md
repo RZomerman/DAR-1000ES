@@ -15,7 +15,7 @@ The requested experience is:
 2. Once display hardware is safely ready, falling-pixel snow fills the whole
    matrix area.
 3. Snow falls away to reveal `Sony DAR-1000ES`.
-4. That title drops down/off the display, revealing `Elevated Performance`.
+4. That title drops down/off the display, revealing `Elevated Standard`.
 5. Restore the last used radio station, brightness and selected display mode
    from a persistent status file; do not reset playback to NPO Radio 2.
 
@@ -58,12 +58,13 @@ within a cell `bit = row * 5 + column`, top-left origin.
 | Content | ASCII glyphs, including spaces/hyphen | Placement in cells, numbered left to right |
 | --- | ---: | --- |
 | `Sony DAR-1000ES` | 15 | Text in 4-18; three blank cells left, four right |
-| `Elevated Performance` | 20 | Text in 2-21; one blank cell each side |
+| `Elevated Standard` | 17 | Text in 3-19; two blank cells left, three right |
 
 Render the exact case and ASCII hyphen shown, using the existing 5x7 font.
 The 15-cell title leaves seven spare cells: exact symmetric whole-cell
 centering is impossible; the placement above chooses the left-biased nearest
-center. The 20-cell tagline is exactly centered.
+center. The 17-cell tagline also uses the left-biased nearest center, with
+two blank cells left and three right.
 Each phrase fits on its own across one row of cells without horizontal
 scrolling. This is pixel animation, **not** an assumption that the existing
 text marquee implements vertical movement.
@@ -483,7 +484,7 @@ do not sense Sony power or buffer readiness.
 2. Snow falls across the entire matrix area, fills it and falls away to show
    **Sony DAR-1000ES**.
 3. The title drops out through the bottom of the seven-pixel-high display,
-   revealing **Elevated Performance**.
+   revealing **Elevated Standard**.
 4. Your last radio station, brightness and display mode are restored from the
    status file; playback does not reset to the hardcoded NPO Radio 2 station.
    If connection is not ready, you see an honest connecting/retrying/offline
