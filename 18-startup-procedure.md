@@ -21,7 +21,9 @@ The requested experience is:
 
 The sequence/content and persistence of all three selections above are user
 requirements. Timings, density, startup-artwork brightness limits, skip
-controls and when sound starts remain recommendations or open decisions.
+controls and when station audio starts remain recommendations or open decisions.
+The startup sound direction is light, short and high fidelity: high bells for
+the first two stages and an airy swoosh for the final title/tagline transition.
 
 ### Current implementation versus target
 
@@ -104,6 +106,56 @@ Unchanged per-grid duty does not mean unchanged aggregate current. If full
 fill cannot meet validated electrical limits, keep it disabled and revisit
 the specification rather than silently treating sparse snow as full fill.
 
+## Startup sound direction
+
+**Required creative direction, not an implemented audio asset:** a short,
+light, high-fidelity sonic signature synchronized with the animation. Use
+delicate high bells in the first and second stages, followed by a soft swoosh
+for the final stage. Avoid a loud boot jingle, heavy bass impact, harsh
+high-frequency transients or a long reverb tail.
+
+The following cue placement is a recommendation for auditioning, not locked
+timing:
+
+| Visual stage | Proposed sound |
+| --- | --- |
+| Snow starts falling and filling the screen | A sparse, soft high-bell shimmer; leave space between notes rather than sounding every falling dot. |
+| Snow falls away to reveal `Sony DAR-1000ES` | A second clear, complementary bell accent as the name becomes readable, with a short, clean decay. |
+| Title drops and `Elevated Standard` appears | A brief, airy swoosh following the downward movement, settling gently as the tagline is revealed. No impact or additional loud sting. |
+
+Keep the complete signature within the artwork sequence; its tail should
+finish before normal station listening begins in the recommended mix. Exact
+notes, bell timbre, level, cue durations, stereo width and reverb require an
+audio/visual audition. High fidelity means a clean, unclipped source and
+playback path, not excessive treble or loudness. Prefer an original lossless
+PCM master and avoid unnecessary lossy encode/decode stages; the delivery
+format must match the eventual audio implementation. The target split-audio
+path is 48 kHz, but asset format, bit depth and decoder support are not
+established by this specification.
+
+### Synchronization and playback boundaries
+
+- Trigger cues from the same elapsed-time phase timeline as the animation,
+  not unrelated delays or network arrival times. Do not send PCM over the
+  diagnostic UART; future audio-side cue scheduling/control is unimplemented.
+- Use a locally available asset or synthesis so the signature does not
+  depend on the radio directory or internet connection. Do not block the
+  display waiting for audio: skip unavailable/late cues rather than replaying
+  them after their matching stage, and expose audio startup failures.
+- Play once per authorized startup. Stream reconnects, browser refreshes and
+  audio-link retries must not repeat the signature. Stop/cancellation or loss
+  of audio authorization must cancel remaining cues and end audio cleanly.
+- Keep station restoration independent of the signature. Recommended:
+  connect the saved station in parallel, hold its audible output until the
+  signature finishes, then transition without overlapping programme audio
+  and bells. Audible-start policy remains open; it must not change the saved
+  station, display mode or brightness.
+- Startup level, mute/disable preference, playback volume relationship and
+  maximum output level remain open. Do not assume a stored radio volume is
+  suitable for the signature or automatically enable unverified audio
+  hardware. Respect separately established audio readiness and mute/relay
+  safeguards.
+
 ## Developer-facing startup state machine
 
 These are proposed logical states, not existing API commands. Hardware
@@ -176,8 +228,9 @@ or incompatible audio ESP must not hold the animation forever, enable audio
 buffers, fabricate telemetry or trigger a display restart. Until migration,
 these readiness distinctions apply to the controller-local radio service.
 
-Audio may connect in parallel; whether audible playback begins immediately
-or after the tagline is **open**. Neither choice authorizes unmute, relay
+Audio may connect in parallel; whether audible station playback begins immediately
+or after the tagline/startup sound is **open**. The recommended mix completes
+the signature before station audio becomes audible. Neither choice authorizes unmute, relay
 operation or audio `/OE`. Chapter 15's audio chip-4 enable covers multiple
 outputs; mute/relay asserted levels remain unverified. Software/audio-ready
 is never electrical authorization, and this chapter specifies no relay,
@@ -482,9 +535,10 @@ do not sense Sony power or buffer readiness.
 1. Power the unit on normally. The two ESPs may finish booting at different
    times; the display waits for verified hardware permission.
 2. Snow falls across the entire matrix area, fills it and falls away to show
-   **Sony DAR-1000ES**.
+   **Sony DAR-1000ES**, accompanied by delicate high bells for those two stages
+   once audio is ready.
 3. The title drops out through the bottom of the seven-pixel-high display,
-   revealing **Elevated Standard**.
+   revealing **Elevated Standard**, with a short, soft airy swoosh.
 4. Your last radio station, brightness and display mode are restored from the
    status file; playback does not reset to the hardcoded NPO Radio 2 station.
    If connection is not ready, you see an honest connecting/retrying/offline
@@ -495,7 +549,7 @@ do not sense Sony power or buffer readiness.
 
 If hardware permission fails, the physical display remains off and diagnostics
 must explain why through an available interface. Do not bypass the protection.
-Sound timing and any optional skip gesture are not yet finalized.
+Exact sound timing, level and any optional skip gesture are not yet finalized.
 
 ## Open decisions
 
@@ -509,5 +563,7 @@ Sound timing and any optional skip gesture are not yet finalized.
   and restoration after preset edits/deletion.
 - Snow density, exact timing/dwell and optional skip input without changing
   existing DISPLAY/CHECK, DIM, preset or Stop semantics.
-- When audible playback begins; future READY protocol and retry budgets.
+- When audible station playback begins; startup-sound notes, timbre, exact
+  timing/mix, asset format, level and mute preference; future READY protocol
+  and retry budgets.
 - Country-filter persistence and broader radio/AirPlay source restoration.
