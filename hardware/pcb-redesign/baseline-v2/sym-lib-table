@@ -1,0 +1,10 @@
+(sym_lib_table
+	(version 7)
+	(lib
+		(name "DAR1000ES")
+		(type "KiCad")
+		(uri "${KIPRJMOD}/DAR1000ES.kicad_sym")
+		(options "")
+		(descr "DAR-1000ES socket carrier symbols")
+	)
+)

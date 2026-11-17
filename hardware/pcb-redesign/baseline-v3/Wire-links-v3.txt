@@ -1,0 +1,146 @@
+DAR-1000ES v3 - physical insulated wire-link schedule
+
+Install all 43 links. These are top-side WIRES, not top copper or vias.
+All listed terminals of one JW reference must be electrically joined.
+Coordinates below are mm, TOP VIEW, using the PCB coordinate origin.
+Through-hole drill is 1.0 mm; choose wire and stripped leads to fit.
+Use insulated AWG26 (or suitably sized equivalent) for logic signals.
+Use insulated AWG22 or equivalent for LOCAL_5V, ESP 5 V and GND links;
+verify current rating and fit. Leave room for component and enclosure clearances.
+Lengths are drawn path lengths, not finished cut lengths; allow extra for
+stripped ends, bends and routing clear of components. Do not copy bends
+that would obstruct sockets, antennas or screws. Fit inaccessible links first.
+For three/four-terminal links, use an insulated wire-tree assembly with
+one lead into each hole; insulate any joined wire ends above the board.
+
+JW1: /A.MUTE; 2 terminals; drawn length 52.81 mm
+  A: X=48.6694, Y=49.8684
+  B: X=48.8881, Y=15.2843
+JW2: /D.MUTE; 2 terminals; drawn length 61.73 mm
+  A: X=30.1736, Y=63.9536
+  B: X=50.5957, Y=13.8459
+JW3: /INIT; 2 terminals; drawn length 19.45 mm
+  A: X=13.7959, Y=149.3446
+  B: X=32.4805, Y=147.5085
+JW4: /LATCH; 2 terminals; drawn length 11.99 mm
+  A: X=18.7618, Y=146.5944
+  B: X=30.4378, Y=147.3617
+JW5: /LRCK; 2 terminals; drawn length 4.76 mm
+  A: X=35.6528, Y=171.1289
+  B: X=38.4102, Y=167.5082
+JW6: /OUT2; 2 terminals; drawn length 7.64 mm
+  A: X=16.2738, Y=74.2308
+  B: X=22.9138, Y=71.8134
+JW7: /RELAY; 2 terminals; drawn length 32.07 mm
+  A: X=40.7954, Y=58.7742
+  B: X=46.9694, Y=29.9473
+JW8: /RELAY; 2 terminals; drawn length 13.32 mm
+  A: X=47.8797, Y=21.6978
+  B: X=52.0506, Y=12.4069
+JW9: ENABLE_U2; 2 terminals; drawn length 16.88 mm
+  A: X=62.0861, Y=39.9931
+  B: X=63.3901, Y=23.9837
+JW10: ENABLE_U3; 2 terminals; drawn length 18.14 mm
+  A: X=48.5784, Y=47.3814
+  B: X=61.9728, Y=35.9128
+JW11: ENABLE_U7; 2 terminals; drawn length 22.99 mm
+  A: X=49.6625, Y=154.2724
+  B: X=63.6252, Y=171.4820
+JW12: GND; 2 terminals; drawn length 11.26 mm
+  A: X=54.2611, Y=137.4419
+  B: X=62.0742, Y=145.4642
+JW13: LOCAL_5V; 2 terminals; drawn length 14.43 mm
+  A: X=44.2494, Y=47.5307
+  B: X=45.0000, Y=33.4114
+JW14: LOCAL_5V; 2 terminals; drawn length 21.34 mm
+  A: X=49.4121, Y=18.4161
+  B: X=68.8356, Y=13.7997
+JW15: Net-(J4-Pin_1); 2 terminals; drawn length 15.20 mm
+  A: X=18.8338, Y=16.8644
+  B: X=33.9810, Y=16.7374
+JW16: Net-(J4-Pin_2); 2 terminals; drawn length 32.73 mm
+  A: X=14.1533, Y=17.7640
+  B: X=25.5524, Y=45.7676
+JW17: Net-(J4-Pin_3); 2 terminals; drawn length 4.80 mm
+  A: X=13.6114, Y=34.3732
+  B: X=18.2892, Y=34.6688
+JW18: Net-(U1-CONTROLLER1-GND-PadJ3.1); 2 terminals; drawn length 12.12 mm
+  A: X=73.1581, Y=94.5001
+  B: X=73.1581, Y=106.6189
+JW19: Net-(U1-CONTROLLER1-IO1); 2 terminals; drawn length 4.74 mm
+  A: X=43.8878, Y=15.7053
+  B: X=47.2365, Y=12.3566
+JW20: Net-(U1-CONTROLLER1-IO10); 2 terminals; drawn length 9.85 mm
+  A: X=42.0233, Y=52.7492
+  B: X=49.3055, Y=58.9488
+JW21: Net-(U1-CONTROLLER1-IO11); 2 terminals; drawn length 13.68 mm
+  A: X=35.9358, Y=63.9635
+  B: X=49.3243, Y=63.2684
+JW22: Net-(U1-CONTROLLER1-IO12); 2 terminals; drawn length 3.01 mm
+  A: X=27.0088, Y=64.6149
+  B: X=27.0088, Y=67.6240
+JW23: Net-(U1-CONTROLLER1-IO12); 2 terminals; drawn length 2.29 mm
+  A: X=48.7107, Y=67.1034
+  B: X=50.7487, Y=66.4886
+JW24: Net-(U1-CONTROLLER1-IO13); 2 terminals; drawn length 3.09 mm
+  A: X=45.8568, Y=90.2700
+  B: X=48.8936, Y=90.1304
+JW25: Net-(U1-CONTROLLER1-IO14); 2 terminals; drawn length 5.19 mm
+  A: X=46.4942, Y=98.2258
+  B: X=51.0513, Y=96.7088
+JW26: Net-(U1-CONTROLLER1-IO2); 2 terminals; drawn length 9.53 mm
+  A: X=24.5517, Y=15.6010
+  B: X=31.2910, Y=8.8617
+JW27: Net-(U1-CONTROLLER1-IO21); 2 terminals; drawn length 88.00 mm
+  A: X=92.7300, Y=68.5100
+  B: X=96.8000, Y=145.0700
+JW28: Net-(U1-CONTROLLER1-IO39); 2 terminals; drawn length 30.90 mm
+  A: X=46.4971, Y=101.9607
+  B: X=73.1887, Y=91.8077
+JW29: Net-(U1-CONTROLLER1-IO4); 2 terminals; drawn length 25.04 mm
+  A: X=41.0051, Y=34.8940
+  B: X=62.0013, Y=26.2165
+JW30: Net-(U1-CONTROLLER1-IO40); 2 terminals; drawn length 30.87 mm
+  A: X=46.4952, Y=93.1448
+  B: X=73.1753, Y=83.0379
+JW31: Net-(U1-CONTROLLER1-IO42); 2 terminals; drawn length 10.84 mm
+  A: X=28.6101, Y=15.6006
+  B: X=33.1343, Y=6.6317
+JW32: Net-(U1-CONTROLLER1-IO5); 2 terminals; drawn length 30.12 mm
+  A: X=30.7499, Y=47.1707
+  B: X=48.2336, Y=24.2937
+JW33: Net-(U1-CONTROLLER1-IO5); 2 terminals; drawn length 13.64 mm
+  A: X=48.5156, Y=28.5449
+  B: X=61.9580, Y=29.0185
+JW34: Net-(U1-CONTROLLER1-IO7); 2 terminals; drawn length 24.57 mm
+  A: X=42.2058, Y=37.3860
+  B: X=61.9617, Y=33.3389
+JW35: Net-(U1-CONTROLLER1-IO8); 2 terminals; drawn length 3.19 mm
+  A: X=42.5948, Y=45.6330
+  B: X=42.6697, Y=48.7912
+JW36: Net-(U6-AUDIO1-IO11); 2 terminals; drawn length 64.86 mm
+  A: X=29.8305, Y=151.0616
+  B: X=92.6567, Y=146.1433
+JW37: Net-(U6-AUDIO1-IO12); 2 terminals; drawn length 55.57 mm
+  A: X=44.4798, Y=139.5663
+  B: X=94.6952, Y=145.7298
+JW38: Net-(U6-AUDIO1-IO47); 2 terminals; drawn length 18.51 mm
+  A: X=44.3383, Y=145.3097
+  B: X=61.9508, Y=147.4828
+JW39: Net-(U6-AUDIO1-IO9); 2 terminals; drawn length 48.72 mm
+  A: X=44.3435, Y=152.2382
+  B: X=92.6711, Y=153.1963
+JW40: SONY_5V_SENSE; 2 terminals; drawn length 61.75 mm
+  A: X=30.3553, Y=68.3607
+  B: X=35.2460, Y=9.8464
+JW41: SONY_POWER_GOOD; 2 terminals; drawn length 75.96 mm
+  A: X=48.5451, Y=147.5437
+  B: X=51.6489, Y=79.6156
+JW42: U2_OE_N; 3 terminals; drawn length 52.02 mm
+  A: X=32.6717, Y=64.6068
+  B: X=38.3693, Y=65.8109
+  C: X=48.6086, Y=32.9157
+  MULTI-TERMINAL LINK: connect every listed terminal, not just A-B.
+JW43: U6_OE_N; 2 terminals; drawn length 6.38 mm
+  A: X=41.0290, Y=150.7363
+  B: X=47.4043, Y=150.7363

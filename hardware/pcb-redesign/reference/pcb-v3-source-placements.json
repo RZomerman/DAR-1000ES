@@ -1,0 +1,2960 @@
+[
+  {
+    "ref": "R13",
+    "pos": [
+      51.0,
+      76.0
+    ],
+    "angle": 0.0,
+    "pads": [
+      {
+        "number": "1",
+        "xy": [
+          51.0,
+          76.0
+        ],
+        "net": "SONY_POWER_GOOD"
+      },
+      {
+        "number": "2",
+        "xy": [
+          58.62,
+          76.0
+        ],
+        "net": "GND"
+      }
+    ]
+  },
+  {
+    "ref": "U2",
+    "pos": [
+      22.74,
+      61.6
+    ],
+    "angle": 90.0,
+    "pads": [
+      {
+        "number": "1",
+        "xy": [
+          22.74,
+          61.6
+        ],
+        "net": "U2_OE_N"
+      },
+      {
+        "number": "2",
+        "xy": [
+          25.28,
+          61.6
+        ],
+        "net": "Net-(U1-CONTROLLER1-IO12)"
+      },
+      {
+        "number": "3",
+        "xy": [
+          27.82,
+          61.6
+        ],
+        "net": "/D.MUTE"
+      },
+      {
+        "number": "4",
+        "xy": [
+          30.36,
+          61.6
+        ],
+        "net": "U2_OE_N"
+      },
+      {
+        "number": "5",
+        "xy": [
+          32.9,
+          61.6
+        ],
+        "net": "Net-(U1-CONTROLLER1-IO11)"
+      },
+      {
+        "number": "6",
+        "xy": [
+          35.44,
+          61.6
+        ],
+        "net": "unconnected-(U2-Pad6)"
+      },
+      {
+        "number": "7",
+        "xy": [
+          37.98,
+          61.6
+        ],
+        "net": "GND"
+      },
+      {
+        "number": "8",
+        "xy": [
+          37.98,
+          53.98
+        ],
+        "net": "/A.MUTE"
+      },
+      {
+        "number": "9",
+        "xy": [
+          35.44,
+          53.98
+        ],
+        "net": "Net-(U1-CONTROLLER1-IO9)"
+      },
+      {
+        "number": "10",
+        "xy": [
+          32.9,
+          53.98
+        ],
+        "net": "U2_OE_N"
+      },
+      {
+        "number": "11",
+        "xy": [
+          30.36,
+          53.98
+        ],
+        "net": "/RELAY"
+      },
+      {
+        "number": "12",
+        "xy": [
+          27.82,
+          53.98
+        ],
+        "net": "Net-(U1-CONTROLLER1-IO10)"
+      },
+      {
+        "number": "13",
+        "xy": [
+          25.28,
+          53.98
+        ],
+        "net": "U2_OE_N"
+      },
+      {
+        "number": "14",
+        "xy": [
+          22.74,
+          53.98
+        ],
+        "net": "LOCAL_5V"
+      }
+    ]
+  },
+  {
+    "ref": "J2",
+    "pos": [
+      92.7,
+      9.7
+    ],
+    "angle": 180.0,
+    "pads": [
+      {
+        "number": "1",
+        "xy": [
+          92.7,
+          9.7
+        ],
+        "net": "GND"
+      },
+      {
+        "number": "2",
+        "xy": [
+          90.2,
+          9.7
+        ],
+        "net": "LOCAL_5V"
+      }
+    ]
+  },
+  {
+    "ref": "C2",
+    "pos": [
+      15.54,
+      41.7
+    ],
+    "angle": 90.0,
+    "pads": [
+      {
+        "number": "1",
+        "xy": [
+          15.54,
+          41.7
+        ],
+        "net": "GND"
+      },
+      {
+        "number": "2",
+        "xy": [
+          15.54,
+          36.7
+        ],
+        "net": "LOCAL_5V"
+      }
+    ]
+  },
+  {
+    "ref": "J11",
+    "pos": [
+      9.7,
+      160.6
+    ],
+    "angle": -90.0,
+    "pads": [
+      {
+        "number": "1",
+        "xy": [
+          9.7,
+          160.6
+        ],
+        "net": "GND"
+      },
+      {
+        "number": "2",
+        "xy": [
+          9.7,
+          163.1
+        ],
+        "net": "/BCKI"
+      },
+      {
+        "number": "3",
+        "xy": [
+          9.7,
+          165.6
+        ],
+        "net": "/DATA"
+      },
+      {
+        "number": "4",
+        "xy": [
+          9.7,
+          168.1
+        ],
+        "net": "/LRCK"
+      }
+    ]
+  },
+  {
+    "ref": "U6-AUDIO1",
+    "pos": [
+      89.6,
+      189.84
+    ],
+    "angle": 180.0,
+    "pads": [
+      {
+        "number": "J1.1",
+        "xy": [
+          89.6,
+          189.84
+        ],
+        "net": "unconnected-(U6-AUDIO1-3V3-PadJ1.1)"
+      },
+      {
+        "number": "J1.2",
+        "xy": [
+          89.6,
+          187.3
+        ],
+        "net": "unconnected-(U6-AUDIO1-3V3-PadJ1.2)"
+      },
+      {
+        "number": "J1.3",
+        "xy": [
+          89.6,
+          184.76
+        ],
+        "net": "unconnected-(U6-AUDIO1-EN-PadJ1.3)"
+      },
+      {
+        "number": "J1.4",
+        "xy": [
+          89.6,
+          182.22
+        ],
+        "net": "unconnected-(U6-AUDIO1-IO4-PadJ1.4)"
+      },
+      {
+        "number": "J1.5",
+        "xy": [
+          89.6,
+          179.68
+        ],
+        "net": "unconnected-(U6-AUDIO1-IO5-PadJ1.5)"
+      },
+      {
+        "number": "J1.6",
+        "xy": [
+          89.6,
+          177.14
+        ],
+        "net": "unconnected-(U6-AUDIO1-IO6-PadJ1.6)"
+      },
+      {
+        "number": "J1.7",
+        "xy": [
+          89.6,
+          174.6
+        ],
+        "net": "unconnected-(U6-AUDIO1-IO7-PadJ1.7)"
+      },
+      {
+        "number": "J1.8",
+        "xy": [
+          89.6,
+          172.06
+        ],
+        "net": "unconnected-(U6-AUDIO1-IO15-PadJ1.8)"
+      },
+      {
+        "number": "J1.9",
+        "xy": [
+          89.6,
+          169.52
+        ],
+        "net": "unconnected-(U6-AUDIO1-IO16-PadJ1.9)"
+      },
+      {
+        "number": "J1.10",
+        "xy": [
+          89.6,
+          166.98
+        ],
+        "net": "unconnected-(U6-AUDIO1-IO17-PadJ1.10)"
+      },
+      {
+        "number": "J1.11",
+        "xy": [
+          89.6,
+          164.44
+        ],
+        "net": "unconnected-(U6-AUDIO1-IO18-PadJ1.11)"
+      },
+      {
+        "number": "J1.12",
+        "xy": [
+          89.6,
+          161.9
+        ],
+        "net": "unconnected-(U6-AUDIO1-IO8-PadJ1.12)"
+      },
+      {
+        "number": "J1.13",
+        "xy": [
+          89.6,
+          159.36
+        ],
+        "net": "unconnected-(U6-AUDIO1-IO3-PadJ1.13)"
+      },
+      {
+        "number": "J1.14",
+        "xy": [
+          89.6,
+          156.82
+        ],
+        "net": "unconnected-(U6-AUDIO1-IO46-PadJ1.14)"
+      },
+      {
+        "number": "J1.15",
+        "xy": [
+          89.6,
+          154.28
+        ],
+        "net": "Net-(U6-AUDIO1-IO9)"
+      },
+      {
+        "number": "J1.16",
+        "xy": [
+          89.6,
+          151.74
+        ],
+        "net": "unconnected-(U6-AUDIO1-IO10-PadJ1.16)"
+      },
+      {
+        "number": "J1.17",
+        "xy": [
+          89.6,
+          149.2
+        ],
+        "net": "Net-(U6-AUDIO1-IO11)"
+      },
+      {
+        "number": "J1.18",
+        "xy": [
+          89.6,
+          146.66
+        ],
+        "net": "Net-(U6-AUDIO1-IO12)"
+      },
+      {
+        "number": "J1.19",
+        "xy": [
+          89.6,
+          144.12
+        ],
+        "net": "Net-(U1-CONTROLLER1-IO21)"
+      },
+      {
+        "number": "J1.20",
+        "xy": [
+          89.6,
+          141.58
+        ],
+        "net": "Net-(U1-CONTROLLER1-IO47)"
+      },
+      {
+        "number": "J1.21",
+        "xy": [
+          89.6,
+          139.04
+        ],
+        "net": "Net-(JP2-B)"
+      },
+      {
+        "number": "J1.22",
+        "xy": [
+          89.6,
+          136.5
+        ],
+        "net": "GND"
+      },
+      {
+        "number": "J3.1",
+        "xy": [
+          66.74,
+          189.84
+        ],
+        "net": "Net-(U1-CONTROLLER1-GND-PadJ3.1)"
+      },
+      {
+        "number": "J3.2",
+        "xy": [
+          66.74,
+          187.3
+        ],
+        "net": "unconnected-(U6-AUDIO1-TX_IO43-PadJ3.2)"
+      },
+      {
+        "number": "J3.3",
+        "xy": [
+          66.74,
+          184.76
+        ],
+        "net": "unconnected-(U6-AUDIO1-RX_IO44-PadJ3.3)"
+      },
+      {
+        "number": "J3.4",
+        "xy": [
+          66.74,
+          182.22
+        ],
+        "net": "Net-(U6-AUDIO1-IO1)"
+      },
+      {
+        "number": "J3.5",
+        "xy": [
+          66.74,
+          179.68
+        ],
+        "net": "Net-(U6-AUDIO1-IO2)"
+      },
+      {
+        "number": "J3.6",
+        "xy": [
+          66.74,
+          177.14
+        ],
+        "net": "Net-(U6-AUDIO1-IO42)"
+      },
+      {
+        "number": "J3.7",
+        "xy": [
+          66.74,
+          174.6
+        ],
+        "net": "ENABLE_U7"
+      },
+      {
+        "number": "J3.8",
+        "xy": [
+          66.74,
+          172.06
+        ],
+        "net": "Net-(U6-AUDIO1-IO40)"
+      },
+      {
+        "number": "J3.9",
+        "xy": [
+          66.74,
+          169.52
+        ],
+        "net": "unconnected-(U6-AUDIO1-IO39-PadJ3.9)"
+      },
+      {
+        "number": "J3.10",
+        "xy": [
+          66.74,
+          166.98
+        ],
+        "net": "unconnected-(U6-AUDIO1-IO38-PadJ3.10)"
+      },
+      {
+        "number": "J3.11",
+        "xy": [
+          66.74,
+          164.44
+        ],
+        "net": "unconnected-(U6-AUDIO1-IO37_PSRAM-PadJ3.11)"
+      },
+      {
+        "number": "J3.12",
+        "xy": [
+          66.74,
+          161.9
+        ],
+        "net": "unconnected-(U6-AUDIO1-IO36_PSRAM-PadJ3.12)"
+      },
+      {
+        "number": "J3.13",
+        "xy": [
+          66.74,
+          159.36
+        ],
+        "net": "unconnected-(U6-AUDIO1-IO35_PSRAM-PadJ3.13)"
+      },
+      {
+        "number": "J3.14",
+        "xy": [
+          66.74,
+          156.82
+        ],
+        "net": "unconnected-(U6-AUDIO1-IO0-PadJ3.14)"
+      },
+      {
+        "number": "J3.15",
+        "xy": [
+          66.74,
+          154.28
+        ],
+        "net": "unconnected-(U6-AUDIO1-IO45-PadJ3.15)"
+      },
+      {
+        "number": "J3.16",
+        "xy": [
+          66.74,
+          151.74
+        ],
+        "net": "unconnected-(U6-AUDIO1-IO48-PadJ3.16)"
+      },
+      {
+        "number": "J3.17",
+        "xy": [
+          66.74,
+          149.2
+        ],
+        "net": "Net-(U6-AUDIO1-IO47)"
+      },
+      {
+        "number": "J3.18",
+        "xy": [
+          66.74,
+          146.66
+        ],
+        "net": "ENABLE_U6"
+      },
+      {
+        "number": "J3.19",
+        "xy": [
+          66.74,
+          144.12
+        ],
+        "net": "unconnected-(U6-AUDIO1-IO20_USB_D+-PadJ3.19)"
+      },
+      {
+        "number": "J3.20",
+        "xy": [
+          66.74,
+          141.58
+        ],
+        "net": "unconnected-(U6-AUDIO1-IO19_USB_D--PadJ3.20)"
+      },
+      {
+        "number": "J3.21",
+        "xy": [
+          66.74,
+          139.04
+        ],
+        "net": "unconnected-(U6-AUDIO1-GND-PadJ3.21)"
+      },
+      {
+        "number": "J3.22",
+        "xy": [
+          66.74,
+          136.5
+        ],
+        "net": "unconnected-(U6-AUDIO1-GND-PadJ3.22)"
+      }
+    ]
+  },
+  {
+    "ref": "J7",
+    "pos": [
+      9.7,
+      92.0
+    ],
+    "angle": -90.0,
+    "pads": [
+      {
+        "number": "1",
+        "xy": [
+          9.7,
+          92.0
+        ],
+        "net": "/IN4"
+      },
+      {
+        "number": "2",
+        "xy": [
+          9.7,
+          94.5
+        ],
+        "net": "/IN5"
+      },
+      {
+        "number": "3",
+        "xy": [
+          9.7,
+          97.0
+        ],
+        "net": "/IN6"
+      },
+      {
+        "number": "4",
+        "xy": [
+          9.7,
+          99.5
+        ],
+        "net": "/IN7"
+      }
+    ]
+  },
+  {
+    "ref": "R3",
+    "pos": [
+      45.0,
+      35.79
+    ],
+    "angle": -90.0,
+    "pads": [
+      {
+        "number": "1",
+        "xy": [
+          45.0,
+          35.79
+        ],
+        "net": "LOCAL_5V"
+      },
+      {
+        "number": "2",
+        "xy": [
+          45.0,
+          43.41
+        ],
+        "net": "U4_OE_N"
+      }
+    ]
+  },
+  {
+    "ref": "U10",
+    "pos": [
+      44.0,
+      76.0
+    ],
+    "angle": 0.0,
+    "pads": [
+      {
+        "number": "1",
+        "xy": [
+          44.0,
+          76.0
+        ],
+        "net": "SONY_RESET_N_RAW"
+      },
+      {
+        "number": "2",
+        "xy": [
+          45.27,
+          76.0
+        ],
+        "net": "SONY_5V_SENSE"
+      },
+      {
+        "number": "3",
+        "xy": [
+          46.54,
+          76.0
+        ],
+        "net": "GND"
+      }
+    ]
+  },
+  {
+    "ref": "R7",
+    "pos": [
+      51.0,
+      45.0
+    ],
+    "angle": 0.0,
+    "pads": [
+      {
+        "number": "1",
+        "xy": [
+          51.0,
+          45.0
+        ],
+        "net": "ENABLE_U2"
+      },
+      {
+        "number": "2",
+        "xy": [
+          58.62,
+          45.0
+        ],
+        "net": "GND"
+      }
+    ]
+  },
+  {
+    "ref": "JP1",
+    "pos": [
+      70.41,
+      102.46
+    ],
+    "angle": 180.0,
+    "pads": [
+      {
+        "number": "1",
+        "xy": [
+          70.41,
+          102.46
+        ],
+        "net": "LOCAL_5V"
+      },
+      {
+        "number": "2",
+        "xy": [
+          70.41,
+          99.92
+        ],
+        "net": "Net-(JP1-B)"
+      }
+    ]
+  },
+  {
+    "ref": "R2",
+    "pos": [
+      45.1,
+      26.81
+    ],
+    "angle": 90.0,
+    "pads": [
+      {
+        "number": "1",
+        "xy": [
+          45.1,
+          26.81
+        ],
+        "net": "U3_OE_N"
+      },
+      {
+        "number": "2",
+        "xy": [
+          45.1,
+          19.19
+        ],
+        "net": "LOCAL_5V"
+      }
+    ]
+  },
+  {
+    "ref": "R10",
+    "pos": [
+      51.0,
+      164.0
+    ],
+    "angle": 0.0,
+    "pads": [
+      {
+        "number": "1",
+        "xy": [
+          51.0,
+          164.0
+        ],
+        "net": "ENABLE_U6"
+      },
+      {
+        "number": "2",
+        "xy": [
+          58.62,
+          164.0
+        ],
+        "net": "GND"
+      }
+    ]
+  },
+  {
+    "ref": "J3",
+    "pos": [
+      27.05,
+      9.7
+    ],
+    "angle": 180.0,
+    "pads": [
+      {
+        "number": "1",
+        "xy": [
+          27.05,
+          9.7
+        ],
+        "net": "GND"
+      },
+      {
+        "number": "2",
+        "xy": [
+          24.55,
+          9.7
+        ],
+        "net": "/FLGDATA"
+      },
+      {
+        "number": "3",
+        "xy": [
+          22.05,
+          9.7
+        ],
+        "net": "/FLGCLK"
+      },
+      {
+        "number": "4",
+        "xy": [
+          19.55,
+          9.7
+        ],
+        "net": "/FLCLEAR"
+      }
+    ]
+  },
+  {
+    "ref": "U8",
+    "pos": [
+      52.0,
+      23.0
+    ],
+    "angle": 0.0,
+    "pads": [
+      {
+        "number": "1",
+        "xy": [
+          52.0,
+          23.0
+        ],
+        "net": "ENABLE_U2"
+      },
+      {
+        "number": "2",
+        "xy": [
+          52.0,
+          25.54
+        ],
+        "net": "SONY_POWER_GOOD"
+      },
+      {
+        "number": "3",
+        "xy": [
+          52.0,
+          28.08
+        ],
+        "net": "U2_OE_N"
+      },
+      {
+        "number": "4",
+        "xy": [
+          52.0,
+          30.62
+        ],
+        "net": "ENABLE_U3"
+      },
+      {
+        "number": "5",
+        "xy": [
+          52.0,
+          33.16
+        ],
+        "net": "SONY_POWER_GOOD"
+      },
+      {
+        "number": "6",
+        "xy": [
+          52.0,
+          35.7
+        ],
+        "net": "U3_OE_N"
+      },
+      {
+        "number": "7",
+        "xy": [
+          52.0,
+          38.24
+        ],
+        "net": "GND"
+      },
+      {
+        "number": "8",
+        "xy": [
+          59.62,
+          38.24
+        ],
+        "net": "U4_OE_N"
+      },
+      {
+        "number": "9",
+        "xy": [
+          59.62,
+          35.7
+        ],
+        "net": "ENABLE_U4"
+      },
+      {
+        "number": "10",
+        "xy": [
+          59.62,
+          33.16
+        ],
+        "net": "SONY_POWER_GOOD"
+      },
+      {
+        "number": "11",
+        "xy": [
+          59.62,
+          30.62
+        ],
+        "net": "unconnected-(U8-4Y-Pad11)"
+      },
+      {
+        "number": "12",
+        "xy": [
+          59.62,
+          28.08
+        ],
+        "net": "GND"
+      },
+      {
+        "number": "13",
+        "xy": [
+          59.62,
+          25.54
+        ],
+        "net": "GND"
+      },
+      {
+        "number": "14",
+        "xy": [
+          59.62,
+          23.0
+        ],
+        "net": "LOCAL_5V"
+      }
+    ]
+  },
+  {
+    "ref": "R4",
+    "pos": [
+      30.39,
+      31.1
+    ],
+    "angle": 0.0,
+    "pads": [
+      {
+        "number": "1",
+        "xy": [
+          30.39,
+          31.1
+        ],
+        "net": "/FLCLEAR"
+      },
+      {
+        "number": "2",
+        "xy": [
+          38.01,
+          31.1
+        ],
+        "net": "GND"
+      }
+    ]
+  },
+  {
+    "ref": "C3",
+    "pos": [
+      16.14,
+      55.6
+    ],
+    "angle": -90.0,
+    "pads": [
+      {
+        "number": "1",
+        "xy": [
+          16.14,
+          55.6
+        ],
+        "net": "LOCAL_5V"
+      },
+      {
+        "number": "2",
+        "xy": [
+          16.14,
+          60.6
+        ],
+        "net": "GND"
+      }
+    ]
+  },
+  {
+    "ref": "H3",
+    "pos": [
+      5.0,
+      110.0
+    ],
+    "angle": 0.0,
+    "pads": [
+      {
+        "number": "",
+        "xy": [
+          5.0,
+          110.0
+        ],
+        "net": ""
+      }
+    ]
+  },
+  {
+    "ref": "H4",
+    "pos": [
+      95.0,
+      110.0
+    ],
+    "angle": 0.0,
+    "pads": [
+      {
+        "number": "",
+        "xy": [
+          95.0,
+          110.0
+        ],
+        "net": ""
+      }
+    ]
+  },
+  {
+    "ref": "U6",
+    "pos": [
+      23.2,
+      145.0
+    ],
+    "angle": 90.0,
+    "pads": [
+      {
+        "number": "1",
+        "xy": [
+          23.2,
+          145.0
+        ],
+        "net": "U6_OE_N"
+      },
+      {
+        "number": "2",
+        "xy": [
+          25.74,
+          145.0
+        ],
+        "net": "Net-(U6-AUDIO1-IO9)"
+      },
+      {
+        "number": "3",
+        "xy": [
+          28.28,
+          145.0
+        ],
+        "net": "/INIT"
+      },
+      {
+        "number": "4",
+        "xy": [
+          30.82,
+          145.0
+        ],
+        "net": "U6_OE_N"
+      },
+      {
+        "number": "5",
+        "xy": [
+          33.36,
+          145.0
+        ],
+        "net": "Net-(U6-AUDIO1-IO47)"
+      },
+      {
+        "number": "6",
+        "xy": [
+          35.9,
+          145.0
+        ],
+        "net": "/LATCH"
+      },
+      {
+        "number": "7",
+        "xy": [
+          38.44,
+          145.0
+        ],
+        "net": "GND"
+      },
+      {
+        "number": "8",
+        "xy": [
+          38.44,
+          137.38
+        ],
+        "net": "/SHIFT"
+      },
+      {
+        "number": "9",
+        "xy": [
+          35.9,
+          137.38
+        ],
+        "net": "Net-(U6-AUDIO1-IO12)"
+      },
+      {
+        "number": "10",
+        "xy": [
+          33.36,
+          137.38
+        ],
+        "net": "U6_OE_N"
+      },
+      {
+        "number": "11",
+        "xy": [
+          30.82,
+          137.38
+        ],
+        "net": "/ATT"
+      },
+      {
+        "number": "12",
+        "xy": [
+          28.28,
+          137.38
+        ],
+        "net": "Net-(U6-AUDIO1-IO11)"
+      },
+      {
+        "number": "13",
+        "xy": [
+          25.74,
+          137.38
+        ],
+        "net": "U6_OE_N"
+      },
+      {
+        "number": "14",
+        "xy": [
+          23.2,
+          137.38
+        ],
+        "net": "LOCAL_5V"
+      }
+    ]
+  },
+  {
+    "ref": "C4",
+    "pos": [
+      16.9,
+      138.6
+    ],
+    "angle": -90.0,
+    "pads": [
+      {
+        "number": "1",
+        "xy": [
+          16.9,
+          138.6
+        ],
+        "net": "LOCAL_5V"
+      },
+      {
+        "number": "2",
+        "xy": [
+          16.9,
+          143.6
+        ],
+        "net": "GND"
+      }
+    ]
+  },
+  {
+    "ref": "R11",
+    "pos": [
+      51.0,
+      169.0
+    ],
+    "angle": 0.0,
+    "pads": [
+      {
+        "number": "1",
+        "xy": [
+          51.0,
+          169.0
+        ],
+        "net": "ENABLE_U7"
+      },
+      {
+        "number": "2",
+        "xy": [
+          58.62,
+          169.0
+        ],
+        "net": "GND"
+      }
+    ]
+  },
+  {
+    "ref": "U9",
+    "pos": [
+      52.0,
+      143.0
+    ],
+    "angle": 0.0,
+    "pads": [
+      {
+        "number": "1",
+        "xy": [
+          52.0,
+          143.0
+        ],
+        "net": "ENABLE_U6"
+      },
+      {
+        "number": "2",
+        "xy": [
+          52.0,
+          145.54
+        ],
+        "net": "SONY_POWER_GOOD"
+      },
+      {
+        "number": "3",
+        "xy": [
+          52.0,
+          148.08
+        ],
+        "net": "U6_OE_N"
+      },
+      {
+        "number": "4",
+        "xy": [
+          52.0,
+          150.62
+        ],
+        "net": "ENABLE_U7"
+      },
+      {
+        "number": "5",
+        "xy": [
+          52.0,
+          153.16
+        ],
+        "net": "SONY_POWER_GOOD"
+      },
+      {
+        "number": "6",
+        "xy": [
+          52.0,
+          155.7
+        ],
+        "net": "U7_OE_N"
+      },
+      {
+        "number": "7",
+        "xy": [
+          52.0,
+          158.24
+        ],
+        "net": "GND"
+      },
+      {
+        "number": "8",
+        "xy": [
+          59.62,
+          158.24
+        ],
+        "net": "unconnected-(U9-3Y-Pad8)"
+      },
+      {
+        "number": "9",
+        "xy": [
+          59.62,
+          155.7
+        ],
+        "net": "GND"
+      },
+      {
+        "number": "10",
+        "xy": [
+          59.62,
+          153.16
+        ],
+        "net": "GND"
+      },
+      {
+        "number": "11",
+        "xy": [
+          59.62,
+          150.62
+        ],
+        "net": "unconnected-(U9-4Y-Pad11)"
+      },
+      {
+        "number": "12",
+        "xy": [
+          59.62,
+          148.08
+        ],
+        "net": "GND"
+      },
+      {
+        "number": "13",
+        "xy": [
+          59.62,
+          145.54
+        ],
+        "net": "GND"
+      },
+      {
+        "number": "14",
+        "xy": [
+          59.62,
+          143.0
+        ],
+        "net": "LOCAL_5V"
+      }
+    ]
+  },
+  {
+    "ref": "JP2",
+    "pos": [
+      75.3,
+      100.025
+    ],
+    "angle": 0.0,
+    "pads": [
+      {
+        "number": "1",
+        "xy": [
+          75.3,
+          100.025
+        ],
+        "net": "LOCAL_5V"
+      },
+      {
+        "number": "2",
+        "xy": [
+          75.3,
+          102.565
+        ],
+        "net": "Net-(JP2-B)"
+      }
+    ]
+  },
+  {
+    "ref": "J8",
+    "pos": [
+      9.7,
+      47.5
+    ],
+    "angle": -90.0,
+    "pads": [
+      {
+        "number": "1",
+        "xy": [
+          9.7,
+          47.5
+        ],
+        "net": "/OUT3"
+      },
+      {
+        "number": "2",
+        "xy": [
+          9.7,
+          50.0
+        ],
+        "net": "/OUT4"
+      },
+      {
+        "number": "3",
+        "xy": [
+          9.7,
+          52.5
+        ],
+        "net": "/OUT5"
+      }
+    ]
+  },
+  {
+    "ref": "H2",
+    "pos": [
+      95.0,
+      20.0
+    ],
+    "angle": 0.0,
+    "pads": [
+      {
+        "number": "",
+        "xy": [
+          95.0,
+          20.0
+        ],
+        "net": ""
+      }
+    ]
+  },
+  {
+    "ref": "H6",
+    "pos": [
+      95.0,
+      200.0
+    ],
+    "angle": 0.0,
+    "pads": [
+      {
+        "number": "",
+        "xy": [
+          95.0,
+          200.0
+        ],
+        "net": ""
+      }
+    ]
+  },
+  {
+    "ref": "C7",
+    "pos": [
+      58.0,
+      139.0
+    ],
+    "angle": 0.0,
+    "pads": [
+      {
+        "number": "1",
+        "xy": [
+          58.0,
+          139.0
+        ],
+        "net": "LOCAL_5V"
+      },
+      {
+        "number": "2",
+        "xy": [
+          63.0,
+          139.0
+        ],
+        "net": "GND"
+      }
+    ]
+  },
+  {
+    "ref": "H1",
+    "pos": [
+      5.0,
+      20.0
+    ],
+    "angle": 0.0,
+    "pads": [
+      {
+        "number": "",
+        "xy": [
+          5.0,
+          20.0
+        ],
+        "net": ""
+      }
+    ]
+  },
+  {
+    "ref": "C6",
+    "pos": [
+      58.0,
+      19.0
+    ],
+    "angle": 0.0,
+    "pads": [
+      {
+        "number": "1",
+        "xy": [
+          58.0,
+          19.0
+        ],
+        "net": "LOCAL_5V"
+      },
+      {
+        "number": "2",
+        "xy": [
+          63.0,
+          19.0
+        ],
+        "net": "GND"
+      }
+    ]
+  },
+  {
+    "ref": "J12",
+    "pos": [
+      43.0,
+      9.7
+    ],
+    "angle": 180.0,
+    "pads": [
+      {
+        "number": "1",
+        "xy": [
+          43.0,
+          9.7
+        ],
+        "net": "GND"
+      },
+      {
+        "number": "2",
+        "xy": [
+          40.5,
+          9.7
+        ],
+        "net": "SONY_5V_SENSE"
+      }
+    ]
+  },
+  {
+    "ref": "R12",
+    "pos": [
+      51.0,
+      71.0
+    ],
+    "angle": 0.0,
+    "pads": [
+      {
+        "number": "1",
+        "xy": [
+          51.0,
+          71.0
+        ],
+        "net": "SONY_RESET_N_RAW"
+      },
+      {
+        "number": "2",
+        "xy": [
+          58.62,
+          71.0
+        ],
+        "net": "SONY_POWER_GOOD"
+      }
+    ]
+  },
+  {
+    "ref": "R6",
+    "pos": [
+      47.2,
+      163.91
+    ],
+    "angle": 90.0,
+    "pads": [
+      {
+        "number": "1",
+        "xy": [
+          47.2,
+          163.91
+        ],
+        "net": "U7_OE_N"
+      },
+      {
+        "number": "2",
+        "xy": [
+          47.2,
+          156.29
+        ],
+        "net": "LOCAL_5V"
+      }
+    ]
+  },
+  {
+    "ref": "J5",
+    "pos": [
+      9.7,
+      60.2
+    ],
+    "angle": -90.0,
+    "pads": [
+      {
+        "number": "1",
+        "xy": [
+          9.7,
+          60.2
+        ],
+        "net": "GND"
+      },
+      {
+        "number": "2",
+        "xy": [
+          9.7,
+          62.7
+        ],
+        "net": "/OUT0"
+      },
+      {
+        "number": "3",
+        "xy": [
+          9.7,
+          65.2
+        ],
+        "net": "/OUT1"
+      },
+      {
+        "number": "4",
+        "xy": [
+          9.7,
+          67.7
+        ],
+        "net": "/OUT2"
+      }
+    ]
+  },
+  {
+    "ref": "U3",
+    "pos": [
+      22.74,
+      26.7
+    ],
+    "angle": 90.0,
+    "pads": [
+      {
+        "number": "1",
+        "xy": [
+          22.74,
+          26.7
+        ],
+        "net": "U3_OE_N"
+      },
+      {
+        "number": "2",
+        "xy": [
+          25.28,
+          26.7
+        ],
+        "net": "Net-(U1-CONTROLLER1-IO42)"
+      },
+      {
+        "number": "3",
+        "xy": [
+          27.82,
+          26.7
+        ],
+        "net": "/FLCLEAR"
+      },
+      {
+        "number": "4",
+        "xy": [
+          30.36,
+          26.7
+        ],
+        "net": "U3_OE_N"
+      },
+      {
+        "number": "5",
+        "xy": [
+          32.9,
+          26.7
+        ],
+        "net": "Net-(U1-CONTROLLER1-IO4)"
+      },
+      {
+        "number": "6",
+        "xy": [
+          35.44,
+          26.7
+        ],
+        "net": "unconnected-(U3-Pad6)"
+      },
+      {
+        "number": "7",
+        "xy": [
+          37.98,
+          26.7
+        ],
+        "net": "GND"
+      },
+      {
+        "number": "8",
+        "xy": [
+          37.98,
+          19.08
+        ],
+        "net": "/FLGCLK"
+      },
+      {
+        "number": "9",
+        "xy": [
+          35.44,
+          19.08
+        ],
+        "net": "Net-(U1-CONTROLLER1-IO1)"
+      },
+      {
+        "number": "10",
+        "xy": [
+          32.9,
+          19.08
+        ],
+        "net": "U3_OE_N"
+      },
+      {
+        "number": "11",
+        "xy": [
+          30.36,
+          19.08
+        ],
+        "net": "/FLGDATA"
+      },
+      {
+        "number": "12",
+        "xy": [
+          27.82,
+          19.08
+        ],
+        "net": "Net-(U1-CONTROLLER1-IO2)"
+      },
+      {
+        "number": "13",
+        "xy": [
+          25.28,
+          19.08
+        ],
+        "net": "U3_OE_N"
+      },
+      {
+        "number": "14",
+        "xy": [
+          22.74,
+          19.08
+        ],
+        "net": "LOCAL_5V"
+      }
+    ]
+  },
+  {
+    "ref": "U5",
+    "pos": [
+      38.2,
+      116.68
+    ],
+    "angle": 90.0,
+    "pads": [
+      {
+        "number": "JP1.1",
+        "xy": [
+          25.5,
+          86.2
+        ],
+        "net": "/OUT1"
+      },
+      {
+        "number": "JP1.2",
+        "xy": [
+          25.5,
+          88.74
+        ],
+        "net": "/OUT0"
+      },
+      {
+        "number": "JP1.3",
+        "xy": [
+          25.5,
+          91.28
+        ],
+        "net": "/IN0"
+      },
+      {
+        "number": "JP1.4",
+        "xy": [
+          25.5,
+          93.82
+        ],
+        "net": "/IN1"
+      },
+      {
+        "number": "JP1.5",
+        "xy": [
+          25.5,
+          96.36
+        ],
+        "net": "/IN2"
+      },
+      {
+        "number": "JP1.6",
+        "xy": [
+          25.5,
+          98.9
+        ],
+        "net": "/IN3"
+      },
+      {
+        "number": "JP1.7",
+        "xy": [
+          25.5,
+          101.44
+        ],
+        "net": "/IN4"
+      },
+      {
+        "number": "JP1.8",
+        "xy": [
+          25.5,
+          103.98
+        ],
+        "net": "/IN5"
+      },
+      {
+        "number": "JP1.9",
+        "xy": [
+          25.5,
+          106.52
+        ],
+        "net": "/IN6"
+      },
+      {
+        "number": "JP1.10",
+        "xy": [
+          25.5,
+          109.06
+        ],
+        "net": "/IN7"
+      },
+      {
+        "number": "JP1.11",
+        "xy": [
+          25.5,
+          111.6
+        ],
+        "net": "unconnected-(U5-C8-PadJP1.11)"
+      },
+      {
+        "number": "JP1.12",
+        "xy": [
+          25.5,
+          114.14
+        ],
+        "net": "unconnected-(U5-C9-PadJP1.12)"
+      },
+      {
+        "number": "JP1.13",
+        "xy": [
+          25.5,
+          116.68
+        ],
+        "net": "GND"
+      },
+      {
+        "number": "JP4.1",
+        "xy": [
+          38.2,
+          116.68
+        ],
+        "net": "Net-(U5-VIN)"
+      },
+      {
+        "number": "JP4.2",
+        "xy": [
+          38.2,
+          114.14
+        ],
+        "net": "unconnected-(U5-3Vo-PadJP4.2)"
+      },
+      {
+        "number": "JP4.3",
+        "xy": [
+          38.2,
+          111.6
+        ],
+        "net": "GND"
+      },
+      {
+        "number": "JP4.4",
+        "xy": [
+          38.2,
+          109.06
+        ],
+        "net": "Net-(U1-CONTROLLER1-IO39)"
+      },
+      {
+        "number": "JP4.5",
+        "xy": [
+          38.2,
+          106.52
+        ],
+        "net": "Net-(U1-CONTROLLER1-IO14)"
+      },
+      {
+        "number": "JP4.6",
+        "xy": [
+          38.2,
+          103.98
+        ],
+        "net": "Net-(U1-CONTROLLER1-IO13)"
+      },
+      {
+        "number": "JP4.7",
+        "xy": [
+          38.2,
+          101.44
+        ],
+        "net": "Net-(U1-CONTROLLER1-IO40)"
+      },
+      {
+        "number": "JP4.8",
+        "xy": [
+          38.2,
+          98.9
+        ],
+        "net": "unconnected-(U5-R7-PadJP4.8)"
+      },
+      {
+        "number": "JP4.9",
+        "xy": [
+          38.2,
+          96.36
+        ],
+        "net": "unconnected-(U5-R6-PadJP4.9)"
+      },
+      {
+        "number": "JP4.10",
+        "xy": [
+          38.2,
+          93.82
+        ],
+        "net": "/OUT5"
+      },
+      {
+        "number": "JP4.11",
+        "xy": [
+          38.2,
+          91.28
+        ],
+        "net": "/OUT4"
+      },
+      {
+        "number": "JP4.12",
+        "xy": [
+          38.2,
+          88.74
+        ],
+        "net": "/OUT3"
+      },
+      {
+        "number": "JP4.13",
+        "xy": [
+          38.2,
+          86.2
+        ],
+        "net": "/OUT2"
+      }
+    ]
+  },
+  {
+    "ref": "J9",
+    "pos": [
+      64.5,
+      9.7
+    ],
+    "angle": 180.0,
+    "pads": [
+      {
+        "number": "1",
+        "xy": [
+          64.5,
+          9.7
+        ],
+        "net": "GND"
+      },
+      {
+        "number": "2",
+        "xy": [
+          62.0,
+          9.7
+        ],
+        "net": "/A.MUTE"
+      },
+      {
+        "number": "3",
+        "xy": [
+          59.5,
+          9.7
+        ],
+        "net": "/D.MUTE"
+      },
+      {
+        "number": "4",
+        "xy": [
+          57.0,
+          9.7
+        ],
+        "net": "/RELAY"
+      }
+    ]
+  },
+  {
+    "ref": "J10",
+    "pos": [
+      9.7,
+      135.1
+    ],
+    "angle": -90.0,
+    "pads": [
+      {
+        "number": "1",
+        "xy": [
+          9.7,
+          135.1
+        ],
+        "net": "GND"
+      },
+      {
+        "number": "2",
+        "xy": [
+          9.7,
+          137.6
+        ],
+        "net": "/ATT"
+      },
+      {
+        "number": "3",
+        "xy": [
+          9.7,
+          140.1
+        ],
+        "net": "/SHIFT"
+      },
+      {
+        "number": "4",
+        "xy": [
+          9.7,
+          142.6
+        ],
+        "net": "/LATCH"
+      },
+      {
+        "number": "5",
+        "xy": [
+          9.7,
+          145.1
+        ],
+        "net": "/INIT"
+      }
+    ]
+  },
+  {
+    "ref": "R8",
+    "pos": [
+      51.0,
+      50.0
+    ],
+    "angle": 0.0,
+    "pads": [
+      {
+        "number": "1",
+        "xy": [
+          51.0,
+          50.0
+        ],
+        "net": "ENABLE_U3"
+      },
+      {
+        "number": "2",
+        "xy": [
+          58.62,
+          50.0
+        ],
+        "net": "GND"
+      }
+    ]
+  },
+  {
+    "ref": "U4",
+    "pos": [
+      22.82,
+      43.42
+    ],
+    "angle": 90.0,
+    "pads": [
+      {
+        "number": "1",
+        "xy": [
+          22.82,
+          43.42
+        ],
+        "net": "U4_OE_N"
+      },
+      {
+        "number": "2",
+        "xy": [
+          25.36,
+          43.42
+        ],
+        "net": "Net-(U1-CONTROLLER1-IO8)"
+      },
+      {
+        "number": "3",
+        "xy": [
+          27.9,
+          43.42
+        ],
+        "net": "Net-(J4-Pin_2)"
+      },
+      {
+        "number": "4",
+        "xy": [
+          30.44,
+          43.42
+        ],
+        "net": "U4_OE_N"
+      },
+      {
+        "number": "5",
+        "xy": [
+          32.98,
+          43.42
+        ],
+        "net": "Net-(U1-CONTROLLER1-IO18)"
+      },
+      {
+        "number": "6",
+        "xy": [
+          35.52,
+          43.42
+        ],
+        "net": "unconnected-(U4-Pad6)"
+      },
+      {
+        "number": "7",
+        "xy": [
+          38.06,
+          43.42
+        ],
+        "net": "GND"
+      },
+      {
+        "number": "8",
+        "xy": [
+          38.06,
+          35.8
+        ],
+        "net": "Net-(J4-Pin_1)"
+      },
+      {
+        "number": "9",
+        "xy": [
+          35.52,
+          35.8
+        ],
+        "net": "Net-(U1-CONTROLLER1-IO7)"
+      },
+      {
+        "number": "10",
+        "xy": [
+          32.98,
+          35.8
+        ],
+        "net": "U4_OE_N"
+      },
+      {
+        "number": "11",
+        "xy": [
+          30.44,
+          35.8
+        ],
+        "net": "Net-(J4-Pin_3)"
+      },
+      {
+        "number": "12",
+        "xy": [
+          27.9,
+          35.8
+        ],
+        "net": "Net-(U1-CONTROLLER1-IO5)"
+      },
+      {
+        "number": "13",
+        "xy": [
+          25.36,
+          35.8
+        ],
+        "net": "U4_OE_N"
+      },
+      {
+        "number": "14",
+        "xy": [
+          22.82,
+          35.8
+        ],
+        "net": "LOCAL_5V"
+      }
+    ]
+  },
+  {
+    "ref": "U1-CONTROLLER1",
+    "pos": [
+      66.47,
+      22.63
+    ],
+    "angle": 0.0,
+    "pads": [
+      {
+        "number": "J1.1",
+        "xy": [
+          66.47,
+          22.63
+        ],
+        "net": "Net-(U5-VIN)"
+      },
+      {
+        "number": "J1.2",
+        "xy": [
+          66.47,
+          25.17
+        ],
+        "net": "unconnected-(U1-CONTROLLER1-3V3-PadJ1.2)"
+      },
+      {
+        "number": "J1.3",
+        "xy": [
+          66.47,
+          27.71
+        ],
+        "net": "unconnected-(U1-CONTROLLER1-EN-PadJ1.3)"
+      },
+      {
+        "number": "J1.4",
+        "xy": [
+          66.47,
+          30.25
+        ],
+        "net": "Net-(U1-CONTROLLER1-IO4)"
+      },
+      {
+        "number": "J1.5",
+        "xy": [
+          66.47,
+          32.79
+        ],
+        "net": "Net-(U1-CONTROLLER1-IO5)"
+      },
+      {
+        "number": "J1.6",
+        "xy": [
+          66.47,
+          35.33
+        ],
+        "net": "ENABLE_U2"
+      },
+      {
+        "number": "J1.7",
+        "xy": [
+          66.47,
+          37.87
+        ],
+        "net": "Net-(U1-CONTROLLER1-IO7)"
+      },
+      {
+        "number": "J1.8",
+        "xy": [
+          66.47,
+          40.41
+        ],
+        "net": "ENABLE_U3"
+      },
+      {
+        "number": "J1.9",
+        "xy": [
+          66.47,
+          42.95
+        ],
+        "net": "ENABLE_U4"
+      },
+      {
+        "number": "J1.10",
+        "xy": [
+          66.47,
+          45.49
+        ],
+        "net": "unconnected-(U1-CONTROLLER1-IO17-PadJ1.10)"
+      },
+      {
+        "number": "J1.11",
+        "xy": [
+          66.47,
+          48.03
+        ],
+        "net": "Net-(U1-CONTROLLER1-IO18)"
+      },
+      {
+        "number": "J1.12",
+        "xy": [
+          66.47,
+          50.57
+        ],
+        "net": "Net-(U1-CONTROLLER1-IO8)"
+      },
+      {
+        "number": "J1.13",
+        "xy": [
+          66.47,
+          53.11
+        ],
+        "net": "unconnected-(U1-CONTROLLER1-IO3-PadJ1.13)"
+      },
+      {
+        "number": "J1.14",
+        "xy": [
+          66.47,
+          55.65
+        ],
+        "net": "unconnected-(U1-CONTROLLER1-IO46-PadJ1.14)"
+      },
+      {
+        "number": "J1.15",
+        "xy": [
+          66.47,
+          58.19
+        ],
+        "net": "Net-(U1-CONTROLLER1-IO9)"
+      },
+      {
+        "number": "J1.16",
+        "xy": [
+          66.47,
+          60.73
+        ],
+        "net": "Net-(U1-CONTROLLER1-IO10)"
+      },
+      {
+        "number": "J1.17",
+        "xy": [
+          66.47,
+          63.27
+        ],
+        "net": "Net-(U1-CONTROLLER1-IO11)"
+      },
+      {
+        "number": "J1.18",
+        "xy": [
+          66.47,
+          65.81
+        ],
+        "net": "Net-(U1-CONTROLLER1-IO12)"
+      },
+      {
+        "number": "J1.19",
+        "xy": [
+          66.47,
+          68.35
+        ],
+        "net": "Net-(U1-CONTROLLER1-IO13)"
+      },
+      {
+        "number": "J1.20",
+        "xy": [
+          66.47,
+          70.89
+        ],
+        "net": "Net-(U1-CONTROLLER1-IO14)"
+      },
+      {
+        "number": "J1.21",
+        "xy": [
+          66.47,
+          73.43
+        ],
+        "net": "Net-(JP1-B)"
+      },
+      {
+        "number": "J1.22",
+        "xy": [
+          66.47,
+          75.97
+        ],
+        "net": "GND"
+      },
+      {
+        "number": "J3.1",
+        "xy": [
+          89.33,
+          22.63
+        ],
+        "net": "Net-(U1-CONTROLLER1-GND-PadJ3.1)"
+      },
+      {
+        "number": "J3.2",
+        "xy": [
+          89.33,
+          25.17
+        ],
+        "net": "unconnected-(U1-CONTROLLER1-TX_IO43-PadJ3.2)"
+      },
+      {
+        "number": "J3.3",
+        "xy": [
+          89.33,
+          27.71
+        ],
+        "net": "unconnected-(U1-CONTROLLER1-RX_IO44-PadJ3.3)"
+      },
+      {
+        "number": "J3.4",
+        "xy": [
+          89.33,
+          30.25
+        ],
+        "net": "Net-(U1-CONTROLLER1-IO1)"
+      },
+      {
+        "number": "J3.5",
+        "xy": [
+          89.33,
+          32.79
+        ],
+        "net": "Net-(U1-CONTROLLER1-IO2)"
+      },
+      {
+        "number": "J3.6",
+        "xy": [
+          89.33,
+          35.33
+        ],
+        "net": "Net-(U1-CONTROLLER1-IO42)"
+      },
+      {
+        "number": "J3.7",
+        "xy": [
+          89.33,
+          37.87
+        ],
+        "net": "unconnected-(U1-CONTROLLER1-IO41-PadJ3.7)"
+      },
+      {
+        "number": "J3.8",
+        "xy": [
+          89.33,
+          40.41
+        ],
+        "net": "Net-(U1-CONTROLLER1-IO40)"
+      },
+      {
+        "number": "J3.9",
+        "xy": [
+          89.33,
+          42.95
+        ],
+        "net": "Net-(U1-CONTROLLER1-IO39)"
+      },
+      {
+        "number": "J3.10",
+        "xy": [
+          89.33,
+          45.49
+        ],
+        "net": "unconnected-(U1-CONTROLLER1-IO38-PadJ3.10)"
+      },
+      {
+        "number": "J3.11",
+        "xy": [
+          89.33,
+          48.03
+        ],
+        "net": "unconnected-(U1-CONTROLLER1-IO37_PSRAM-PadJ3.11)"
+      },
+      {
+        "number": "J3.12",
+        "xy": [
+          89.33,
+          50.57
+        ],
+        "net": "unconnected-(U1-CONTROLLER1-IO36_PSRAM-PadJ3.12)"
+      },
+      {
+        "number": "J3.13",
+        "xy": [
+          89.33,
+          53.11
+        ],
+        "net": "unconnected-(U1-CONTROLLER1-IO35_PSRAM-PadJ3.13)"
+      },
+      {
+        "number": "J3.14",
+        "xy": [
+          89.33,
+          55.65
+        ],
+        "net": "unconnected-(U1-CONTROLLER1-IO0-PadJ3.14)"
+      },
+      {
+        "number": "J3.15",
+        "xy": [
+          89.33,
+          58.19
+        ],
+        "net": "unconnected-(U1-CONTROLLER1-IO45-PadJ3.15)"
+      },
+      {
+        "number": "J3.16",
+        "xy": [
+          89.33,
+          60.73
+        ],
+        "net": "unconnected-(U1-CONTROLLER1-IO48-PadJ3.16)"
+      },
+      {
+        "number": "J3.17",
+        "xy": [
+          89.33,
+          63.27
+        ],
+        "net": "Net-(U1-CONTROLLER1-IO47)"
+      },
+      {
+        "number": "J3.18",
+        "xy": [
+          89.33,
+          65.81
+        ],
+        "net": "Net-(U1-CONTROLLER1-IO21)"
+      },
+      {
+        "number": "J3.19",
+        "xy": [
+          89.33,
+          68.35
+        ],
+        "net": "unconnected-(U1-CONTROLLER1-IO20_USB_D+-PadJ3.19)"
+      },
+      {
+        "number": "J3.20",
+        "xy": [
+          89.33,
+          70.89
+        ],
+        "net": "unconnected-(U1-CONTROLLER1-IO19_USB_D--PadJ3.20)"
+      },
+      {
+        "number": "J3.21",
+        "xy": [
+          89.33,
+          73.43
+        ],
+        "net": "unconnected-(U1-CONTROLLER1-GND-PadJ3.21)"
+      },
+      {
+        "number": "J3.22",
+        "xy": [
+          89.33,
+          75.97
+        ],
+        "net": "unconnected-(U1-CONTROLLER1-GND-PadJ3.22)"
+      }
+    ]
+  },
+  {
+    "ref": "R1",
+    "pos": [
+      44.8,
+      54.09
+    ],
+    "angle": -90.0,
+    "pads": [
+      {
+        "number": "1",
+        "xy": [
+          44.8,
+          54.09
+        ],
+        "net": "LOCAL_5V"
+      },
+      {
+        "number": "2",
+        "xy": [
+          44.8,
+          61.71
+        ],
+        "net": "U2_OE_N"
+      }
+    ]
+  },
+  {
+    "ref": "R9",
+    "pos": [
+      51.0,
+      55.0
+    ],
+    "angle": 0.0,
+    "pads": [
+      {
+        "number": "1",
+        "xy": [
+          51.0,
+          55.0
+        ],
+        "net": "ENABLE_U4"
+      },
+      {
+        "number": "2",
+        "xy": [
+          58.62,
+          55.0
+        ],
+        "net": "GND"
+      }
+    ]
+  },
+  {
+    "ref": "U7",
+    "pos": [
+      22.44,
+      164.18
+    ],
+    "angle": 90.0,
+    "pads": [
+      {
+        "number": "1",
+        "xy": [
+          22.44,
+          164.18
+        ],
+        "net": "U7_OE_N"
+      },
+      {
+        "number": "2",
+        "xy": [
+          24.98,
+          164.18
+        ],
+        "net": "Net-(U6-AUDIO1-IO1)"
+      },
+      {
+        "number": "3",
+        "xy": [
+          27.52,
+          164.18
+        ],
+        "net": "/DATA"
+      },
+      {
+        "number": "4",
+        "xy": [
+          30.06,
+          164.18
+        ],
+        "net": "U7_OE_N"
+      },
+      {
+        "number": "5",
+        "xy": [
+          32.6,
+          164.18
+        ],
+        "net": "Net-(U6-AUDIO1-IO42)"
+      },
+      {
+        "number": "6",
+        "xy": [
+          35.14,
+          164.18
+        ],
+        "net": "/LRCK"
+      },
+      {
+        "number": "7",
+        "xy": [
+          37.68,
+          164.18
+        ],
+        "net": "GND"
+      },
+      {
+        "number": "8",
+        "xy": [
+          37.68,
+          156.56
+        ],
+        "net": "unconnected-(U7-Pad8)"
+      },
+      {
+        "number": "9",
+        "xy": [
+          35.14,
+          156.56
+        ],
+        "net": "Net-(U6-AUDIO1-IO40)"
+      },
+      {
+        "number": "10",
+        "xy": [
+          32.6,
+          156.56
+        ],
+        "net": "U7_OE_N"
+      },
+      {
+        "number": "11",
+        "xy": [
+          30.06,
+          156.56
+        ],
+        "net": "/BCKI"
+      },
+      {
+        "number": "12",
+        "xy": [
+          27.52,
+          156.56
+        ],
+        "net": "Net-(U6-AUDIO1-IO2)"
+      },
+      {
+        "number": "13",
+        "xy": [
+          24.98,
+          156.56
+        ],
+        "net": "U7_OE_N"
+      },
+      {
+        "number": "14",
+        "xy": [
+          22.44,
+          156.56
+        ],
+        "net": "LOCAL_5V"
+      }
+    ]
+  },
+  {
+    "ref": "C5",
+    "pos": [
+      17.3,
+      163.0
+    ],
+    "angle": 90.0,
+    "pads": [
+      {
+        "number": "1",
+        "xy": [
+          17.3,
+          163.0
+        ],
+        "net": "GND"
+      },
+      {
+        "number": "2",
+        "xy": [
+          17.3,
+          158.0
+        ],
+        "net": "LOCAL_5V"
+      }
+    ]
+  },
+  {
+    "ref": "J4",
+    "pos": [
+      13.3,
+      9.7
+    ],
+    "angle": 180.0,
+    "pads": [
+      {
+        "number": "1",
+        "xy": [
+          13.3,
+          9.7
+        ],
+        "net": "Net-(J4-Pin_1)"
+      },
+      {
+        "number": "2",
+        "xy": [
+          10.8,
+          9.7
+        ],
+        "net": "Net-(J4-Pin_2)"
+      },
+      {
+        "number": "3",
+        "xy": [
+          8.3,
+          9.7
+        ],
+        "net": "Net-(J4-Pin_3)"
+      }
+    ]
+  },
+  {
+    "ref": "C8",
+    "pos": [
+      43.0,
+      81.0
+    ],
+    "angle": 0.0,
+    "pads": [
+      {
+        "number": "1",
+        "xy": [
+          43.0,
+          81.0
+        ],
+        "net": "SONY_5V_SENSE"
+      },
+      {
+        "number": "2",
+        "xy": [
+          48.0,
+          81.0
+        ],
+        "net": "GND"
+      }
+    ]
+  },
+  {
+    "ref": "R5",
+    "pos": [
+      47.3,
+      137.19
+    ],
+    "angle": -90.0,
+    "pads": [
+      {
+        "number": "1",
+        "xy": [
+          47.3,
+          137.19
+        ],
+        "net": "LOCAL_5V"
+      },
+      {
+        "number": "2",
+        "xy": [
+          47.3,
+          144.81
+        ],
+        "net": "U6_OE_N"
+      }
+    ]
+  },
+  {
+    "ref": "H5",
+    "pos": [
+      5.0,
+      200.0
+    ],
+    "angle": 0.0,
+    "pads": [
+      {
+        "number": "",
+        "xy": [
+          5.0,
+          200.0
+        ],
+        "net": ""
+      }
+    ]
+  },
+  {
+    "ref": "J6",
+    "pos": [
+      9.7,
+      75.8
+    ],
+    "angle": -90.0,
+    "pads": [
+      {
+        "number": "1",
+        "xy": [
+          9.7,
+          75.8
+        ],
+        "net": "/IN0"
+      },
+      {
+        "number": "2",
+        "xy": [
+          9.7,
+          78.3
+        ],
+        "net": "/IN1"
+      },
+      {
+        "number": "3",
+        "xy": [
+          9.7,
+          80.8
+        ],
+        "net": "/IN2"
+      },
+      {
+        "number": "4",
+        "xy": [
+          9.7,
+          83.3
+        ],
+        "net": "/IN3"
+      }
+    ]
+  },
+  {
+    "ref": "C1",
+    "pos": [
+      15.7,
+      25.1
+    ],
+    "angle": 90.0,
+    "pads": [
+      {
+        "number": "1",
+        "xy": [
+          15.7,
+          25.1
+        ],
+        "net": "GND"
+      },
+      {
+        "number": "2",
+        "xy": [
+          15.7,
+          20.1
+        ],
+        "net": "LOCAL_5V"
+      }
+    ]
+  }
+]

@@ -1,0 +1,28 @@
+DAR-1000ES v3 - saved design verification
+
+PCB DRC: 0 violations, 0 unconnected items with all wire links installed.
+Routing: 888 B.Cu tracks; 0 F.Cu tracks; 0 routing vias; no copper zones.
+Normal plated through-hole annuli on both faces are intentional, as confirmed.
+Physical wire links: 43; dedicated wire holes: 87.
+Removing the physical wire links creates 44 missing connections, as expected.
+Bottom track length: 4358.12 mm.
+All 51 original footprint origins, orientations and pad positions retained.
+All original connector functions and GPIO assignments unchanged from v2.
+Five supply capacitors added on the input and two post-jumper ESP rails.
+Sony sense supply remains electrically separate from LOCAL_5V.
+Signal routing width: 0.30 mm, with two short 0.25 mm fanout sections.
+Power-class routing width: 0.80 mm.
+Existing 0.20 mm netclass clearance retained for the fine-pitch TO-92 device.
+Wire holes were routed outside component bodies, printed references and mounting screwhead areas.
+PDFs are automatically fitted to the page, not 1:1 fabrication artwork.
+Bottom-copper PDF is mirrored (underside view); assembly PDF is top view.
+All 18 recorded v2 file hashes unchanged.
+
+Schematic ERC: 63 outstanding review items; not waived:
+  label_dangling: 3
+  pin_not_connected: 47
+  pin_not_driven: 2
+  power_pin_not_driven: 10
+  same_local_global_label: 1
+
+See Review-before-fabrication.txt. This is not a bench-qualified production release.

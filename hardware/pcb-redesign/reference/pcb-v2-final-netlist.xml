@@ -1,0 +1,2431 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<export version="E">
+  <design>
+    <source>C:\Dev\DAR-1000ES-Production-v2\DAR-1000ES-v2.kicad_sch</source>
+    <date>2026-11-17T17:56:02</date>
+    <tool>Eeschema 10.0.8</tool>
+    <sheet number="1" name="/" tstamps="/">
+      <title_block>
+        <title>DAR-1000ES v2 - socketed ESP32-S3 and AHCT interlock</title>
+        <company/>
+        <rev/>
+        <date/>
+        <source>DAR-1000ES-v2.kicad_sch</source>
+        <comment number="1" value="V2 routing revision - electrical and hardware review required"/>
+        <comment number="2" value=""/>
+        <comment number="3" value=""/>
+        <comment number="4" value=""/>
+        <comment number="5" value=""/>
+        <comment number="6" value=""/>
+        <comment number="7" value=""/>
+        <comment number="8" value=""/>
+        <comment number="9" value=""/>
+      </title_block>
+    </sheet>
+    <sheet number="2" name="/Sony power interlock/" tstamps="/55e31ced-cf75-50f1-83ff-24354f1944ad/">
+      <title_block>
+        <title>Sony power interlock - independent bank enables</title>
+        <company/>
+        <rev/>
+        <date/>
+        <source>DAR-1000ES-v2-interlock.kicad_sch</source>
+        <comment number="1" value=""/>
+        <comment number="2" value=""/>
+        <comment number="3" value=""/>
+        <comment number="4" value=""/>
+        <comment number="5" value=""/>
+        <comment number="6" value=""/>
+        <comment number="7" value=""/>
+        <comment number="8" value=""/>
+        <comment number="9" value=""/>
+      </title_block>
+    </sheet>
+  </design>
+  <components>
+    <comp ref="C1">
+      <value>C</value>
+      <footprint>Capacitor_THT:C_Disc_D5.0mm_W2.5mm_P5.00mm</footprint>
+      <description>Unpolarized capacitor</description>
+      <fields>
+        <field name="Footprint">Capacitor_THT:C_Disc_D5.0mm_W2.5mm_P5.00mm</field>
+        <field name="Datasheet"/>
+        <field name="Description">Unpolarized capacitor</field>
+      </fields>
+      <libsource lib="Device" part="C" description="Unpolarized capacitor"/>
+      <property name="Sheetname" value="DAR-1000ES-v2"/>
+      <property name="Sheetfile" value="DAR-1000ES-v2.kicad_sch"/>
+      <property name="ki_keywords" value="cap capacitor"/>
+      <property name="ki_fp_filters" value="C_*"/>
+      <sheetpath names="/" tstamps="/"/>
+      <tstamps>e1782232-5566-43fd-ae34-c5b7337f58e7</tstamps>
+      <units>
+        <unit name="A">
+          <pins>
+            <pin num="1"/>
+            <pin num="2"/>
+          </pins>
+        </unit>
+      </units>
+    </comp>
+    <comp ref="C2">
+      <value>C</value>
+      <footprint>Capacitor_THT:C_Disc_D5.0mm_W2.5mm_P5.00mm</footprint>
+      <description>Unpolarized capacitor</description>
+      <fields>
+        <field name="Footprint">Capacitor_THT:C_Disc_D5.0mm_W2.5mm_P5.00mm</field>
+        <field name="Datasheet"/>
+        <field name="Description">Unpolarized capacitor</field>
+      </fields>
+      <libsource lib="Device" part="C" description="Unpolarized capacitor"/>
+      <property name="Sheetname" value="DAR-1000ES-v2"/>
+      <property name="Sheetfile" value="DAR-1000ES-v2.kicad_sch"/>
+      <property name="ki_keywords" value="cap capacitor"/>
+      <property name="ki_fp_filters" value="C_*"/>
+      <sheetpath names="/" tstamps="/"/>
+      <tstamps>c2ca855e-bd93-4983-b71c-c1bb3579a74d</tstamps>
+      <units>
+        <unit name="A">
+          <pins>
+            <pin num="1"/>
+            <pin num="2"/>
+          </pins>
+        </unit>
+      </units>
+    </comp>
+    <comp ref="C3">
+      <value>C</value>
+      <footprint>Capacitor_THT:C_Disc_D5.0mm_W2.5mm_P5.00mm</footprint>
+      <description>Unpolarized capacitor</description>
+      <fields>
+        <field name="Footprint">Capacitor_THT:C_Disc_D5.0mm_W2.5mm_P5.00mm</field>
+        <field name="Datasheet"/>
+        <field name="Description">Unpolarized capacitor</field>
+      </fields>
+      <libsource lib="Device" part="C" description="Unpolarized capacitor"/>
+      <property name="Sheetname" value="DAR-1000ES-v2"/>
+      <property name="Sheetfile" value="DAR-1000ES-v2.kicad_sch"/>
+      <property name="ki_keywords" value="cap capacitor"/>
+      <property name="ki_fp_filters" value="C_*"/>
+      <sheetpath names="/" tstamps="/"/>
+      <tstamps>ce5f1b67-7c65-49ae-b9d1-8665aac5d771</tstamps>
+      <units>
+        <unit name="A">
+          <pins>
+            <pin num="1"/>
+            <pin num="2"/>
+          </pins>
+        </unit>
+      </units>
+    </comp>
+    <comp ref="C4">
+      <value>C</value>
+      <footprint>Capacitor_THT:C_Disc_D5.0mm_W2.5mm_P5.00mm</footprint>
+      <description>Unpolarized capacitor</description>
+      <fields>
+        <field name="Footprint">Capacitor_THT:C_Disc_D5.0mm_W2.5mm_P5.00mm</field>
+        <field name="Datasheet"/>
+        <field name="Description">Unpolarized capacitor</field>
+      </fields>
+      <libsource lib="Device" part="C" description="Unpolarized capacitor"/>
+      <property name="Sheetname" value="DAR-1000ES-v2"/>
+      <property name="Sheetfile" value="DAR-1000ES-v2.kicad_sch"/>
+      <property name="ki_keywords" value="cap capacitor"/>
+      <property name="ki_fp_filters" value="C_*"/>
+      <sheetpath names="/" tstamps="/"/>
+      <tstamps>67851b8d-93bc-4e23-8f74-ae3ceacfe3c8</tstamps>
+      <units>
+        <unit name="A">
+          <pins>
+            <pin num="1"/>
+            <pin num="2"/>
+          </pins>
+        </unit>
+      </units>
+    </comp>
+    <comp ref="C5">
+      <value>C</value>
+      <footprint>Capacitor_THT:C_Disc_D5.0mm_W2.5mm_P5.00mm</footprint>
+      <description>Unpolarized capacitor</description>
+      <fields>
+        <field name="Footprint">Capacitor_THT:C_Disc_D5.0mm_W2.5mm_P5.00mm</field>
+        <field name="Datasheet"/>
+        <field name="Description">Unpolarized capacitor</field>
+      </fields>
+      <libsource lib="Device" part="C" description="Unpolarized capacitor"/>
+      <property name="Sheetname" value="DAR-1000ES-v2"/>
+      <property name="Sheetfile" value="DAR-1000ES-v2.kicad_sch"/>
+      <property name="ki_keywords" value="cap capacitor"/>
+      <property name="ki_fp_filters" value="C_*"/>
+      <sheetpath names="/" tstamps="/"/>
+      <tstamps>161d5fbc-431c-46de-bf14-8d494a297138</tstamps>
+      <units>
+        <unit name="A">
+          <pins>
+            <pin num="1"/>
+            <pin num="2"/>
+          </pins>
+        </unit>
+      </units>
+    </comp>
+    <comp ref="J2">
+      <value>Conn_01x02</value>
+      <footprint>Connector_JST:JST_XH_S2B-XH-A_1x02_P2.50mm_Horizontal</footprint>
+      <description>Generic connector, single row, 01x02, script generated (kicad-library-utils/schlib/autogen/connector/)</description>
+      <fields>
+        <field name="Footprint">Connector_JST:JST_XH_S2B-XH-A_1x02_P2.50mm_Horizontal</field>
+        <field name="Datasheet"/>
+        <field name="Description">Generic connector, single row, 01x02, script generated (kicad-library-utils/schlib/autogen/connector/)</field>
+      </fields>
+      <libsource lib="Connector_Generic" part="Conn_01x02" description="Generic connector, single row, 01x02, script generated (kicad-library-utils/schlib/autogen/connector/)"/>
+      <property name="Sheetname" value="DAR-1000ES-v2"/>
+      <property name="Sheetfile" value="DAR-1000ES-v2.kicad_sch"/>
+      <property name="ki_keywords" value="connector"/>
+      <property name="ki_fp_filters" value="Connector*:*_1x??_*"/>
+      <sheetpath names="/" tstamps="/"/>
+      <tstamps>4fbab7b1-1693-4da1-a8b5-849d7bb034ee</tstamps>
+      <units>
+        <unit name="A">
+          <pins>
+            <pin num="1"/>
+            <pin num="2"/>
+          </pins>
+        </unit>
+      </units>
+    </comp>
+    <comp ref="J3">
+      <value>Conn_01x04</value>
+      <footprint>Connector_JST:JST_XH_S4B-XH-A_1x04_P2.50mm_Horizontal</footprint>
+      <description>Generic connector, single row, 01x04, script generated (kicad-library-utils/schlib/autogen/connector/)</description>
+      <fields>
+        <field name="Footprint">Connector_JST:JST_XH_S4B-XH-A_1x04_P2.50mm_Horizontal</field>
+        <field name="Datasheet"/>
+        <field name="Description">Generic connector, single row, 01x04, script generated (kicad-library-utils/schlib/autogen/connector/)</field>
+      </fields>
+      <libsource lib="Connector_Generic" part="Conn_01x04" description="Generic connector, single row, 01x04, script generated (kicad-library-utils/schlib/autogen/connector/)"/>
+      <property name="Sheetname" value="DAR-1000ES-v2"/>
+      <property name="Sheetfile" value="DAR-1000ES-v2.kicad_sch"/>
+      <property name="ki_keywords" value="connector"/>
+      <property name="ki_fp_filters" value="Connector*:*_1x??_*"/>
+      <sheetpath names="/" tstamps="/"/>
+      <tstamps>520824eb-ebcb-4a93-b868-6185d8a41499</tstamps>
+      <units>
+        <unit name="A">
+          <pins>
+            <pin num="1"/>
+            <pin num="2"/>
+            <pin num="3"/>
+            <pin num="4"/>
+          </pins>
+        </unit>
+      </units>
+    </comp>
+    <comp ref="J4">
+      <value>Conn_01x03</value>
+      <footprint>Connector_JST:JST_XH_S3B-XH-A_1x03_P2.50mm_Horizontal</footprint>
+      <description>Generic connector, single row, 01x03, script generated (kicad-library-utils/schlib/autogen/connector/)</description>
+      <fields>
+        <field name="Footprint">Connector_JST:JST_XH_S3B-XH-A_1x03_P2.50mm_Horizontal</field>
+        <field name="Datasheet"/>
+        <field name="Description">Generic connector, single row, 01x03, script generated (kicad-library-utils/schlib/autogen/connector/)</field>
+      </fields>
+      <libsource lib="Connector_Generic" part="Conn_01x03" description="Generic connector, single row, 01x03, script generated (kicad-library-utils/schlib/autogen/connector/)"/>
+      <property name="Sheetname" value="DAR-1000ES-v2"/>
+      <property name="Sheetfile" value="DAR-1000ES-v2.kicad_sch"/>
+      <property name="ki_keywords" value="connector"/>
+      <property name="ki_fp_filters" value="Connector*:*_1x??_*"/>
+      <sheetpath names="/" tstamps="/"/>
+      <tstamps>88515b06-f768-4953-8936-332cc71b317c</tstamps>
+      <units>
+        <unit name="A">
+          <pins>
+            <pin num="1"/>
+            <pin num="2"/>
+            <pin num="3"/>
+          </pins>
+        </unit>
+      </units>
+    </comp>
+    <comp ref="J5">
+      <value>Conn_01x04</value>
+      <footprint>Connector_JST:JST_XH_S4B-XH-A_1x04_P2.50mm_Horizontal</footprint>
+      <description>Generic connector, single row, 01x04, script generated (kicad-library-utils/schlib/autogen/connector/)</description>
+      <fields>
+        <field name="Footprint">Connector_JST:JST_XH_S4B-XH-A_1x04_P2.50mm_Horizontal</field>
+        <field name="Datasheet"/>
+        <field name="Description">Generic connector, single row, 01x04, script generated (kicad-library-utils/schlib/autogen/connector/)</field>
+      </fields>
+      <libsource lib="Connector_Generic" part="Conn_01x04" description="Generic connector, single row, 01x04, script generated (kicad-library-utils/schlib/autogen/connector/)"/>
+      <property name="Sheetname" value="DAR-1000ES-v2"/>
+      <property name="Sheetfile" value="DAR-1000ES-v2.kicad_sch"/>
+      <property name="ki_keywords" value="connector"/>
+      <property name="ki_fp_filters" value="Connector*:*_1x??_*"/>
+      <sheetpath names="/" tstamps="/"/>
+      <tstamps>a0eaa6fb-3240-4aa8-a1a3-3e8ee492486e</tstamps>
+      <units>
+        <unit name="A">
+          <pins>
+            <pin num="1"/>
+            <pin num="2"/>
+            <pin num="3"/>
+            <pin num="4"/>
+          </pins>
+        </unit>
+      </units>
+    </comp>
+    <comp ref="J6">
+      <value>Conn_01x04</value>
+      <footprint>Connector_JST:JST_XH_S4B-XH-A_1x04_P2.50mm_Horizontal</footprint>
+      <description>Generic connector, single row, 01x04, script generated (kicad-library-utils/schlib/autogen/connector/)</description>
+      <fields>
+        <field name="Footprint">Connector_JST:JST_XH_S4B-XH-A_1x04_P2.50mm_Horizontal</field>
+        <field name="Datasheet"/>
+        <field name="Description">Generic connector, single row, 01x04, script generated (kicad-library-utils/schlib/autogen/connector/)</field>
+      </fields>
+      <libsource lib="Connector_Generic" part="Conn_01x04" description="Generic connector, single row, 01x04, script generated (kicad-library-utils/schlib/autogen/connector/)"/>
+      <property name="Sheetname" value="DAR-1000ES-v2"/>
+      <property name="Sheetfile" value="DAR-1000ES-v2.kicad_sch"/>
+      <property name="ki_keywords" value="connector"/>
+      <property name="ki_fp_filters" value="Connector*:*_1x??_*"/>
+      <sheetpath names="/" tstamps="/"/>
+      <tstamps>3aa1f524-cee0-4a97-bbf9-8b580454720f</tstamps>
+      <units>
+        <unit name="A">
+          <pins>
+            <pin num="1"/>
+            <pin num="2"/>
+            <pin num="3"/>
+            <pin num="4"/>
+          </pins>
+        </unit>
+      </units>
+    </comp>
+    <comp ref="J7">
+      <value>Conn_01x04</value>
+      <footprint>Connector_JST:JST_XH_S4B-XH-A_1x04_P2.50mm_Horizontal</footprint>
+      <description>Generic connector, single row, 01x04, script generated (kicad-library-utils/schlib/autogen/connector/)</description>
+      <fields>
+        <field name="Footprint">Connector_JST:JST_XH_S4B-XH-A_1x04_P2.50mm_Horizontal</field>
+        <field name="Datasheet"/>
+        <field name="Description">Generic connector, single row, 01x04, script generated (kicad-library-utils/schlib/autogen/connector/)</field>
+      </fields>
+      <libsource lib="Connector_Generic" part="Conn_01x04" description="Generic connector, single row, 01x04, script generated (kicad-library-utils/schlib/autogen/connector/)"/>
+      <property name="Sheetname" value="DAR-1000ES-v2"/>
+      <property name="Sheetfile" value="DAR-1000ES-v2.kicad_sch"/>
+      <property name="ki_keywords" value="connector"/>
+      <property name="ki_fp_filters" value="Connector*:*_1x??_*"/>
+      <sheetpath names="/" tstamps="/"/>
+      <tstamps>8f764518-6638-4a83-9e51-e4d0546ce73d</tstamps>
+      <units>
+        <unit name="A">
+          <pins>
+            <pin num="1"/>
+            <pin num="2"/>
+            <pin num="3"/>
+            <pin num="4"/>
+          </pins>
+        </unit>
+      </units>
+    </comp>
+    <comp ref="J8">
+      <value>Conn_01x03</value>
+      <footprint>Connector_JST:JST_XH_S3B-XH-A_1x03_P2.50mm_Horizontal</footprint>
+      <description>Generic connector, single row, 01x03, script generated (kicad-library-utils/schlib/autogen/connector/)</description>
+      <fields>
+        <field name="Footprint">Connector_JST:JST_XH_S3B-XH-A_1x03_P2.50mm_Horizontal</field>
+        <field name="Datasheet"/>
+        <field name="Description">Generic connector, single row, 01x03, script generated (kicad-library-utils/schlib/autogen/connector/)</field>
+      </fields>
+      <libsource lib="Connector_Generic" part="Conn_01x03" description="Generic connector, single row, 01x03, script generated (kicad-library-utils/schlib/autogen/connector/)"/>
+      <property name="Sheetname" value="DAR-1000ES-v2"/>
+      <property name="Sheetfile" value="DAR-1000ES-v2.kicad_sch"/>
+      <property name="ki_keywords" value="connector"/>
+      <property name="ki_fp_filters" value="Connector*:*_1x??_*"/>
+      <sheetpath names="/" tstamps="/"/>
+      <tstamps>a31d4c86-8aac-4cce-9db5-ccf0f9c5fada</tstamps>
+      <units>
+        <unit name="A">
+          <pins>
+            <pin num="1"/>
+            <pin num="2"/>
+            <pin num="3"/>
+          </pins>
+        </unit>
+      </units>
+    </comp>
+    <comp ref="J9">
+      <value>Conn_01x04</value>
+      <footprint>Connector_JST:JST_XH_S4B-XH-A_1x04_P2.50mm_Horizontal</footprint>
+      <description>Generic connector, single row, 01x04, script generated (kicad-library-utils/schlib/autogen/connector/)</description>
+      <fields>
+        <field name="Footprint">Connector_JST:JST_XH_S4B-XH-A_1x04_P2.50mm_Horizontal</field>
+        <field name="Datasheet"/>
+        <field name="Description">Generic connector, single row, 01x04, script generated (kicad-library-utils/schlib/autogen/connector/)</field>
+      </fields>
+      <libsource lib="Connector_Generic" part="Conn_01x04" description="Generic connector, single row, 01x04, script generated (kicad-library-utils/schlib/autogen/connector/)"/>
+      <property name="Sheetname" value="DAR-1000ES-v2"/>
+      <property name="Sheetfile" value="DAR-1000ES-v2.kicad_sch"/>
+      <property name="ki_keywords" value="connector"/>
+      <property name="ki_fp_filters" value="Connector*:*_1x??_*"/>
+      <sheetpath names="/" tstamps="/"/>
+      <tstamps>f1e6b65a-66e7-4afe-ade5-058708ff3a01</tstamps>
+      <units>
+        <unit name="A">
+          <pins>
+            <pin num="1"/>
+            <pin num="2"/>
+            <pin num="3"/>
+            <pin num="4"/>
+          </pins>
+        </unit>
+      </units>
+    </comp>
+    <comp ref="J10">
+      <value>DAC CONTROL</value>
+      <footprint>Connector_JST:JST_XH_S5B-XH-A_1x05_P2.50mm_Horizontal</footprint>
+      <description>Generic connector, single row, 01x05, script generated (kicad-library-utils/schlib/autogen/connector/)</description>
+      <fields>
+        <field name="Footprint">Connector_JST:JST_XH_S5B-XH-A_1x05_P2.50mm_Horizontal</field>
+        <field name="Datasheet"/>
+        <field name="Description">Generic connector, single row, 01x05, script generated (kicad-library-utils/schlib/autogen/connector/)</field>
+      </fields>
+      <libsource lib="Connector_Generic" part="Conn_01x05" description="Generic connector, single row, 01x05, script generated (kicad-library-utils/schlib/autogen/connector/)"/>
+      <property name="Sheetname" value="DAR-1000ES-v2"/>
+      <property name="Sheetfile" value="DAR-1000ES-v2.kicad_sch"/>
+      <property name="ki_keywords" value="connector"/>
+      <property name="ki_fp_filters" value="Connector*:*_1x??_*"/>
+      <sheetpath names="/" tstamps="/"/>
+      <tstamps>06f01642-f590-4297-a2fa-b61102ecfd49</tstamps>
+      <units>
+        <unit name="A">
+          <pins>
+            <pin num="1"/>
+            <pin num="2"/>
+            <pin num="3"/>
+            <pin num="4"/>
+            <pin num="5"/>
+          </pins>
+        </unit>
+      </units>
+    </comp>
+    <comp ref="J11">
+      <value>Conn_01x04</value>
+      <footprint>Connector_JST:JST_XH_S4B-XH-A_1x04_P2.50mm_Horizontal</footprint>
+      <description>Generic connector, single row, 01x04, script generated (kicad-library-utils/schlib/autogen/connector/)</description>
+      <fields>
+        <field name="Footprint">Connector_JST:JST_XH_S4B-XH-A_1x04_P2.50mm_Horizontal</field>
+        <field name="Datasheet"/>
+        <field name="Description">Generic connector, single row, 01x04, script generated (kicad-library-utils/schlib/autogen/connector/)</field>
+      </fields>
+      <libsource lib="Connector_Generic" part="Conn_01x04" description="Generic connector, single row, 01x04, script generated (kicad-library-utils/schlib/autogen/connector/)"/>
+      <property name="Sheetname" value="DAR-1000ES-v2"/>
+      <property name="Sheetfile" value="DAR-1000ES-v2.kicad_sch"/>
+      <property name="ki_keywords" value="connector"/>
+      <property name="ki_fp_filters" value="Connector*:*_1x??_*"/>
+      <sheetpath names="/" tstamps="/"/>
+      <tstamps>5ad5eb42-a216-46b1-a52d-aadd8d57273b</tstamps>
+      <units>
+        <unit name="A">
+          <pins>
+            <pin num="1"/>
+            <pin num="2"/>
+            <pin num="3"/>
+            <pin num="4"/>
+          </pins>
+        </unit>
+      </units>
+    </comp>
+    <comp ref="JP1">
+      <value>Jumper_2_Bridged</value>
+      <footprint>Connector_PinHeader_2.54mm:PinHeader_1x02_P2.54mm_Vertical</footprint>
+      <description>Jumper, 2-pole, closed/bridged</description>
+      <fields>
+        <field name="Footprint">Connector_PinHeader_2.54mm:PinHeader_1x02_P2.54mm_Vertical</field>
+        <field name="Datasheet"/>
+        <field name="Description">Jumper, 2-pole, closed/bridged</field>
+      </fields>
+      <libsource lib="Jumper" part="Jumper_2_Bridged" description="Jumper, 2-pole, closed/bridged"/>
+      <property name="Sheetname" value="DAR-1000ES-v2"/>
+      <property name="Sheetfile" value="DAR-1000ES-v2.kicad_sch"/>
+      <property name="ki_keywords" value="Jumper SPST"/>
+      <property name="ki_fp_filters" value="Jumper* TestPoint*2Pads* TestPoint*Bridge*"/>
+      <sheetpath names="/" tstamps="/"/>
+      <tstamps>947619d2-bf91-49b9-8f5d-44b6f1911921</tstamps>
+      <units>
+        <unit name="A">
+          <pins>
+            <pin num="1"/>
+            <pin num="2"/>
+          </pins>
+        </unit>
+      </units>
+    </comp>
+    <comp ref="JP2">
+      <value>Jumper_2_Bridged</value>
+      <footprint>Connector_PinHeader_2.54mm:PinHeader_1x02_P2.54mm_Vertical</footprint>
+      <description>Jumper, 2-pole, closed/bridged</description>
+      <fields>
+        <field name="Footprint">Connector_PinHeader_2.54mm:PinHeader_1x02_P2.54mm_Vertical</field>
+        <field name="Datasheet"/>
+        <field name="Description">Jumper, 2-pole, closed/bridged</field>
+      </fields>
+      <libsource lib="Jumper" part="Jumper_2_Bridged" description="Jumper, 2-pole, closed/bridged"/>
+      <property name="Sheetname" value="DAR-1000ES-v2"/>
+      <property name="Sheetfile" value="DAR-1000ES-v2.kicad_sch"/>
+      <property name="ki_keywords" value="Jumper SPST"/>
+      <property name="ki_fp_filters" value="Jumper* TestPoint*2Pads* TestPoint*Bridge*"/>
+      <sheetpath names="/" tstamps="/"/>
+      <tstamps>2e9c2260-eb8b-451f-93f3-5de7fa7540a9</tstamps>
+      <units>
+        <unit name="A">
+          <pins>
+            <pin num="1"/>
+            <pin num="2"/>
+          </pins>
+        </unit>
+      </units>
+    </comp>
+    <comp ref="R1">
+      <value>10k</value>
+      <footprint>Resistor_THT:R_Axial_DIN0207_L6.3mm_D2.5mm_P7.62mm_Horizontal</footprint>
+      <description>Resistor</description>
+      <fields>
+        <field name="Footprint">Resistor_THT:R_Axial_DIN0207_L6.3mm_D2.5mm_P7.62mm_Horizontal</field>
+        <field name="Datasheet"/>
+        <field name="Description">Resistor</field>
+      </fields>
+      <libsource lib="Device" part="R" description="Resistor"/>
+      <property name="Sheetname" value="DAR-1000ES-v2"/>
+      <property name="Sheetfile" value="DAR-1000ES-v2.kicad_sch"/>
+      <property name="ki_keywords" value="R res resistor"/>
+      <property name="ki_fp_filters" value="R_*"/>
+      <sheetpath names="/" tstamps="/"/>
+      <tstamps>da9887c4-aa7f-4b5d-8f15-d5052af75c6d</tstamps>
+      <units>
+        <unit name="A">
+          <pins>
+            <pin num="1"/>
+            <pin num="2"/>
+          </pins>
+        </unit>
+      </units>
+    </comp>
+    <comp ref="R2">
+      <value>10k</value>
+      <footprint>Resistor_THT:R_Axial_DIN0207_L6.3mm_D2.5mm_P7.62mm_Horizontal</footprint>
+      <description>Resistor</description>
+      <fields>
+        <field name="Footprint">Resistor_THT:R_Axial_DIN0207_L6.3mm_D2.5mm_P7.62mm_Horizontal</field>
+        <field name="Datasheet"/>
+        <field name="Description">Resistor</field>
+      </fields>
+      <libsource lib="Device" part="R" description="Resistor"/>
+      <property name="Sheetname" value="DAR-1000ES-v2"/>
+      <property name="Sheetfile" value="DAR-1000ES-v2.kicad_sch"/>
+      <property name="ki_keywords" value="R res resistor"/>
+      <property name="ki_fp_filters" value="R_*"/>
+      <sheetpath names="/" tstamps="/"/>
+      <tstamps>11ef5c97-aa6a-4646-922e-4f1e0990edd3</tstamps>
+      <units>
+        <unit name="A">
+          <pins>
+            <pin num="1"/>
+            <pin num="2"/>
+          </pins>
+        </unit>
+      </units>
+    </comp>
+    <comp ref="R3">
+      <value>10k</value>
+      <footprint>Resistor_THT:R_Axial_DIN0207_L6.3mm_D2.5mm_P7.62mm_Horizontal</footprint>
+      <description>Resistor</description>
+      <fields>
+        <field name="Footprint">Resistor_THT:R_Axial_DIN0207_L6.3mm_D2.5mm_P7.62mm_Horizontal</field>
+        <field name="Datasheet"/>
+        <field name="Description">Resistor</field>
+      </fields>
+      <libsource lib="Device" part="R" description="Resistor"/>
+      <property name="Sheetname" value="DAR-1000ES-v2"/>
+      <property name="Sheetfile" value="DAR-1000ES-v2.kicad_sch"/>
+      <property name="ki_keywords" value="R res resistor"/>
+      <property name="ki_fp_filters" value="R_*"/>
+      <sheetpath names="/" tstamps="/"/>
+      <tstamps>7290402c-f737-476f-bfbe-852bd3c3b2ff</tstamps>
+      <units>
+        <unit name="A">
+          <pins>
+            <pin num="1"/>
+            <pin num="2"/>
+          </pins>
+        </unit>
+      </units>
+    </comp>
+    <comp ref="R4">
+      <value>10k</value>
+      <footprint>Resistor_THT:R_Axial_DIN0207_L6.3mm_D2.5mm_P7.62mm_Horizontal</footprint>
+      <description>Resistor</description>
+      <fields>
+        <field name="Footprint">Resistor_THT:R_Axial_DIN0207_L6.3mm_D2.5mm_P7.62mm_Horizontal</field>
+        <field name="Datasheet"/>
+        <field name="Description">Resistor</field>
+      </fields>
+      <libsource lib="Device" part="R" description="Resistor"/>
+      <property name="Sheetname" value="DAR-1000ES-v2"/>
+      <property name="Sheetfile" value="DAR-1000ES-v2.kicad_sch"/>
+      <property name="ki_keywords" value="R res resistor"/>
+      <property name="ki_fp_filters" value="R_*"/>
+      <sheetpath names="/" tstamps="/"/>
+      <tstamps>b4f7bd78-10fc-481c-b82a-5128dc0cff39</tstamps>
+      <units>
+        <unit name="A">
+          <pins>
+            <pin num="1"/>
+            <pin num="2"/>
+          </pins>
+        </unit>
+      </units>
+    </comp>
+    <comp ref="R5">
+      <value>10k</value>
+      <footprint>Resistor_THT:R_Axial_DIN0207_L6.3mm_D2.5mm_P7.62mm_Horizontal</footprint>
+      <description>Resistor</description>
+      <fields>
+        <field name="Footprint">Resistor_THT:R_Axial_DIN0207_L6.3mm_D2.5mm_P7.62mm_Horizontal</field>
+        <field name="Datasheet"/>
+        <field name="Description">Resistor</field>
+      </fields>
+      <libsource lib="Device" part="R" description="Resistor"/>
+      <property name="Sheetname" value="DAR-1000ES-v2"/>
+      <property name="Sheetfile" value="DAR-1000ES-v2.kicad_sch"/>
+      <property name="ki_keywords" value="R res resistor"/>
+      <property name="ki_fp_filters" value="R_*"/>
+      <sheetpath names="/" tstamps="/"/>
+      <tstamps>ad735577-05d0-4b1c-a5ab-eac730adb54a</tstamps>
+      <units>
+        <unit name="A">
+          <pins>
+            <pin num="1"/>
+            <pin num="2"/>
+          </pins>
+        </unit>
+      </units>
+    </comp>
+    <comp ref="R6">
+      <value>10k</value>
+      <footprint>Resistor_THT:R_Axial_DIN0207_L6.3mm_D2.5mm_P7.62mm_Horizontal</footprint>
+      <description>Resistor</description>
+      <fields>
+        <field name="Footprint">Resistor_THT:R_Axial_DIN0207_L6.3mm_D2.5mm_P7.62mm_Horizontal</field>
+        <field name="Datasheet"/>
+        <field name="Description">Resistor</field>
+      </fields>
+      <libsource lib="Device" part="R" description="Resistor"/>
+      <property name="Sheetname" value="DAR-1000ES-v2"/>
+      <property name="Sheetfile" value="DAR-1000ES-v2.kicad_sch"/>
+      <property name="ki_keywords" value="R res resistor"/>
+      <property name="ki_fp_filters" value="R_*"/>
+      <sheetpath names="/" tstamps="/"/>
+      <tstamps>a3232a90-92dc-4cc3-93fd-4d8588404457</tstamps>
+      <units>
+        <unit name="A">
+          <pins>
+            <pin num="1"/>
+            <pin num="2"/>
+          </pins>
+        </unit>
+      </units>
+    </comp>
+    <comp ref="U1-CONTROLLER1">
+      <value>ESP32-S3-DevKitC-1-N16R8</value>
+      <footprint>DAR1000ES:ESP32-S3-DevKitC-1_2xSocket_1x22_P2.54mm_W22.86mm</footprint>
+      <datasheet>https://docs.espressif.com/projects/esp-dev-kits/en/latest/esp32s3/esp32-s3-devkitc-1/user_guide_v1.1.html</datasheet>
+      <fields>
+        <field name="Manufacturer">Espressif Systems</field>
+        <field name="MPN">ESP32-S3-DevKitC-1-N16R8</field>
+        <field name="Footprint">DAR1000ES:ESP32-S3-DevKitC-1_2xSocket_1x22_P2.54mm_W22.86mm</field>
+        <field name="Datasheet">https://docs.espressif.com/projects/esp-dev-kits/en/latest/esp32s3/esp32-s3-devkitc-1/user_guide_v1.1.html</field>
+        <field name="Description"/>
+      </fields>
+      <libsource lib="DAR1000ES" part="ESP32-S3-DevKitC-1-N16R8_Controller_v2" description="Socketed Espressif DevKitC-1, 16 MB flash / 8 MB octal PSRAM; J1/J3 header pin numbering"/>
+      <property name="Manufacturer" value="Espressif Systems"/>
+      <property name="MPN" value="ESP32-S3-DevKitC-1-N16R8"/>
+      <property name="Sheetname" value="DAR-1000ES-v2"/>
+      <property name="Sheetfile" value="DAR-1000ES-v2.kicad_sch"/>
+      <property name="ki_fp_filters" value="ESP32-S3-DevKitC-1_2xSocket_1x22_P2.54mm_W22.86mm"/>
+      <sheetpath names="/" tstamps="/"/>
+      <tstamps>e075fdd3-ffca-55ca-8e92-0c235f4803ae</tstamps>
+      <units>
+        <unit name="A">
+          <pins>
+            <pin num="J1.1"/>
+            <pin num="J1.2"/>
+            <pin num="J1.3"/>
+            <pin num="J1.8"/>
+            <pin num="J3.4"/>
+            <pin num="J3.5"/>
+            <pin num="J3.6"/>
+            <pin num="J1.4"/>
+            <pin num="J1.9"/>
+            <pin num="J1.7"/>
+            <pin num="J1.11"/>
+            <pin num="J1.12"/>
+            <pin num="J1.5"/>
+            <pin num="J1.14"/>
+            <pin num="J1.10"/>
+            <pin num="J1.20"/>
+            <pin num="J3.9"/>
+            <pin num="J3.8"/>
+            <pin num="J1.19"/>
+            <pin num="J1.13"/>
+            <pin num="J1.21"/>
+            <pin num="J1.22"/>
+            <pin num="J3.1"/>
+            <pin num="J3.18"/>
+            <pin num="J3.17"/>
+            <pin num="J1.6"/>
+            <pin num="J1.15"/>
+            <pin num="J1.18"/>
+            <pin num="J1.16"/>
+            <pin num="J1.17"/>
+            <pin num="J3.2"/>
+            <pin num="J3.10"/>
+            <pin num="J3.11"/>
+            <pin num="J3.12"/>
+            <pin num="J3.13"/>
+            <pin num="J3.14"/>
+            <pin num="J3.15"/>
+            <pin num="J3.16"/>
+            <pin num="J3.3"/>
+            <pin num="J3.7"/>
+            <pin num="J3.19"/>
+            <pin num="J3.20"/>
+            <pin num="J3.21"/>
+            <pin num="J3.22"/>
+          </pins>
+        </unit>
+      </units>
+    </comp>
+    <comp ref="U2">
+      <value>SN74AHCT125N</value>
+      <footprint>Package_DIP:DIP-14_W7.62mm</footprint>
+      <datasheet>https://www.ti.com/lit/ds/symlink/sn74ahct125.pdf</datasheet>
+      <fields>
+        <field name="Manufacturer">Texas Instruments</field>
+        <field name="MPN">SN74AHCT125N</field>
+        <field name="Footprint">Package_DIP:DIP-14_W7.62mm</field>
+        <field name="Datasheet">https://www.ti.com/lit/ds/symlink/sn74ahct125.pdf</field>
+        <field name="Description"/>
+      </fields>
+      <libsource lib="DAR1000ES" part="SN74AHCT125N" description="Quad TTL-input 3-state buffer; PDIP-14 N package; VCC 4.5-5.5 V"/>
+      <property name="Manufacturer" value="Texas Instruments"/>
+      <property name="MPN" value="SN74AHCT125N"/>
+      <property name="Sheetname" value="DAR-1000ES-v2"/>
+      <property name="Sheetfile" value="DAR-1000ES-v2.kicad_sch"/>
+      <property name="ki_keywords" value="AHCT buffer 3-state through-hole"/>
+      <property name="ki_fp_filters" value="DIP-14_W7.62mm*"/>
+      <sheetpath names="/" tstamps="/"/>
+      <tstamps>dacda33f-dd28-5ec8-92b8-1b7927569af5 9f0cb14c-7076-57ea-a8a2-f302ff910f76 d4d2b0df-6c2a-5a40-bc60-8ef15ce8d249 e6412423-47a3-5538-92d2-97a5abb3e11f 902ad887-f2ee-5327-ae2e-0ac85bef3d17</tstamps>
+      <units>
+        <unit name="A">
+          <pins>
+            <pin num="2"/>
+            <pin num="1"/>
+            <pin num="3"/>
+          </pins>
+        </unit>
+        <unit name="B">
+          <pins>
+            <pin num="5"/>
+            <pin num="4"/>
+            <pin num="6"/>
+          </pins>
+        </unit>
+        <unit name="C">
+          <pins>
+            <pin num="9"/>
+            <pin num="10"/>
+            <pin num="8"/>
+          </pins>
+        </unit>
+        <unit name="D">
+          <pins>
+            <pin num="12"/>
+            <pin num="13"/>
+            <pin num="11"/>
+          </pins>
+        </unit>
+        <unit name="E">
+          <pins>
+            <pin num="14"/>
+            <pin num="7"/>
+          </pins>
+        </unit>
+      </units>
+    </comp>
+    <comp ref="U3">
+      <value>SN74AHCT125N</value>
+      <footprint>Package_DIP:DIP-14_W7.62mm</footprint>
+      <datasheet>https://www.ti.com/lit/ds/symlink/sn74ahct125.pdf</datasheet>
+      <fields>
+        <field name="Manufacturer">Texas Instruments</field>
+        <field name="MPN">SN74AHCT125N</field>
+        <field name="Footprint">Package_DIP:DIP-14_W7.62mm</field>
+        <field name="Datasheet">https://www.ti.com/lit/ds/symlink/sn74ahct125.pdf</field>
+        <field name="Description"/>
+      </fields>
+      <libsource lib="DAR1000ES" part="SN74AHCT125N" description="Quad TTL-input 3-state buffer; PDIP-14 N package; VCC 4.5-5.5 V"/>
+      <property name="Manufacturer" value="Texas Instruments"/>
+      <property name="MPN" value="SN74AHCT125N"/>
+      <property name="Sheetname" value="DAR-1000ES-v2"/>
+      <property name="Sheetfile" value="DAR-1000ES-v2.kicad_sch"/>
+      <property name="ki_keywords" value="AHCT buffer 3-state through-hole"/>
+      <property name="ki_fp_filters" value="DIP-14_W7.62mm*"/>
+      <sheetpath names="/" tstamps="/"/>
+      <tstamps>3d5d2121-513e-4569-a762-e30246dee68f 29745185-8b03-41f7-b120-3b82f2247cc7 daf0fb9a-5cac-4017-9d86-fcc3be8587fc 7342ac72-b97b-4b29-b465-0c3d5b9a6d87 0b938712-125c-43b3-8b76-96177c103c8f</tstamps>
+      <units>
+        <unit name="A">
+          <pins>
+            <pin num="2"/>
+            <pin num="1"/>
+            <pin num="3"/>
+          </pins>
+        </unit>
+        <unit name="B">
+          <pins>
+            <pin num="5"/>
+            <pin num="4"/>
+            <pin num="6"/>
+          </pins>
+        </unit>
+        <unit name="C">
+          <pins>
+            <pin num="9"/>
+            <pin num="10"/>
+            <pin num="8"/>
+          </pins>
+        </unit>
+        <unit name="D">
+          <pins>
+            <pin num="12"/>
+            <pin num="13"/>
+            <pin num="11"/>
+          </pins>
+        </unit>
+        <unit name="E">
+          <pins>
+            <pin num="14"/>
+            <pin num="7"/>
+          </pins>
+        </unit>
+      </units>
+    </comp>
+    <comp ref="U4">
+      <value>SN74AHCT125N</value>
+      <footprint>Package_DIP:DIP-14_W7.62mm</footprint>
+      <datasheet>https://www.ti.com/lit/ds/symlink/sn74ahct125.pdf</datasheet>
+      <fields>
+        <field name="Manufacturer">Texas Instruments</field>
+        <field name="MPN">SN74AHCT125N</field>
+        <field name="Footprint">Package_DIP:DIP-14_W7.62mm</field>
+        <field name="Datasheet">https://www.ti.com/lit/ds/symlink/sn74ahct125.pdf</field>
+        <field name="Description"/>
+      </fields>
+      <libsource lib="DAR1000ES" part="SN74AHCT125N" description="Quad TTL-input 3-state buffer; PDIP-14 N package; VCC 4.5-5.5 V"/>
+      <property name="Manufacturer" value="Texas Instruments"/>
+      <property name="MPN" value="SN74AHCT125N"/>
+      <property name="Sheetname" value="DAR-1000ES-v2"/>
+      <property name="Sheetfile" value="DAR-1000ES-v2.kicad_sch"/>
+      <property name="ki_keywords" value="AHCT buffer 3-state through-hole"/>
+      <property name="ki_fp_filters" value="DIP-14_W7.62mm*"/>
+      <sheetpath names="/" tstamps="/"/>
+      <tstamps>5836115e-0624-4bf4-9762-6956838fd3ba 34b8aa81-667f-4f35-a198-b2617eef5cd3 a282b35d-8cde-401a-8b31-af8a1f831295 7a564d16-07e9-4a2f-a5a8-fa5ffa821c66 1553769e-81bd-4a87-ac52-02245baa2236</tstamps>
+      <units>
+        <unit name="A">
+          <pins>
+            <pin num="2"/>
+            <pin num="1"/>
+            <pin num="3"/>
+          </pins>
+        </unit>
+        <unit name="B">
+          <pins>
+            <pin num="5"/>
+            <pin num="4"/>
+            <pin num="6"/>
+          </pins>
+        </unit>
+        <unit name="C">
+          <pins>
+            <pin num="9"/>
+            <pin num="10"/>
+            <pin num="8"/>
+          </pins>
+        </unit>
+        <unit name="D">
+          <pins>
+            <pin num="12"/>
+            <pin num="13"/>
+            <pin num="11"/>
+          </pins>
+        </unit>
+        <unit name="E">
+          <pins>
+            <pin num="14"/>
+            <pin num="7"/>
+          </pins>
+        </unit>
+      </units>
+    </comp>
+    <comp ref="U5">
+      <value>Adafruit_TCA8418_4918</value>
+      <footprint>DAR1000ES:Adafruit_TCA8418_4918_2x13_P2.54mm_W12.70mm</footprint>
+      <datasheet>https://learn.adafruit.com/adafruit-tca8418-keypad-matrix-and-gpio-expander-breakout</datasheet>
+      <fields>
+        <field name="Manufacturer">Adafruit Industries</field>
+        <field name="MPN">4918</field>
+        <field name="I2C_Address">0x34</field>
+        <field name="Footprint">DAR1000ES:Adafruit_TCA8418_4918_2x13_P2.54mm_W12.70mm</field>
+        <field name="Datasheet">https://learn.adafruit.com/adafruit-tca8418-keypad-matrix-and-gpio-expander-breakout</field>
+        <field name="Description"/>
+      </fields>
+      <libsource lib="DAR1000ES" part="Adafruit_TCA8418_4918" description="Adafruit 4918 TCA8418 breakout, 2x13 headers, 2.54 mm pitch, 12.70 mm row spacing"/>
+      <property name="Manufacturer" value="Adafruit Industries"/>
+      <property name="MPN" value="4918"/>
+      <property name="I2C_Address" value="0x34"/>
+      <property name="Sheetname" value="DAR-1000ES-v2"/>
+      <property name="Sheetfile" value="DAR-1000ES-v2.kicad_sch"/>
+      <property name="ki_fp_filters" value="Adafruit_TCA8418_4918_2x13_P2.54mm_W12.70mm"/>
+      <sheetpath names="/" tstamps="/"/>
+      <tstamps>8d8a5767-f2fb-57af-8885-0d62cc213b8c</tstamps>
+      <units>
+        <unit name="A">
+          <pins>
+            <pin num="JP4.1"/>
+            <pin num="JP4.2"/>
+            <pin num="JP4.5"/>
+            <pin num="JP4.4"/>
+            <pin num="JP4.6"/>
+            <pin num="JP4.7"/>
+            <pin num="JP4.3"/>
+            <pin num="JP1.13"/>
+            <pin num="JP1.2"/>
+            <pin num="JP1.1"/>
+            <pin num="JP4.13"/>
+            <pin num="JP4.12"/>
+            <pin num="JP4.11"/>
+            <pin num="JP4.10"/>
+            <pin num="JP4.9"/>
+            <pin num="JP4.8"/>
+            <pin num="JP1.3"/>
+            <pin num="JP1.4"/>
+            <pin num="JP1.5"/>
+            <pin num="JP1.6"/>
+            <pin num="JP1.7"/>
+            <pin num="JP1.8"/>
+            <pin num="JP1.9"/>
+            <pin num="JP1.10"/>
+            <pin num="JP1.11"/>
+            <pin num="JP1.12"/>
+          </pins>
+        </unit>
+      </units>
+    </comp>
+    <comp ref="U6">
+      <value>SN74AHCT125N</value>
+      <footprint>Package_DIP:DIP-14_W7.62mm</footprint>
+      <datasheet>https://www.ti.com/lit/ds/symlink/sn74ahct125.pdf</datasheet>
+      <fields>
+        <field name="Manufacturer">Texas Instruments</field>
+        <field name="MPN">SN74AHCT125N</field>
+        <field name="Footprint">Package_DIP:DIP-14_W7.62mm</field>
+        <field name="Datasheet">https://www.ti.com/lit/ds/symlink/sn74ahct125.pdf</field>
+        <field name="Description"/>
+      </fields>
+      <libsource lib="DAR1000ES" part="SN74AHCT125N" description="Quad TTL-input 3-state buffer; PDIP-14 N package; VCC 4.5-5.5 V"/>
+      <property name="Manufacturer" value="Texas Instruments"/>
+      <property name="MPN" value="SN74AHCT125N"/>
+      <property name="Sheetname" value="DAR-1000ES-v2"/>
+      <property name="Sheetfile" value="DAR-1000ES-v2.kicad_sch"/>
+      <property name="ki_keywords" value="AHCT buffer 3-state through-hole"/>
+      <property name="ki_fp_filters" value="DIP-14_W7.62mm*"/>
+      <sheetpath names="/" tstamps="/"/>
+      <tstamps>c6b9dc52-d30b-49bf-aee3-c7de33571517 fff52060-bc9b-4557-add5-8a225be3f173 9e046fca-7b22-4681-9b65-8a18bf15bd9b 33269300-292c-428e-8eb7-dba2636bcfdf 254dc557-62db-4c78-88e7-a7f103414ec5</tstamps>
+      <units>
+        <unit name="A">
+          <pins>
+            <pin num="2"/>
+            <pin num="1"/>
+            <pin num="3"/>
+          </pins>
+        </unit>
+        <unit name="B">
+          <pins>
+            <pin num="5"/>
+            <pin num="4"/>
+            <pin num="6"/>
+          </pins>
+        </unit>
+        <unit name="C">
+          <pins>
+            <pin num="9"/>
+            <pin num="10"/>
+            <pin num="8"/>
+          </pins>
+        </unit>
+        <unit name="D">
+          <pins>
+            <pin num="12"/>
+            <pin num="13"/>
+            <pin num="11"/>
+          </pins>
+        </unit>
+        <unit name="E">
+          <pins>
+            <pin num="14"/>
+            <pin num="7"/>
+          </pins>
+        </unit>
+      </units>
+    </comp>
+    <comp ref="U6-AUDIO1">
+      <value>ESP32-S3-DevKitC-1-N16R8</value>
+      <footprint>DAR1000ES:ESP32-S3-DevKitC-1_2xSocket_1x22_P2.54mm_W22.86mm</footprint>
+      <datasheet>https://docs.espressif.com/projects/esp-dev-kits/en/latest/esp32s3/esp32-s3-devkitc-1/user_guide_v1.1.html</datasheet>
+      <fields>
+        <field name="Manufacturer">Espressif Systems</field>
+        <field name="MPN">ESP32-S3-DevKitC-1-N16R8</field>
+        <field name="Footprint">DAR1000ES:ESP32-S3-DevKitC-1_2xSocket_1x22_P2.54mm_W22.86mm</field>
+        <field name="Datasheet">https://docs.espressif.com/projects/esp-dev-kits/en/latest/esp32s3/esp32-s3-devkitc-1/user_guide_v1.1.html</field>
+        <field name="Description"/>
+      </fields>
+      <libsource lib="DAR1000ES" part="ESP32-S3-DevKitC-1-N16R8_Audio_v2" description="Socketed Espressif DevKitC-1, 16 MB flash / 8 MB octal PSRAM; J1/J3 header pin numbering"/>
+      <property name="Manufacturer" value="Espressif Systems"/>
+      <property name="MPN" value="ESP32-S3-DevKitC-1-N16R8"/>
+      <property name="Sheetname" value="DAR-1000ES-v2"/>
+      <property name="Sheetfile" value="DAR-1000ES-v2.kicad_sch"/>
+      <property name="ki_fp_filters" value="ESP32-S3-DevKitC-1_2xSocket_1x22_P2.54mm_W22.86mm"/>
+      <sheetpath names="/" tstamps="/"/>
+      <tstamps>63552aa0-99c5-471a-a314-27aa35883464</tstamps>
+      <units>
+        <unit name="A">
+          <pins>
+            <pin num="J1.1"/>
+            <pin num="J1.2"/>
+            <pin num="J1.3"/>
+            <pin num="J3.6"/>
+            <pin num="J3.5"/>
+            <pin num="J3.4"/>
+            <pin num="J3.8"/>
+            <pin num="J1.8"/>
+            <pin num="J1.9"/>
+            <pin num="J1.10"/>
+            <pin num="J1.11"/>
+            <pin num="J3.18"/>
+            <pin num="J1.13"/>
+            <pin num="J1.14"/>
+            <pin num="J3.7"/>
+            <pin num="J1.16"/>
+            <pin num="J1.4"/>
+            <pin num="J1.5"/>
+            <pin num="J1.6"/>
+            <pin num="J1.7"/>
+            <pin num="J1.21"/>
+            <pin num="J1.22"/>
+            <pin num="J3.1"/>
+            <pin num="J1.20"/>
+            <pin num="J1.19"/>
+            <pin num="J1.17"/>
+            <pin num="J1.18"/>
+            <pin num="J3.17"/>
+            <pin num="J1.15"/>
+            <pin num="J1.12"/>
+            <pin num="J3.9"/>
+            <pin num="J3.10"/>
+            <pin num="J3.11"/>
+            <pin num="J3.12"/>
+            <pin num="J3.13"/>
+            <pin num="J3.14"/>
+            <pin num="J3.15"/>
+            <pin num="J3.16"/>
+            <pin num="J3.2"/>
+            <pin num="J3.3"/>
+            <pin num="J3.19"/>
+            <pin num="J3.20"/>
+            <pin num="J3.21"/>
+            <pin num="J3.22"/>
+          </pins>
+        </unit>
+      </units>
+    </comp>
+    <comp ref="U7">
+      <value>SN74AHCT125N</value>
+      <footprint>Package_DIP:DIP-14_W7.62mm</footprint>
+      <datasheet>https://www.ti.com/lit/ds/symlink/sn74ahct125.pdf</datasheet>
+      <fields>
+        <field name="Manufacturer">Texas Instruments</field>
+        <field name="MPN">SN74AHCT125N</field>
+        <field name="Footprint">Package_DIP:DIP-14_W7.62mm</field>
+        <field name="Datasheet">https://www.ti.com/lit/ds/symlink/sn74ahct125.pdf</field>
+        <field name="Description"/>
+      </fields>
+      <libsource lib="DAR1000ES" part="SN74AHCT125N" description="Quad TTL-input 3-state buffer; PDIP-14 N package; VCC 4.5-5.5 V"/>
+      <property name="Manufacturer" value="Texas Instruments"/>
+      <property name="MPN" value="SN74AHCT125N"/>
+      <property name="Sheetname" value="DAR-1000ES-v2"/>
+      <property name="Sheetfile" value="DAR-1000ES-v2.kicad_sch"/>
+      <property name="ki_keywords" value="AHCT buffer 3-state through-hole"/>
+      <property name="ki_fp_filters" value="DIP-14_W7.62mm*"/>
+      <sheetpath names="/" tstamps="/"/>
+      <tstamps>edb6f9f5-463d-4dfe-95eb-31ffa5350a20 c72a8b70-584d-49ee-aa40-180120dd3000 240aad49-dee0-4b96-a911-af90fc783a0e 667ca71c-894a-4ced-911e-e29e2d69a9f7 1789b9cc-4126-403a-b5d5-ba84074c10d7</tstamps>
+      <units>
+        <unit name="A">
+          <pins>
+            <pin num="2"/>
+            <pin num="1"/>
+            <pin num="3"/>
+          </pins>
+        </unit>
+        <unit name="B">
+          <pins>
+            <pin num="5"/>
+            <pin num="4"/>
+            <pin num="6"/>
+          </pins>
+        </unit>
+        <unit name="C">
+          <pins>
+            <pin num="9"/>
+            <pin num="10"/>
+            <pin num="8"/>
+          </pins>
+        </unit>
+        <unit name="D">
+          <pins>
+            <pin num="12"/>
+            <pin num="13"/>
+            <pin num="11"/>
+          </pins>
+        </unit>
+        <unit name="E">
+          <pins>
+            <pin num="14"/>
+            <pin num="7"/>
+          </pins>
+        </unit>
+      </units>
+    </comp>
+    <comp ref="C6">
+      <value>100nF</value>
+      <footprint>Capacitor_THT:C_Disc_D5.0mm_W2.5mm_P5.00mm</footprint>
+      <fields>
+        <field name="Footprint">Capacitor_THT:C_Disc_D5.0mm_W2.5mm_P5.00mm</field>
+        <field name="Datasheet"/>
+        <field name="Description"/>
+      </fields>
+      <libsource lib="Device" part="C" description="Unpolarized capacitor"/>
+      <property name="Sheetname" value="Sony power interlock"/>
+      <property name="Sheetfile" value="DAR-1000ES-v2-interlock.kicad_sch"/>
+      <property name="ki_keywords" value="cap capacitor"/>
+      <property name="ki_fp_filters" value="C_*"/>
+      <sheetpath names="/Sony power interlock/" tstamps="/55e31ced-cf75-50f1-83ff-24354f1944ad/"/>
+      <tstamps>3c5331ae-b6be-57cb-ad05-6a84fa7c4eee</tstamps>
+      <units>
+        <unit name="A">
+          <pins>
+            <pin num="1"/>
+            <pin num="2"/>
+          </pins>
+        </unit>
+      </units>
+    </comp>
+    <comp ref="C7">
+      <value>100nF</value>
+      <footprint>Capacitor_THT:C_Disc_D5.0mm_W2.5mm_P5.00mm</footprint>
+      <fields>
+        <field name="Footprint">Capacitor_THT:C_Disc_D5.0mm_W2.5mm_P5.00mm</field>
+        <field name="Datasheet"/>
+        <field name="Description"/>
+      </fields>
+      <libsource lib="Device" part="C" description="Unpolarized capacitor"/>
+      <property name="Sheetname" value="Sony power interlock"/>
+      <property name="Sheetfile" value="DAR-1000ES-v2-interlock.kicad_sch"/>
+      <property name="ki_keywords" value="cap capacitor"/>
+      <property name="ki_fp_filters" value="C_*"/>
+      <sheetpath names="/Sony power interlock/" tstamps="/55e31ced-cf75-50f1-83ff-24354f1944ad/"/>
+      <tstamps>d2266e61-d6fc-5c47-8dd1-4470c1f588a5</tstamps>
+      <units>
+        <unit name="A">
+          <pins>
+            <pin num="1"/>
+            <pin num="2"/>
+          </pins>
+        </unit>
+      </units>
+    </comp>
+    <comp ref="C8">
+      <value>100nF</value>
+      <footprint>Capacitor_THT:C_Disc_D5.0mm_W2.5mm_P5.00mm</footprint>
+      <fields>
+        <field name="Footprint">Capacitor_THT:C_Disc_D5.0mm_W2.5mm_P5.00mm</field>
+        <field name="Datasheet"/>
+        <field name="Description"/>
+      </fields>
+      <libsource lib="Device" part="C" description="Unpolarized capacitor"/>
+      <property name="Sheetname" value="Sony power interlock"/>
+      <property name="Sheetfile" value="DAR-1000ES-v2-interlock.kicad_sch"/>
+      <property name="ki_keywords" value="cap capacitor"/>
+      <property name="ki_fp_filters" value="C_*"/>
+      <sheetpath names="/Sony power interlock/" tstamps="/55e31ced-cf75-50f1-83ff-24354f1944ad/"/>
+      <tstamps>5fa2f90e-e125-53a4-aa26-f8a5d90addfb</tstamps>
+      <units>
+        <unit name="A">
+          <pins>
+            <pin num="1"/>
+            <pin num="2"/>
+          </pins>
+        </unit>
+      </units>
+    </comp>
+    <comp ref="J12">
+      <value>SONY_5V_SENSE</value>
+      <footprint>Connector_JST:JST_XH_S2B-XH-A_1x02_P2.50mm_Horizontal</footprint>
+      <fields>
+        <field name="Footprint">Connector_JST:JST_XH_S2B-XH-A_1x02_P2.50mm_Horizontal</field>
+        <field name="Datasheet"/>
+        <field name="Description"/>
+      </fields>
+      <libsource lib="Connector_Generic" part="Conn_01x02" description="Generic connector, single row, 01x02, script generated (kicad-library-utils/schlib/autogen/connector/)"/>
+      <property name="Sheetname" value="Sony power interlock"/>
+      <property name="Sheetfile" value="DAR-1000ES-v2-interlock.kicad_sch"/>
+      <property name="ki_keywords" value="connector"/>
+      <property name="ki_fp_filters" value="Connector*:*_1x??_*"/>
+      <sheetpath names="/Sony power interlock/" tstamps="/55e31ced-cf75-50f1-83ff-24354f1944ad/"/>
+      <tstamps>2a88d88b-9ef0-5ee0-8148-18f912b512f7</tstamps>
+      <units>
+        <unit name="A">
+          <pins>
+            <pin num="1"/>
+            <pin num="2"/>
+          </pins>
+        </unit>
+      </units>
+    </comp>
+    <comp ref="R7">
+      <value>100k</value>
+      <footprint>Resistor_THT:R_Axial_DIN0207_L6.3mm_D2.5mm_P7.62mm_Horizontal</footprint>
+      <fields>
+        <field name="Footprint">Resistor_THT:R_Axial_DIN0207_L6.3mm_D2.5mm_P7.62mm_Horizontal</field>
+        <field name="Datasheet"/>
+        <field name="Description"/>
+      </fields>
+      <libsource lib="Device" part="R" description="Resistor"/>
+      <property name="Sheetname" value="Sony power interlock"/>
+      <property name="Sheetfile" value="DAR-1000ES-v2-interlock.kicad_sch"/>
+      <property name="ki_keywords" value="R res resistor"/>
+      <property name="ki_fp_filters" value="R_*"/>
+      <sheetpath names="/Sony power interlock/" tstamps="/55e31ced-cf75-50f1-83ff-24354f1944ad/"/>
+      <tstamps>160cebde-a4a7-5fb9-815c-13a7e2cc0150</tstamps>
+      <units>
+        <unit name="A">
+          <pins>
+            <pin num="1"/>
+            <pin num="2"/>
+          </pins>
+        </unit>
+      </units>
+    </comp>
+    <comp ref="R8">
+      <value>100k</value>
+      <footprint>Resistor_THT:R_Axial_DIN0207_L6.3mm_D2.5mm_P7.62mm_Horizontal</footprint>
+      <fields>
+        <field name="Footprint">Resistor_THT:R_Axial_DIN0207_L6.3mm_D2.5mm_P7.62mm_Horizontal</field>
+        <field name="Datasheet"/>
+        <field name="Description"/>
+      </fields>
+      <libsource lib="Device" part="R" description="Resistor"/>
+      <property name="Sheetname" value="Sony power interlock"/>
+      <property name="Sheetfile" value="DAR-1000ES-v2-interlock.kicad_sch"/>
+      <property name="ki_keywords" value="R res resistor"/>
+      <property name="ki_fp_filters" value="R_*"/>
+      <sheetpath names="/Sony power interlock/" tstamps="/55e31ced-cf75-50f1-83ff-24354f1944ad/"/>
+      <tstamps>6c496464-b6c7-512c-a349-493b01144dc8</tstamps>
+      <units>
+        <unit name="A">
+          <pins>
+            <pin num="1"/>
+            <pin num="2"/>
+          </pins>
+        </unit>
+      </units>
+    </comp>
+    <comp ref="R9">
+      <value>100k</value>
+      <footprint>Resistor_THT:R_Axial_DIN0207_L6.3mm_D2.5mm_P7.62mm_Horizontal</footprint>
+      <fields>
+        <field name="Footprint">Resistor_THT:R_Axial_DIN0207_L6.3mm_D2.5mm_P7.62mm_Horizontal</field>
+        <field name="Datasheet"/>
+        <field name="Description"/>
+      </fields>
+      <libsource lib="Device" part="R" description="Resistor"/>
+      <property name="Sheetname" value="Sony power interlock"/>
+      <property name="Sheetfile" value="DAR-1000ES-v2-interlock.kicad_sch"/>
+      <property name="ki_keywords" value="R res resistor"/>
+      <property name="ki_fp_filters" value="R_*"/>
+      <sheetpath names="/Sony power interlock/" tstamps="/55e31ced-cf75-50f1-83ff-24354f1944ad/"/>
+      <tstamps>3f78aef5-0fa2-54ef-ba22-d438531b0995</tstamps>
+      <units>
+        <unit name="A">
+          <pins>
+            <pin num="1"/>
+            <pin num="2"/>
+          </pins>
+        </unit>
+      </units>
+    </comp>
+    <comp ref="R10">
+      <value>100k</value>
+      <footprint>Resistor_THT:R_Axial_DIN0207_L6.3mm_D2.5mm_P7.62mm_Horizontal</footprint>
+      <fields>
+        <field name="Footprint">Resistor_THT:R_Axial_DIN0207_L6.3mm_D2.5mm_P7.62mm_Horizontal</field>
+        <field name="Datasheet"/>
+        <field name="Description"/>
+      </fields>
+      <libsource lib="Device" part="R" description="Resistor"/>
+      <property name="Sheetname" value="Sony power interlock"/>
+      <property name="Sheetfile" value="DAR-1000ES-v2-interlock.kicad_sch"/>
+      <property name="ki_keywords" value="R res resistor"/>
+      <property name="ki_fp_filters" value="R_*"/>
+      <sheetpath names="/Sony power interlock/" tstamps="/55e31ced-cf75-50f1-83ff-24354f1944ad/"/>
+      <tstamps>a50985e8-117d-5b78-9a46-4d754f5e411d</tstamps>
+      <units>
+        <unit name="A">
+          <pins>
+            <pin num="1"/>
+            <pin num="2"/>
+          </pins>
+        </unit>
+      </units>
+    </comp>
+    <comp ref="R11">
+      <value>100k</value>
+      <footprint>Resistor_THT:R_Axial_DIN0207_L6.3mm_D2.5mm_P7.62mm_Horizontal</footprint>
+      <fields>
+        <field name="Footprint">Resistor_THT:R_Axial_DIN0207_L6.3mm_D2.5mm_P7.62mm_Horizontal</field>
+        <field name="Datasheet"/>
+        <field name="Description"/>
+      </fields>
+      <libsource lib="Device" part="R" description="Resistor"/>
+      <property name="Sheetname" value="Sony power interlock"/>
+      <property name="Sheetfile" value="DAR-1000ES-v2-interlock.kicad_sch"/>
+      <property name="ki_keywords" value="R res resistor"/>
+      <property name="ki_fp_filters" value="R_*"/>
+      <sheetpath names="/Sony power interlock/" tstamps="/55e31ced-cf75-50f1-83ff-24354f1944ad/"/>
+      <tstamps>7df3acee-c46f-5253-813f-898c97666e8e</tstamps>
+      <units>
+        <unit name="A">
+          <pins>
+            <pin num="1"/>
+            <pin num="2"/>
+          </pins>
+        </unit>
+      </units>
+    </comp>
+    <comp ref="R12">
+      <value>1k</value>
+      <footprint>Resistor_THT:R_Axial_DIN0207_L6.3mm_D2.5mm_P7.62mm_Horizontal</footprint>
+      <fields>
+        <field name="Footprint">Resistor_THT:R_Axial_DIN0207_L6.3mm_D2.5mm_P7.62mm_Horizontal</field>
+        <field name="Datasheet"/>
+        <field name="Description"/>
+      </fields>
+      <libsource lib="Device" part="R" description="Resistor"/>
+      <property name="Sheetname" value="Sony power interlock"/>
+      <property name="Sheetfile" value="DAR-1000ES-v2-interlock.kicad_sch"/>
+      <property name="ki_keywords" value="R res resistor"/>
+      <property name="ki_fp_filters" value="R_*"/>
+      <sheetpath names="/Sony power interlock/" tstamps="/55e31ced-cf75-50f1-83ff-24354f1944ad/"/>
+      <tstamps>8998cf5d-efc3-5415-8913-0efec6e74f55</tstamps>
+      <units>
+        <unit name="A">
+          <pins>
+            <pin num="1"/>
+            <pin num="2"/>
+          </pins>
+        </unit>
+      </units>
+    </comp>
+    <comp ref="R13">
+      <value>100k</value>
+      <footprint>Resistor_THT:R_Axial_DIN0207_L6.3mm_D2.5mm_P7.62mm_Horizontal</footprint>
+      <fields>
+        <field name="Footprint">Resistor_THT:R_Axial_DIN0207_L6.3mm_D2.5mm_P7.62mm_Horizontal</field>
+        <field name="Datasheet"/>
+        <field name="Description"/>
+      </fields>
+      <libsource lib="Device" part="R" description="Resistor"/>
+      <property name="Sheetname" value="Sony power interlock"/>
+      <property name="Sheetfile" value="DAR-1000ES-v2-interlock.kicad_sch"/>
+      <property name="ki_keywords" value="R res resistor"/>
+      <property name="ki_fp_filters" value="R_*"/>
+      <sheetpath names="/Sony power interlock/" tstamps="/55e31ced-cf75-50f1-83ff-24354f1944ad/"/>
+      <tstamps>f003ece9-b187-5e69-8033-693deb5eb8fa</tstamps>
+      <units>
+        <unit name="A">
+          <pins>
+            <pin num="1"/>
+            <pin num="2"/>
+          </pins>
+        </unit>
+      </units>
+    </comp>
+    <comp ref="U8">
+      <value>SN74AHCT00N</value>
+      <footprint>Package_DIP:DIP-14_W7.62mm</footprint>
+      <fields>
+        <field name="Footprint">Package_DIP:DIP-14_W7.62mm</field>
+        <field name="Datasheet"/>
+        <field name="Description"/>
+      </fields>
+      <libsource lib="DAR1000ES" part="SN74AHCT00N" description=""/>
+      <property name="Sheetname" value="Sony power interlock"/>
+      <property name="Sheetfile" value="DAR-1000ES-v2-interlock.kicad_sch"/>
+      <sheetpath names="/Sony power interlock/" tstamps="/55e31ced-cf75-50f1-83ff-24354f1944ad/"/>
+      <tstamps>ed38621c-aeed-5519-a5b7-66854b8448c7</tstamps>
+      <units>
+        <unit name="A">
+          <pins>
+            <pin num="1"/>
+            <pin num="2"/>
+            <pin num="4"/>
+            <pin num="5"/>
+            <pin num="9"/>
+            <pin num="10"/>
+            <pin num="12"/>
+            <pin num="13"/>
+            <pin num="14"/>
+            <pin num="7"/>
+            <pin num="3"/>
+            <pin num="6"/>
+            <pin num="8"/>
+            <pin num="11"/>
+          </pins>
+        </unit>
+      </units>
+    </comp>
+    <comp ref="U9">
+      <value>SN74AHCT00N</value>
+      <footprint>Package_DIP:DIP-14_W7.62mm</footprint>
+      <fields>
+        <field name="Footprint">Package_DIP:DIP-14_W7.62mm</field>
+        <field name="Datasheet"/>
+        <field name="Description"/>
+      </fields>
+      <libsource lib="DAR1000ES" part="SN74AHCT00N" description=""/>
+      <property name="Sheetname" value="Sony power interlock"/>
+      <property name="Sheetfile" value="DAR-1000ES-v2-interlock.kicad_sch"/>
+      <sheetpath names="/Sony power interlock/" tstamps="/55e31ced-cf75-50f1-83ff-24354f1944ad/"/>
+      <tstamps>981cd9b6-1c59-570c-8ef6-614ed9653629</tstamps>
+      <units>
+        <unit name="A">
+          <pins>
+            <pin num="1"/>
+            <pin num="2"/>
+            <pin num="4"/>
+            <pin num="5"/>
+            <pin num="9"/>
+            <pin num="10"/>
+            <pin num="12"/>
+            <pin num="13"/>
+            <pin num="14"/>
+            <pin num="7"/>
+            <pin num="3"/>
+            <pin num="6"/>
+            <pin num="8"/>
+            <pin num="11"/>
+          </pins>
+        </unit>
+      </units>
+    </comp>
+    <comp ref="U10">
+      <value>MCP100-475DI/TO</value>
+      <footprint>Package_TO_SOT_THT:TO-92_Inline</footprint>
+      <fields>
+        <field name="Footprint">Package_TO_SOT_THT:TO-92_Inline</field>
+        <field name="Datasheet"/>
+        <field name="Description"/>
+      </fields>
+      <libsource lib="DAR1000ES" part="MCP100-475DI_TO" description=""/>
+      <property name="Sheetname" value="Sony power interlock"/>
+      <property name="Sheetfile" value="DAR-1000ES-v2-interlock.kicad_sch"/>
+      <sheetpath names="/Sony power interlock/" tstamps="/55e31ced-cf75-50f1-83ff-24354f1944ad/"/>
+      <tstamps>3e679f9e-a52e-582e-a177-8c7227c1c282</tstamps>
+      <units>
+        <unit name="A">
+          <pins>
+            <pin num="2"/>
+            <pin num="3"/>
+            <pin num="1"/>
+          </pins>
+        </unit>
+      </units>
+    </comp>
+  </components>
+  <libparts>
+    <libpart lib="Connector_Generic" part="Conn_01x02">
+      <description>Generic connector, single row, 01x02, script generated (kicad-library-utils/schlib/autogen/connector/)</description>
+      <footprints>
+        <fp>Connector*:*_1x??_*</fp>
+      </footprints>
+      <fields>
+        <field name="Reference">J</field>
+        <field name="Value">Conn_01x02</field>
+        <field name="Footprint"/>
+        <field name="Datasheet"/>
+        <field name="Description">Generic connector, single row, 01x02, script generated (kicad-library-utils/schlib/autogen/connector/)</field>
+      </fields>
+      <pins>
+        <pin num="1" name="Pin_1" type="passive"/>
+        <pin num="2" name="Pin_2" type="passive"/>
+      </pins>
+    </libpart>
+    <libpart lib="Connector_Generic" part="Conn_01x03">
+      <description>Generic connector, single row, 01x03, script generated (kicad-library-utils/schlib/autogen/connector/)</description>
+      <footprints>
+        <fp>Connector*:*_1x??_*</fp>
+      </footprints>
+      <fields>
+        <field name="Reference">J</field>
+        <field name="Value">Conn_01x03</field>
+        <field name="Footprint"/>
+        <field name="Datasheet"/>
+        <field name="Description">Generic connector, single row, 01x03, script generated (kicad-library-utils/schlib/autogen/connector/)</field>
+      </fields>
+      <pins>
+        <pin num="1" name="Pin_1" type="passive"/>
+        <pin num="2" name="Pin_2" type="passive"/>
+        <pin num="3" name="Pin_3" type="passive"/>
+      </pins>
+    </libpart>
+    <libpart lib="Connector_Generic" part="Conn_01x04">
+      <description>Generic connector, single row, 01x04, script generated (kicad-library-utils/schlib/autogen/connector/)</description>
+      <footprints>
+        <fp>Connector*:*_1x??_*</fp>
+      </footprints>
+      <fields>
+        <field name="Reference">J</field>
+        <field name="Value">Conn_01x04</field>
+        <field name="Footprint"/>
+        <field name="Datasheet"/>
+        <field name="Description">Generic connector, single row, 01x04, script generated (kicad-library-utils/schlib/autogen/connector/)</field>
+      </fields>
+      <pins>
+        <pin num="1" name="Pin_1" type="passive"/>
+        <pin num="2" name="Pin_2" type="passive"/>
+        <pin num="3" name="Pin_3" type="passive"/>
+        <pin num="4" name="Pin_4" type="passive"/>
+      </pins>
+    </libpart>
+    <libpart lib="Connector_Generic" part="Conn_01x05">
+      <description>Generic connector, single row, 01x05, script generated (kicad-library-utils/schlib/autogen/connector/)</description>
+      <footprints>
+        <fp>Connector*:*_1x??_*</fp>
+      </footprints>
+      <fields>
+        <field name="Reference">J</field>
+        <field name="Value">Conn_01x05</field>
+        <field name="Footprint"/>
+        <field name="Datasheet"/>
+        <field name="Description">Generic connector, single row, 01x05, script generated (kicad-library-utils/schlib/autogen/connector/)</field>
+      </fields>
+      <pins>
+        <pin num="1" name="Pin_1" type="passive"/>
+        <pin num="2" name="Pin_2" type="passive"/>
+        <pin num="3" name="Pin_3" type="passive"/>
+        <pin num="4" name="Pin_4" type="passive"/>
+        <pin num="5" name="Pin_5" type="passive"/>
+      </pins>
+    </libpart>
+    <libpart lib="DAR1000ES" part="Adafruit_TCA8418_4918">
+      <description>Adafruit 4918 TCA8418 breakout, 2x13 headers, 2.54 mm pitch, 12.70 mm row spacing</description>
+      <docs>https://learn.adafruit.com/adafruit-tca8418-keypad-matrix-and-gpio-expander-breakout</docs>
+      <footprints>
+        <fp>Adafruit_TCA8418_4918_2x13_P2.54mm_W12.70mm</fp>
+      </footprints>
+      <fields>
+        <field name="Reference">U</field>
+        <field name="Value">Adafruit_TCA8418_4918</field>
+        <field name="Footprint">DAR1000ES:Adafruit_TCA8418_4918_2x13_P2.54mm_W12.70mm</field>
+        <field name="Datasheet">https://learn.adafruit.com/adafruit-tca8418-keypad-matrix-and-gpio-expander-breakout</field>
+        <field name="Description">Adafruit 4918 TCA8418 breakout, 2x13 headers, 2.54 mm pitch, 12.70 mm row spacing</field>
+        <field name="Manufacturer">Adafruit Industries</field>
+        <field name="MPN">4918</field>
+        <field name="I2C_Address">0x34</field>
+        <field name="Source">https://github.com/adafruit/Adafruit-TCA8418-PCB</field>
+        <field name="License">CC-BY-SA-3.0</field>
+      </fields>
+      <pins>
+        <pin num="JP1.1" name="R1" type="bidirectional"/>
+        <pin num="JP1.2" name="R0" type="bidirectional"/>
+        <pin num="JP1.3" name="C0" type="bidirectional"/>
+        <pin num="JP1.4" name="C1" type="bidirectional"/>
+        <pin num="JP1.5" name="C2" type="bidirectional"/>
+        <pin num="JP1.6" name="C3" type="bidirectional"/>
+        <pin num="JP1.7" name="C4" type="bidirectional"/>
+        <pin num="JP1.8" name="C5" type="bidirectional"/>
+        <pin num="JP1.9" name="C6" type="bidirectional"/>
+        <pin num="JP1.10" name="C7" type="bidirectional"/>
+        <pin num="JP1.11" name="C8" type="bidirectional"/>
+        <pin num="JP1.12" name="C9" type="bidirectional"/>
+        <pin num="JP1.13" name="GND" type="power_in"/>
+        <pin num="JP4.1" name="VIN" type="power_in"/>
+        <pin num="JP4.2" name="3Vo" type="power_out"/>
+        <pin num="JP4.3" name="GND" type="power_in"/>
+        <pin num="JP4.4" name="SCL" type="input"/>
+        <pin num="JP4.5" name="SDA" type="bidirectional"/>
+        <pin num="JP4.6" name="~{INT}" type="open_collector"/>
+        <pin num="JP4.7" name="~{RST}" type="input"/>
+        <pin num="JP4.8" name="R7" type="bidirectional"/>
+        <pin num="JP4.9" name="R6" type="bidirectional"/>
+        <pin num="JP4.10" name="R5" type="bidirectional"/>
+        <pin num="JP4.11" name="R4" type="bidirectional"/>
+        <pin num="JP4.12" name="R3" type="bidirectional"/>
+        <pin num="JP4.13" name="R2" type="bidirectional"/>
+      </pins>
+    </libpart>
+    <libpart lib="DAR1000ES" part="ESP32-S3-DevKitC-1-N16R8_Audio_v2">
+      <description>Socketed Espressif DevKitC-1, 16 MB flash / 8 MB octal PSRAM; J1/J3 header pin numbering</description>
+      <docs>https://docs.espressif.com/projects/esp-dev-kits/en/latest/esp32s3/esp32-s3-devkitc-1/user_guide_v1.1.html</docs>
+      <footprints>
+        <fp>ESP32-S3-DevKitC-1_2xSocket_1x22_P2.54mm_W22.86mm</fp>
+      </footprints>
+      <fields>
+        <field name="Reference">U</field>
+        <field name="Value">ESP32-S3-DevKitC-1-N16R8</field>
+        <field name="Footprint">DAR1000ES:ESP32-S3-DevKitC-1_2xSocket_1x22_P2.54mm_W22.86mm</field>
+        <field name="Datasheet">https://docs.espressif.com/projects/esp-dev-kits/en/latest/esp32s3/esp32-s3-devkitc-1/user_guide_v1.1.html</field>
+        <field name="Description">Socketed Espressif DevKitC-1, 16 MB flash / 8 MB octal PSRAM; J1/J3 header pin numbering</field>
+        <field name="Manufacturer">Espressif Systems</field>
+        <field name="MPN">ESP32-S3-DevKitC-1-N16R8</field>
+      </fields>
+      <pins>
+        <pin num="J1.1" name="3V3" type="power_out"/>
+        <pin num="J1.2" name="3V3" type="power_out"/>
+        <pin num="J1.3" name="EN" type="input"/>
+        <pin num="J1.4" name="IO4" type="bidirectional"/>
+        <pin num="J1.5" name="IO5" type="bidirectional"/>
+        <pin num="J1.6" name="IO6" type="bidirectional"/>
+        <pin num="J1.7" name="IO7" type="bidirectional"/>
+        <pin num="J1.8" name="IO15" type="bidirectional"/>
+        <pin num="J1.9" name="IO16" type="bidirectional"/>
+        <pin num="J1.10" name="IO17" type="bidirectional"/>
+        <pin num="J1.11" name="IO18" type="bidirectional"/>
+        <pin num="J1.12" name="IO8" type="bidirectional"/>
+        <pin num="J1.13" name="IO3" type="bidirectional"/>
+        <pin num="J1.14" name="IO46" type="bidirectional"/>
+        <pin num="J1.15" name="IO9" type="bidirectional"/>
+        <pin num="J1.16" name="IO10" type="bidirectional"/>
+        <pin num="J1.17" name="IO11" type="bidirectional"/>
+        <pin num="J1.18" name="IO12" type="bidirectional"/>
+        <pin num="J1.19" name="IO13" type="bidirectional"/>
+        <pin num="J1.20" name="IO14" type="bidirectional"/>
+        <pin num="J1.21" name="5V" type="power_in"/>
+        <pin num="J1.22" name="GND" type="power_in"/>
+        <pin num="J3.1" name="GND" type="power_in"/>
+        <pin num="J3.2" name="TX_IO43" type="bidirectional"/>
+        <pin num="J3.3" name="RX_IO44" type="bidirectional"/>
+        <pin num="J3.4" name="IO1" type="bidirectional"/>
+        <pin num="J3.5" name="IO2" type="bidirectional"/>
+        <pin num="J3.6" name="IO42" type="bidirectional"/>
+        <pin num="J3.7" name="IO41" type="bidirectional"/>
+        <pin num="J3.8" name="IO40" type="bidirectional"/>
+        <pin num="J3.9" name="IO39" type="bidirectional"/>
+        <pin num="J3.10" name="IO38" type="bidirectional"/>
+        <pin num="J3.11" name="IO37_PSRAM" type="no_connect"/>
+        <pin num="J3.12" name="IO36_PSRAM" type="no_connect"/>
+        <pin num="J3.13" name="IO35_PSRAM" type="no_connect"/>
+        <pin num="J3.14" name="IO0" type="bidirectional"/>
+        <pin num="J3.15" name="IO45" type="bidirectional"/>
+        <pin num="J3.16" name="IO48" type="bidirectional"/>
+        <pin num="J3.17" name="IO47" type="bidirectional"/>
+        <pin num="J3.18" name="IO21" type="bidirectional"/>
+        <pin num="J3.19" name="IO20_USB_D+" type="bidirectional"/>
+        <pin num="J3.20" name="IO19_USB_D-" type="bidirectional"/>
+        <pin num="J3.21" name="GND" type="power_in"/>
+        <pin num="J3.22" name="GND" type="power_in"/>
+      </pins>
+    </libpart>
+    <libpart lib="DAR1000ES" part="ESP32-S3-DevKitC-1-N16R8_Controller_v2">
+      <description>Socketed Espressif DevKitC-1, 16 MB flash / 8 MB octal PSRAM; J1/J3 header pin numbering</description>
+      <docs>https://docs.espressif.com/projects/esp-dev-kits/en/latest/esp32s3/esp32-s3-devkitc-1/user_guide_v1.1.html</docs>
+      <footprints>
+        <fp>ESP32-S3-DevKitC-1_2xSocket_1x22_P2.54mm_W22.86mm</fp>
+      </footprints>
+      <fields>
+        <field name="Reference">U</field>
+        <field name="Value">ESP32-S3-DevKitC-1-N16R8</field>
+        <field name="Footprint">DAR1000ES:ESP32-S3-DevKitC-1_2xSocket_1x22_P2.54mm_W22.86mm</field>
+        <field name="Datasheet">https://docs.espressif.com/projects/esp-dev-kits/en/latest/esp32s3/esp32-s3-devkitc-1/user_guide_v1.1.html</field>
+        <field name="Description">Socketed Espressif DevKitC-1, 16 MB flash / 8 MB octal PSRAM; J1/J3 header pin numbering</field>
+        <field name="Manufacturer">Espressif Systems</field>
+        <field name="MPN">ESP32-S3-DevKitC-1-N16R8</field>
+      </fields>
+      <pins>
+        <pin num="J1.1" name="3V3" type="power_out"/>
+        <pin num="J1.2" name="3V3" type="power_out"/>
+        <pin num="J1.3" name="EN" type="input"/>
+        <pin num="J1.4" name="IO4" type="bidirectional"/>
+        <pin num="J1.5" name="IO5" type="bidirectional"/>
+        <pin num="J1.6" name="IO6" type="bidirectional"/>
+        <pin num="J1.7" name="IO7" type="bidirectional"/>
+        <pin num="J1.8" name="IO15" type="bidirectional"/>
+        <pin num="J1.9" name="IO16" type="bidirectional"/>
+        <pin num="J1.10" name="IO17" type="bidirectional"/>
+        <pin num="J1.11" name="IO18" type="bidirectional"/>
+        <pin num="J1.12" name="IO8" type="bidirectional"/>
+        <pin num="J1.13" name="IO3" type="bidirectional"/>
+        <pin num="J1.14" name="IO46" type="bidirectional"/>
+        <pin num="J1.15" name="IO9" type="bidirectional"/>
+        <pin num="J1.16" name="IO10" type="bidirectional"/>
+        <pin num="J1.17" name="IO11" type="bidirectional"/>
+        <pin num="J1.18" name="IO12" type="bidirectional"/>
+        <pin num="J1.19" name="IO13" type="bidirectional"/>
+        <pin num="J1.20" name="IO14" type="bidirectional"/>
+        <pin num="J1.21" name="5V" type="power_in"/>
+        <pin num="J1.22" name="GND" type="power_in"/>
+        <pin num="J3.1" name="GND" type="power_in"/>
+        <pin num="J3.2" name="TX_IO43" type="bidirectional"/>
+        <pin num="J3.3" name="RX_IO44" type="bidirectional"/>
+        <pin num="J3.4" name="IO1" type="bidirectional"/>
+        <pin num="J3.5" name="IO2" type="bidirectional"/>
+        <pin num="J3.6" name="IO42" type="bidirectional"/>
+        <pin num="J3.7" name="IO41" type="bidirectional"/>
+        <pin num="J3.8" name="IO40" type="bidirectional"/>
+        <pin num="J3.9" name="IO39" type="bidirectional"/>
+        <pin num="J3.10" name="IO38" type="bidirectional"/>
+        <pin num="J3.11" name="IO37_PSRAM" type="no_connect"/>
+        <pin num="J3.12" name="IO36_PSRAM" type="no_connect"/>
+        <pin num="J3.13" name="IO35_PSRAM" type="no_connect"/>
+        <pin num="J3.14" name="IO0" type="bidirectional"/>
+        <pin num="J3.15" name="IO45" type="bidirectional"/>
+        <pin num="J3.16" name="IO48" type="bidirectional"/>
+        <pin num="J3.17" name="IO47" type="bidirectional"/>
+        <pin num="J3.18" name="IO21" type="bidirectional"/>
+        <pin num="J3.19" name="IO20_USB_D+" type="bidirectional"/>
+        <pin num="J3.20" name="IO19_USB_D-" type="bidirectional"/>
+        <pin num="J3.21" name="GND" type="power_in"/>
+        <pin num="J3.22" name="GND" type="power_in"/>
+      </pins>
+    </libpart>
+    <libpart lib="DAR1000ES" part="MCP100-475DI_TO">
+      <docs>https://ww1.microchip.com/downloads/en/DeviceDoc/11187F.pdf</docs>
+      <fields>
+        <field name="Reference">U</field>
+        <field name="Value">MCP100-475DI_TO</field>
+        <field name="Footprint">Package_TO_SOT_THT:TO-92_Inline</field>
+        <field name="Datasheet">https://ww1.microchip.com/downloads/en/DeviceDoc/11187F.pdf</field>
+        <field name="Description"/>
+      </fields>
+      <pins>
+        <pin num="1" name="~{RESET}" type="output"/>
+        <pin num="2" name="VDD_SONY" type="power_in"/>
+        <pin num="3" name="GND" type="power_in"/>
+      </pins>
+    </libpart>
+    <libpart lib="DAR1000ES" part="SN74AHCT00N">
+      <docs>https://www.ti.com/lit/ds/symlink/sn74ahct00.pdf</docs>
+      <fields>
+        <field name="Reference">U</field>
+        <field name="Value">SN74AHCT00N</field>
+        <field name="Footprint">Package_DIP:DIP-14_W7.62mm</field>
+        <field name="Datasheet">https://www.ti.com/lit/ds/symlink/sn74ahct00.pdf</field>
+        <field name="Description"/>
+      </fields>
+      <pins>
+        <pin num="1" name="1A" type="input"/>
+        <pin num="2" name="1B" type="input"/>
+        <pin num="3" name="1Y" type="output"/>
+        <pin num="4" name="2A" type="input"/>
+        <pin num="5" name="2B" type="input"/>
+        <pin num="6" name="2Y" type="output"/>
+        <pin num="7" name="GND" type="power_in"/>
+        <pin num="8" name="3Y" type="output"/>
+        <pin num="9" name="3A" type="input"/>
+        <pin num="10" name="3B" type="input"/>
+        <pin num="11" name="4Y" type="output"/>
+        <pin num="12" name="4A" type="input"/>
+        <pin num="13" name="4B" type="input"/>
+        <pin num="14" name="VCC" type="power_in"/>
+      </pins>
+    </libpart>
+    <libpart lib="DAR1000ES" part="SN74AHCT125N">
+      <description>Quad TTL-input 3-state buffer; PDIP-14 N package; VCC 4.5-5.5 V</description>
+      <docs>https://www.ti.com/lit/ds/symlink/sn74ahct125.pdf</docs>
+      <footprints>
+        <fp>DIP-14_W7.62mm*</fp>
+      </footprints>
+      <fields>
+        <field name="Reference">U</field>
+        <field name="Value">SN74AHCT125N</field>
+        <field name="Footprint">Package_DIP:DIP-14_W7.62mm</field>
+        <field name="Datasheet">https://www.ti.com/lit/ds/symlink/sn74ahct125.pdf</field>
+        <field name="Description">Quad TTL-input 3-state buffer; PDIP-14 N package; VCC 4.5-5.5 V</field>
+        <field name="Manufacturer">Texas Instruments</field>
+        <field name="MPN">SN74AHCT125N</field>
+      </fields>
+      <pins>
+        <pin num="1" name="" type="input"/>
+        <pin num="2" name="" type="input"/>
+        <pin num="3" name="" type="tri_state"/>
+        <pin num="4" name="" type="input"/>
+        <pin num="5" name="" type="input"/>
+        <pin num="6" name="" type="tri_state"/>
+        <pin num="7" name="GND" type="power_in"/>
+        <pin num="8" name="" type="tri_state"/>
+        <pin num="9" name="" type="input"/>
+        <pin num="10" name="" type="input"/>
+        <pin num="11" name="" type="tri_state"/>
+        <pin num="12" name="" type="input"/>
+        <pin num="13" name="" type="input"/>
+        <pin num="14" name="VCC" type="power_in"/>
+      </pins>
+    </libpart>
+    <libpart lib="Device" part="C">
+      <description>Unpolarized capacitor</description>
+      <footprints>
+        <fp>C_*</fp>
+      </footprints>
+      <fields>
+        <field name="Reference">C</field>
+        <field name="Value">C</field>
+        <field name="Footprint"/>
+        <field name="Datasheet"/>
+        <field name="Description">Unpolarized capacitor</field>
+      </fields>
+      <pins>
+        <pin num="1" name="" type="passive"/>
+        <pin num="2" name="" type="passive"/>
+      </pins>
+    </libpart>
+    <libpart lib="Device" part="R">
+      <description>Resistor</description>
+      <footprints>
+        <fp>R_*</fp>
+      </footprints>
+      <fields>
+        <field name="Reference">R</field>
+        <field name="Value">R</field>
+        <field name="Footprint"/>
+        <field name="Datasheet"/>
+        <field name="Description">Resistor</field>
+      </fields>
+      <pins>
+        <pin num="1" name="" type="passive"/>
+        <pin num="2" name="" type="passive"/>
+      </pins>
+    </libpart>
+    <libpart lib="Jumper" part="Jumper_2_Bridged">
+      <description>Jumper, 2-pole, closed/bridged</description>
+      <footprints>
+        <fp>Jumper*</fp>
+        <fp>TestPoint*2Pads*</fp>
+        <fp>TestPoint*Bridge*</fp>
+      </footprints>
+      <fields>
+        <field name="Reference">JP</field>
+        <field name="Value">Jumper_2_Bridged</field>
+        <field name="Footprint"/>
+        <field name="Datasheet"/>
+        <field name="Description">Jumper, 2-pole, closed/bridged</field>
+      </fields>
+      <pins>
+        <pin num="1" name="A" type="passive"/>
+        <pin num="2" name="B" type="passive"/>
+      </pins>
+    </libpart>
+  </libparts>
+  <libraries>
+    <library logical="Connector_Generic">
+      <uri>${KICAD10_SYMBOL_DIR}/Connector_Generic.kicad_sym</uri>
+    </library>
+    <library logical="DAR1000ES">
+      <uri>${KIPRJMOD}/DAR1000ES.kicad_sym</uri>
+    </library>
+    <library logical="Device">
+      <uri>${KICAD10_SYMBOL_DIR}/Device.kicad_sym</uri>
+    </library>
+    <library logical="Jumper">
+      <uri>${KICAD10_SYMBOL_DIR}/Jumper.kicad_sym</uri>
+    </library>
+  </libraries>
+  <nets>
+    <net code="1" name="/A.MUTE" class="Default">
+      <node ref="J9" pin="2" pinfunction="Pin_2_2" pintype="passive"/>
+      <node ref="U2" pin="8" pintype="tri_state"/>
+    </net>
+    <net code="2" name="/ATT" class="Default">
+      <node ref="J10" pin="2" pinfunction="Pin_2_2" pintype="passive"/>
+      <node ref="U6" pin="11" pintype="tri_state"/>
+    </net>
+    <net code="3" name="/BCKI" class="Default">
+      <node ref="J11" pin="2" pinfunction="Pin_2_2" pintype="passive"/>
+      <node ref="U7" pin="11" pintype="tri_state"/>
+    </net>
+    <net code="4" name="/D.MUTE" class="Default">
+      <node ref="J9" pin="3" pinfunction="Pin_3_3" pintype="passive"/>
+      <node ref="U2" pin="3" pintype="tri_state"/>
+    </net>
+    <net code="5" name="/DATA" class="Default">
+      <node ref="J11" pin="3" pinfunction="Pin_3_3" pintype="passive"/>
+      <node ref="U7" pin="3" pintype="tri_state"/>
+    </net>
+    <net code="6" name="/FLCLEAR" class="Default">
+      <node ref="J3" pin="4" pinfunction="Pin_4_4" pintype="passive"/>
+      <node ref="R4" pin="1" pintype="passive"/>
+      <node ref="U3" pin="3" pintype="tri_state"/>
+    </net>
+    <net code="7" name="/FLGCLK" class="Default">
+      <node ref="J3" pin="3" pinfunction="Pin_3_3" pintype="passive"/>
+      <node ref="U3" pin="8" pintype="tri_state"/>
+    </net>
+    <net code="8" name="/FLGDATA" class="Default">
+      <node ref="J3" pin="2" pinfunction="Pin_2_2" pintype="passive"/>
+      <node ref="U3" pin="11" pintype="tri_state"/>
+    </net>
+    <net code="12" name="/IN0" class="Default">
+      <node ref="J6" pin="1" pinfunction="Pin_1_1" pintype="passive"/>
+      <node ref="U5" pin="JP1.3" pinfunction="C0_JP1.3" pintype="bidirectional"/>
+    </net>
+    <net code="13" name="/IN1" class="Default">
+      <node ref="J6" pin="2" pinfunction="Pin_2_2" pintype="passive"/>
+      <node ref="U5" pin="JP1.4" pinfunction="C1_JP1.4" pintype="bidirectional"/>
+    </net>
+    <net code="14" name="/IN2" class="Default">
+      <node ref="J6" pin="3" pinfunction="Pin_3_3" pintype="passive"/>
+      <node ref="U5" pin="JP1.5" pinfunction="C2_JP1.5" pintype="bidirectional"/>
+    </net>
+    <net code="15" name="/IN3" class="Default">
+      <node ref="J6" pin="4" pinfunction="Pin_4_4" pintype="passive"/>
+      <node ref="U5" pin="JP1.6" pinfunction="C3_JP1.6" pintype="bidirectional"/>
+    </net>
+    <net code="16" name="/IN4" class="Default">
+      <node ref="J7" pin="1" pinfunction="Pin_1_1" pintype="passive"/>
+      <node ref="U5" pin="JP1.7" pinfunction="C4_JP1.7" pintype="bidirectional"/>
+    </net>
+    <net code="17" name="/IN5" class="Default">
+      <node ref="J7" pin="2" pinfunction="Pin_2_2" pintype="passive"/>
+      <node ref="U5" pin="JP1.8" pinfunction="C5_JP1.8" pintype="bidirectional"/>
+    </net>
+    <net code="18" name="/IN6" class="Default">
+      <node ref="J7" pin="3" pinfunction="Pin_3_3" pintype="passive"/>
+      <node ref="U5" pin="JP1.9" pinfunction="C6_JP1.9" pintype="bidirectional"/>
+    </net>
+    <net code="19" name="/IN7" class="Default">
+      <node ref="J7" pin="4" pinfunction="Pin_4_4" pintype="passive"/>
+      <node ref="U5" pin="JP1.10" pinfunction="C7_JP1.10" pintype="bidirectional"/>
+    </net>
+    <net code="20" name="/INIT" class="Default">
+      <node ref="J10" pin="5" pinfunction="Pin_5_5" pintype="passive"/>
+      <node ref="U6" pin="3" pintype="tri_state"/>
+    </net>
+    <net code="21" name="/LATCH" class="Default">
+      <node ref="J10" pin="4" pinfunction="Pin_4_4" pintype="passive"/>
+      <node ref="U6" pin="6" pintype="tri_state"/>
+    </net>
+    <net code="22" name="/LRCK" class="Default">
+      <node ref="J11" pin="4" pinfunction="Pin_4_4" pintype="passive"/>
+      <node ref="U7" pin="6" pintype="tri_state"/>
+    </net>
+    <net code="23" name="/OUT0" class="Default">
+      <node ref="J5" pin="2" pinfunction="Pin_2_2" pintype="passive"/>
+      <node ref="U5" pin="JP1.2" pinfunction="R0_JP1.2" pintype="bidirectional"/>
+    </net>
+    <net code="24" name="/OUT1" class="Default">
+      <node ref="J5" pin="3" pinfunction="Pin_3_3" pintype="passive"/>
+      <node ref="U5" pin="JP1.1" pinfunction="R1_JP1.1" pintype="bidirectional"/>
+    </net>
+    <net code="25" name="/OUT2" class="Default">
+      <node ref="J5" pin="4" pinfunction="Pin_4_4" pintype="passive"/>
+      <node ref="U5" pin="JP4.13" pinfunction="R2_JP4.13" pintype="bidirectional"/>
+    </net>
+    <net code="26" name="/OUT3" class="Default">
+      <node ref="J8" pin="1" pinfunction="Pin_1_1" pintype="passive"/>
+      <node ref="U5" pin="JP4.12" pinfunction="R3_JP4.12" pintype="bidirectional"/>
+    </net>
+    <net code="27" name="/OUT4" class="Default">
+      <node ref="J8" pin="2" pinfunction="Pin_2_2" pintype="passive"/>
+      <node ref="U5" pin="JP4.11" pinfunction="R4_JP4.11" pintype="bidirectional"/>
+    </net>
+    <net code="28" name="/OUT5" class="Default">
+      <node ref="J8" pin="3" pinfunction="Pin_3_3" pintype="passive"/>
+      <node ref="U5" pin="JP4.10" pinfunction="R5_JP4.10" pintype="bidirectional"/>
+    </net>
+    <net code="29" name="/RELAY" class="Default">
+      <node ref="J9" pin="4" pinfunction="Pin_4_4" pintype="passive"/>
+      <node ref="U2" pin="11" pintype="tri_state"/>
+    </net>
+    <net code="30" name="/SHIFT" class="Default">
+      <node ref="J10" pin="3" pinfunction="Pin_3_3" pintype="passive"/>
+      <node ref="U6" pin="8" pintype="tri_state"/>
+    </net>
+    <net code="31" name="ENABLE_U2" class="Default">
+      <node ref="R7" pin="1" pintype="passive"/>
+      <node ref="U1-CONTROLLER1" pin="J1.6" pinfunction="IO6_J1.6" pintype="bidirectional"/>
+      <node ref="U8" pin="1" pinfunction="1A_1" pintype="input"/>
+    </net>
+    <net code="32" name="ENABLE_U3" class="Default">
+      <node ref="R8" pin="1" pintype="passive"/>
+      <node ref="U1-CONTROLLER1" pin="J1.8" pinfunction="IO15_J1.8" pintype="bidirectional"/>
+      <node ref="U8" pin="4" pinfunction="2A_4" pintype="input"/>
+    </net>
+    <net code="33" name="ENABLE_U4" class="Default">
+      <node ref="R9" pin="1" pintype="passive"/>
+      <node ref="U1-CONTROLLER1" pin="J1.9" pinfunction="IO16_J1.9" pintype="bidirectional"/>
+      <node ref="U8" pin="9" pinfunction="3A_9" pintype="input"/>
+    </net>
+    <net code="34" name="ENABLE_U6" class="Default">
+      <node ref="R10" pin="1" pintype="passive"/>
+      <node ref="U6-AUDIO1" pin="J3.18" pinfunction="IO21_J3.18" pintype="bidirectional"/>
+      <node ref="U9" pin="1" pinfunction="1A_1" pintype="input"/>
+    </net>
+    <net code="35" name="ENABLE_U7" class="Default">
+      <node ref="R11" pin="1" pintype="passive"/>
+      <node ref="U6-AUDIO1" pin="J3.7" pinfunction="IO41_J3.7" pintype="bidirectional"/>
+      <node ref="U9" pin="4" pinfunction="2A_4" pintype="input"/>
+    </net>
+    <net code="36" name="GND" class="Power">
+      <node ref="C1" pin="1" pintype="passive"/>
+      <node ref="C2" pin="1" pintype="passive"/>
+      <node ref="C3" pin="2" pintype="passive"/>
+      <node ref="C4" pin="2" pintype="passive"/>
+      <node ref="C5" pin="1" pintype="passive"/>
+      <node ref="C6" pin="2" pintype="passive"/>
+      <node ref="C7" pin="2" pintype="passive"/>
+      <node ref="C8" pin="2" pintype="passive"/>
+      <node ref="J10" pin="1" pinfunction="Pin_1_1" pintype="passive"/>
+      <node ref="J11" pin="1" pinfunction="Pin_1_1" pintype="passive"/>
+      <node ref="J12" pin="1" pinfunction="Pin_1_1" pintype="passive"/>
+      <node ref="J2" pin="1" pinfunction="Pin_1_1" pintype="passive"/>
+      <node ref="J3" pin="1" pinfunction="Pin_1_1" pintype="passive"/>
+      <node ref="J5" pin="1" pinfunction="Pin_1_1" pintype="passive"/>
+      <node ref="J9" pin="1" pinfunction="Pin_1_1" pintype="passive"/>
+      <node ref="R10" pin="2" pintype="passive"/>
+      <node ref="R11" pin="2" pintype="passive"/>
+      <node ref="R13" pin="2" pintype="passive"/>
+      <node ref="R4" pin="2" pintype="passive"/>
+      <node ref="R7" pin="2" pintype="passive"/>
+      <node ref="R8" pin="2" pintype="passive"/>
+      <node ref="R9" pin="2" pintype="passive"/>
+      <node ref="U1-CONTROLLER1" pin="J1.22" pinfunction="GND_J1.22" pintype="power_in"/>
+      <node ref="U10" pin="3" pinfunction="GND_3" pintype="power_in"/>
+      <node ref="U2" pin="7" pinfunction="GND_7" pintype="power_in"/>
+      <node ref="U3" pin="7" pinfunction="GND_7" pintype="power_in"/>
+      <node ref="U4" pin="7" pinfunction="GND_7" pintype="power_in"/>
+      <node ref="U5" pin="JP1.13" pinfunction="GND_JP1.13" pintype="power_in"/>
+      <node ref="U5" pin="JP4.3" pinfunction="GND_JP4.3" pintype="power_in"/>
+      <node ref="U6" pin="7" pinfunction="GND_7" pintype="power_in"/>
+      <node ref="U6-AUDIO1" pin="J1.22" pinfunction="GND_J1.22" pintype="power_in"/>
+      <node ref="U7" pin="7" pinfunction="GND_7" pintype="power_in"/>
+      <node ref="U8" pin="12" pinfunction="4A_12" pintype="input"/>
+      <node ref="U8" pin="13" pinfunction="4B_13" pintype="input"/>
+      <node ref="U8" pin="7" pinfunction="GND_7" pintype="power_in"/>
+      <node ref="U9" pin="10" pinfunction="3B_10" pintype="input"/>
+      <node ref="U9" pin="12" pinfunction="4A_12" pintype="input"/>
+      <node ref="U9" pin="13" pinfunction="4B_13" pintype="input"/>
+      <node ref="U9" pin="7" pinfunction="GND_7" pintype="power_in"/>
+      <node ref="U9" pin="9" pinfunction="3A_9" pintype="input"/>
+    </net>
+    <net code="37" name="LOCAL_5V" class="Power">
+      <node ref="C1" pin="2" pintype="passive"/>
+      <node ref="C2" pin="2" pintype="passive"/>
+      <node ref="C3" pin="1" pintype="passive"/>
+      <node ref="C4" pin="1" pintype="passive"/>
+      <node ref="C5" pin="2" pintype="passive"/>
+      <node ref="C6" pin="1" pintype="passive"/>
+      <node ref="C7" pin="1" pintype="passive"/>
+      <node ref="J2" pin="2" pinfunction="Pin_2_2" pintype="passive"/>
+      <node ref="JP1" pin="1" pinfunction="A_1" pintype="passive"/>
+      <node ref="JP2" pin="1" pinfunction="A_1" pintype="passive"/>
+      <node ref="R1" pin="1" pintype="passive"/>
+      <node ref="R2" pin="2" pintype="passive"/>
+      <node ref="R3" pin="1" pintype="passive"/>
+      <node ref="R5" pin="1" pintype="passive"/>
+      <node ref="R6" pin="2" pintype="passive"/>
+      <node ref="U2" pin="14" pinfunction="VCC_14" pintype="power_in"/>
+      <node ref="U3" pin="14" pinfunction="VCC_14" pintype="power_in"/>
+      <node ref="U4" pin="14" pinfunction="VCC_14" pintype="power_in"/>
+      <node ref="U6" pin="14" pinfunction="VCC_14" pintype="power_in"/>
+      <node ref="U7" pin="14" pinfunction="VCC_14" pintype="power_in"/>
+      <node ref="U8" pin="14" pinfunction="VCC_14" pintype="power_in"/>
+      <node ref="U9" pin="14" pinfunction="VCC_14" pintype="power_in"/>
+    </net>
+    <net code="38" name="Net-(J4-Pin_1)" class="Default">
+      <node ref="J4" pin="1" pinfunction="Pin_1_1" pintype="passive"/>
+      <node ref="U4" pin="8" pintype="tri_state"/>
+    </net>
+    <net code="39" name="Net-(J4-Pin_2)" class="Default">
+      <node ref="J4" pin="2" pinfunction="Pin_2_2" pintype="passive"/>
+      <node ref="U4" pin="3" pintype="tri_state"/>
+    </net>
+    <net code="40" name="Net-(J4-Pin_3)" class="Default">
+      <node ref="J4" pin="3" pinfunction="Pin_3_3" pintype="passive"/>
+      <node ref="U4" pin="11" pintype="tri_state"/>
+    </net>
+    <net code="41" name="Net-(JP1-B)" class="Power">
+      <node ref="JP1" pin="2" pinfunction="B_2" pintype="passive"/>
+      <node ref="U1-CONTROLLER1" pin="J1.21" pinfunction="5V_J1.21" pintype="power_in"/>
+    </net>
+    <net code="42" name="Net-(JP2-B)" class="Power">
+      <node ref="JP2" pin="2" pinfunction="B_2" pintype="passive"/>
+      <node ref="U6-AUDIO1" pin="J1.21" pinfunction="5V_J1.21" pintype="power_in"/>
+    </net>
+    <net code="43" name="Net-(U1-CONTROLLER1-GND-PadJ3.1)" class="Default">
+      <node ref="U1-CONTROLLER1" pin="J3.1" pinfunction="GND_J3.1" pintype="power_in"/>
+      <node ref="U6-AUDIO1" pin="J3.1" pinfunction="GND_J3.1" pintype="power_in"/>
+    </net>
+    <net code="44" name="Net-(U1-CONTROLLER1-IO1)" class="Default">
+      <node ref="U1-CONTROLLER1" pin="J3.4" pinfunction="IO1_J3.4" pintype="bidirectional"/>
+      <node ref="U3" pin="9" pintype="input"/>
+    </net>
+    <net code="45" name="Net-(U1-CONTROLLER1-IO2)" class="Default">
+      <node ref="U1-CONTROLLER1" pin="J3.5" pinfunction="IO2_J3.5" pintype="bidirectional"/>
+      <node ref="U3" pin="12" pintype="input"/>
+    </net>
+    <net code="46" name="Net-(U1-CONTROLLER1-IO4)" class="Default">
+      <node ref="U1-CONTROLLER1" pin="J1.4" pinfunction="IO4_J1.4" pintype="bidirectional"/>
+      <node ref="U3" pin="5" pintype="input"/>
+    </net>
+    <net code="47" name="Net-(U1-CONTROLLER1-IO5)" class="Default">
+      <node ref="U1-CONTROLLER1" pin="J1.5" pinfunction="IO5_J1.5" pintype="bidirectional"/>
+      <node ref="U4" pin="12" pintype="input"/>
+    </net>
+    <net code="48" name="Net-(U1-CONTROLLER1-IO7)" class="Default">
+      <node ref="U1-CONTROLLER1" pin="J1.7" pinfunction="IO7_J1.7" pintype="bidirectional"/>
+      <node ref="U4" pin="9" pintype="input"/>
+    </net>
+    <net code="49" name="Net-(U1-CONTROLLER1-IO8)" class="Default">
+      <node ref="U1-CONTROLLER1" pin="J1.12" pinfunction="IO8_J1.12" pintype="bidirectional"/>
+      <node ref="U4" pin="2" pintype="input"/>
+    </net>
+    <net code="50" name="Net-(U1-CONTROLLER1-IO9)" class="Default">
+      <node ref="U1-CONTROLLER1" pin="J1.15" pinfunction="IO9_J1.15" pintype="bidirectional"/>
+      <node ref="U2" pin="9" pintype="input"/>
+    </net>
+    <net code="51" name="Net-(U1-CONTROLLER1-IO10)" class="Default">
+      <node ref="U1-CONTROLLER1" pin="J1.16" pinfunction="IO10_J1.16" pintype="bidirectional"/>
+      <node ref="U2" pin="12" pintype="input"/>
+    </net>
+    <net code="52" name="Net-(U1-CONTROLLER1-IO11)" class="Default">
+      <node ref="U1-CONTROLLER1" pin="J1.17" pinfunction="IO11_J1.17" pintype="bidirectional"/>
+      <node ref="U2" pin="5" pintype="input"/>
+    </net>
+    <net code="53" name="Net-(U1-CONTROLLER1-IO12)" class="Default">
+      <node ref="U1-CONTROLLER1" pin="J1.18" pinfunction="IO12_J1.18" pintype="bidirectional"/>
+      <node ref="U2" pin="2" pintype="input"/>
+    </net>
+    <net code="54" name="Net-(U1-CONTROLLER1-IO13)" class="Default">
+      <node ref="U1-CONTROLLER1" pin="J1.19" pinfunction="IO13_J1.19" pintype="bidirectional"/>
+      <node ref="U5" pin="JP4.6" pinfunction="~{INT}_JP4.6" pintype="open_collector"/>
+    </net>
+    <net code="55" name="Net-(U1-CONTROLLER1-IO14)" class="Default">
+      <node ref="U1-CONTROLLER1" pin="J1.20" pinfunction="IO14_J1.20" pintype="bidirectional"/>
+      <node ref="U5" pin="JP4.5" pinfunction="SDA_JP4.5" pintype="bidirectional"/>
+    </net>
+    <net code="56" name="Net-(U1-CONTROLLER1-IO18)" class="Default">
+      <node ref="U1-CONTROLLER1" pin="J1.11" pinfunction="IO18_J1.11" pintype="bidirectional"/>
+      <node ref="U4" pin="5" pintype="input"/>
+    </net>
+    <net code="57" name="Net-(U1-CONTROLLER1-IO21)" class="Default">
+      <node ref="U1-CONTROLLER1" pin="J3.18" pinfunction="IO21_J3.18" pintype="bidirectional"/>
+      <node ref="U6-AUDIO1" pin="J1.19" pinfunction="IO13_J1.19" pintype="bidirectional"/>
+    </net>
+    <net code="58" name="Net-(U1-CONTROLLER1-IO39)" class="Default">
+      <node ref="U1-CONTROLLER1" pin="J3.9" pinfunction="IO39_J3.9" pintype="bidirectional"/>
+      <node ref="U5" pin="JP4.4" pinfunction="SCL_JP4.4" pintype="input"/>
+    </net>
+    <net code="59" name="Net-(U1-CONTROLLER1-IO40)" class="Default">
+      <node ref="U1-CONTROLLER1" pin="J3.8" pinfunction="IO40_J3.8" pintype="bidirectional"/>
+      <node ref="U5" pin="JP4.7" pinfunction="~{RST}_JP4.7" pintype="input"/>
+    </net>
+    <net code="60" name="Net-(U1-CONTROLLER1-IO42)" class="Default">
+      <node ref="U1-CONTROLLER1" pin="J3.6" pinfunction="IO42_J3.6" pintype="bidirectional"/>
+      <node ref="U3" pin="2" pintype="input"/>
+    </net>
+    <net code="61" name="Net-(U1-CONTROLLER1-IO47)" class="Default">
+      <node ref="U1-CONTROLLER1" pin="J3.17" pinfunction="IO47_J3.17" pintype="bidirectional"/>
+      <node ref="U6-AUDIO1" pin="J1.20" pinfunction="IO14_J1.20" pintype="bidirectional"/>
+    </net>
+    <net code="62" name="Net-(U5-VIN)" class="Default">
+      <node ref="U1-CONTROLLER1" pin="J1.1" pinfunction="3V3_J1.1" pintype="power_out"/>
+      <node ref="U5" pin="JP4.1" pinfunction="VIN_JP4.1" pintype="power_in"/>
+    </net>
+    <net code="63" name="Net-(U6-AUDIO1-IO1)" class="Default">
+      <node ref="U6-AUDIO1" pin="J3.4" pinfunction="IO1_J3.4" pintype="bidirectional"/>
+      <node ref="U7" pin="2" pintype="input"/>
+    </net>
+    <net code="64" name="Net-(U6-AUDIO1-IO2)" class="Default">
+      <node ref="U6-AUDIO1" pin="J3.5" pinfunction="IO2_J3.5" pintype="bidirectional"/>
+      <node ref="U7" pin="12" pintype="input"/>
+    </net>
+    <net code="65" name="Net-(U6-AUDIO1-IO9)" class="Default">
+      <node ref="U6" pin="2" pintype="input"/>
+      <node ref="U6-AUDIO1" pin="J1.15" pinfunction="IO9_J1.15" pintype="bidirectional"/>
+    </net>
+    <net code="66" name="Net-(U6-AUDIO1-IO11)" class="Default">
+      <node ref="U6" pin="12" pintype="input"/>
+      <node ref="U6-AUDIO1" pin="J1.17" pinfunction="IO11_J1.17" pintype="bidirectional"/>
+    </net>
+    <net code="67" name="Net-(U6-AUDIO1-IO12)" class="Default">
+      <node ref="U6" pin="9" pintype="input"/>
+      <node ref="U6-AUDIO1" pin="J1.18" pinfunction="IO12_J1.18" pintype="bidirectional"/>
+    </net>
+    <net code="68" name="Net-(U6-AUDIO1-IO40)" class="Default">
+      <node ref="U6-AUDIO1" pin="J3.8" pinfunction="IO40_J3.8" pintype="bidirectional"/>
+      <node ref="U7" pin="9" pintype="input"/>
+    </net>
+    <net code="69" name="Net-(U6-AUDIO1-IO42)" class="Default">
+      <node ref="U6-AUDIO1" pin="J3.6" pinfunction="IO42_J3.6" pintype="bidirectional"/>
+      <node ref="U7" pin="5" pintype="input"/>
+    </net>
+    <net code="70" name="Net-(U6-AUDIO1-IO47)" class="Default">
+      <node ref="U6" pin="5" pintype="input"/>
+      <node ref="U6-AUDIO1" pin="J3.17" pinfunction="IO47_J3.17" pintype="bidirectional"/>
+    </net>
+    <net code="71" name="SONY_5V_SENSE" class="Default">
+      <node ref="C8" pin="1" pintype="passive"/>
+      <node ref="J12" pin="2" pinfunction="Pin_2_2" pintype="passive"/>
+      <node ref="U10" pin="2" pinfunction="VDD_SONY_2" pintype="power_in"/>
+    </net>
+    <net code="72" name="SONY_POWER_GOOD" class="Default">
+      <node ref="R12" pin="2" pintype="passive"/>
+      <node ref="R13" pin="1" pintype="passive"/>
+      <node ref="U8" pin="10" pinfunction="3B_10" pintype="input"/>
+      <node ref="U8" pin="2" pinfunction="1B_2" pintype="input"/>
+      <node ref="U8" pin="5" pinfunction="2B_5" pintype="input"/>
+      <node ref="U9" pin="2" pinfunction="1B_2" pintype="input"/>
+      <node ref="U9" pin="5" pinfunction="2B_5" pintype="input"/>
+    </net>
+    <net code="73" name="SONY_RESET_N_RAW" class="Default">
+      <node ref="R12" pin="1" pintype="passive"/>
+      <node ref="U10" pin="1" pinfunction="~{RESET}_1" pintype="output"/>
+    </net>
+    <net code="74" name="U2_OE_N" class="Default">
+      <node ref="R1" pin="2" pintype="passive"/>
+      <node ref="U2" pin="1" pintype="input"/>
+      <node ref="U2" pin="10" pintype="input"/>
+      <node ref="U2" pin="13" pintype="input"/>
+      <node ref="U2" pin="4" pintype="input"/>
+      <node ref="U8" pin="3" pinfunction="1Y_3" pintype="output"/>
+    </net>
+    <net code="75" name="U3_OE_N" class="Default">
+      <node ref="R2" pin="1" pintype="passive"/>
+      <node ref="U3" pin="1" pintype="input"/>
+      <node ref="U3" pin="10" pintype="input"/>
+      <node ref="U3" pin="13" pintype="input"/>
+      <node ref="U3" pin="4" pintype="input"/>
+      <node ref="U8" pin="6" pinfunction="2Y_6" pintype="output"/>
+    </net>
+    <net code="76" name="U4_OE_N" class="Default">
+      <node ref="R3" pin="2" pintype="passive"/>
+      <node ref="U4" pin="1" pintype="input"/>
+      <node ref="U4" pin="10" pintype="input"/>
+      <node ref="U4" pin="13" pintype="input"/>
+      <node ref="U4" pin="4" pintype="input"/>
+      <node ref="U8" pin="8" pinfunction="3Y_8" pintype="output"/>
+    </net>
+    <net code="77" name="U6_OE_N" class="Default">
+      <node ref="R5" pin="2" pintype="passive"/>
+      <node ref="U6" pin="1" pintype="input"/>
+      <node ref="U6" pin="10" pintype="input"/>
+      <node ref="U6" pin="13" pintype="input"/>
+      <node ref="U6" pin="4" pintype="input"/>
+      <node ref="U9" pin="3" pinfunction="1Y_3" pintype="output"/>
+    </net>
+    <net code="78" name="U7_OE_N" class="Default">
+      <node ref="R6" pin="1" pintype="passive"/>
+      <node ref="U7" pin="1" pintype="input"/>
+      <node ref="U7" pin="10" pintype="input"/>
+      <node ref="U7" pin="13" pintype="input"/>
+      <node ref="U7" pin="4" pintype="input"/>
+      <node ref="U9" pin="6" pinfunction="2Y_6" pintype="output"/>
+    </net>
+    <net code="79" name="unconnected-(U1-CONTROLLER1-3V3-PadJ1.2)" class="Default">
+      <node ref="U1-CONTROLLER1" pin="J1.2" pinfunction="3V3_J1.2" pintype="power_out"/>
+    </net>
+    <net code="80" name="unconnected-(U1-CONTROLLER1-EN-PadJ1.3)" class="Default">
+      <node ref="U1-CONTROLLER1" pin="J1.3" pinfunction="EN_J1.3" pintype="input"/>
+    </net>
+    <net code="81" name="unconnected-(U1-CONTROLLER1-GND-PadJ3.21)" class="Default">
+      <node ref="U1-CONTROLLER1" pin="J3.21" pinfunction="GND_J3.21" pintype="power_in"/>
+    </net>
+    <net code="82" name="unconnected-(U1-CONTROLLER1-GND-PadJ3.22)" class="Default">
+      <node ref="U1-CONTROLLER1" pin="J3.22" pinfunction="GND_J3.22" pintype="power_in"/>
+    </net>
+    <net code="83" name="unconnected-(U1-CONTROLLER1-IO0-PadJ3.14)" class="Default">
+      <node ref="U1-CONTROLLER1" pin="J3.14" pinfunction="IO0_J3.14" pintype="bidirectional"/>
+    </net>
+    <net code="84" name="unconnected-(U1-CONTROLLER1-IO3-PadJ1.13)" class="Default">
+      <node ref="U1-CONTROLLER1" pin="J1.13" pinfunction="IO3_J1.13" pintype="bidirectional"/>
+    </net>
+    <net code="85" name="unconnected-(U1-CONTROLLER1-IO17-PadJ1.10)" class="Default">
+      <node ref="U1-CONTROLLER1" pin="J1.10" pinfunction="IO17_J1.10" pintype="bidirectional"/>
+    </net>
+    <net code="86" name="unconnected-(U1-CONTROLLER1-IO19_USB_D--PadJ3.20)" class="Default">
+      <node ref="U1-CONTROLLER1" pin="J3.20" pinfunction="IO19_USB_D-_J3.20" pintype="bidirectional"/>
+    </net>
+    <net code="87" name="unconnected-(U1-CONTROLLER1-IO20_USB_D+-PadJ3.19)" class="Default">
+      <node ref="U1-CONTROLLER1" pin="J3.19" pinfunction="IO20_USB_D+_J3.19" pintype="bidirectional"/>
+    </net>
+    <net code="88" name="unconnected-(U1-CONTROLLER1-IO35_PSRAM-PadJ3.13)" class="Default">
+      <node ref="U1-CONTROLLER1" pin="J3.13" pinfunction="IO35_PSRAM_J3.13" pintype="no_connect"/>
+    </net>
+    <net code="89" name="unconnected-(U1-CONTROLLER1-IO36_PSRAM-PadJ3.12)" class="Default">
+      <node ref="U1-CONTROLLER1" pin="J3.12" pinfunction="IO36_PSRAM_J3.12" pintype="no_connect"/>
+    </net>
+    <net code="90" name="unconnected-(U1-CONTROLLER1-IO37_PSRAM-PadJ3.11)" class="Default">
+      <node ref="U1-CONTROLLER1" pin="J3.11" pinfunction="IO37_PSRAM_J3.11" pintype="no_connect"/>
+    </net>
+    <net code="91" name="unconnected-(U1-CONTROLLER1-IO38-PadJ3.10)" class="Default">
+      <node ref="U1-CONTROLLER1" pin="J3.10" pinfunction="IO38_J3.10" pintype="bidirectional"/>
+    </net>
+    <net code="92" name="unconnected-(U1-CONTROLLER1-IO41-PadJ3.7)" class="Default">
+      <node ref="U1-CONTROLLER1" pin="J3.7" pinfunction="IO41_J3.7" pintype="bidirectional"/>
+    </net>
+    <net code="93" name="unconnected-(U1-CONTROLLER1-IO45-PadJ3.15)" class="Default">
+      <node ref="U1-CONTROLLER1" pin="J3.15" pinfunction="IO45_J3.15" pintype="bidirectional"/>
+    </net>
+    <net code="94" name="unconnected-(U1-CONTROLLER1-IO46-PadJ1.14)" class="Default">
+      <node ref="U1-CONTROLLER1" pin="J1.14" pinfunction="IO46_J1.14" pintype="bidirectional"/>
+    </net>
+    <net code="95" name="unconnected-(U1-CONTROLLER1-IO48-PadJ3.16)" class="Default">
+      <node ref="U1-CONTROLLER1" pin="J3.16" pinfunction="IO48_J3.16" pintype="bidirectional"/>
+    </net>
+    <net code="96" name="unconnected-(U1-CONTROLLER1-RX_IO44-PadJ3.3)" class="Default">
+      <node ref="U1-CONTROLLER1" pin="J3.3" pinfunction="RX_IO44_J3.3" pintype="bidirectional"/>
+    </net>
+    <net code="97" name="unconnected-(U1-CONTROLLER1-TX_IO43-PadJ3.2)" class="Default">
+      <node ref="U1-CONTROLLER1" pin="J3.2" pinfunction="TX_IO43_J3.2" pintype="bidirectional"/>
+    </net>
+    <net code="98" name="unconnected-(U2-Pad6)" class="Default">
+      <node ref="U2" pin="6" pintype="tri_state"/>
+    </net>
+    <net code="99" name="unconnected-(U3-Pad6)" class="Default">
+      <node ref="U3" pin="6" pintype="tri_state"/>
+    </net>
+    <net code="100" name="unconnected-(U4-Pad6)" class="Default">
+      <node ref="U4" pin="6" pintype="tri_state"/>
+    </net>
+    <net code="101" name="unconnected-(U5-3Vo-PadJP4.2)" class="Default">
+      <node ref="U5" pin="JP4.2" pinfunction="3Vo_JP4.2" pintype="power_out"/>
+    </net>
+    <net code="102" name="unconnected-(U5-C8-PadJP1.11)" class="Default">
+      <node ref="U5" pin="JP1.11" pinfunction="C8_JP1.11" pintype="bidirectional+no_connect"/>
+    </net>
+    <net code="103" name="unconnected-(U5-C9-PadJP1.12)" class="Default">
+      <node ref="U5" pin="JP1.12" pinfunction="C9_JP1.12" pintype="bidirectional+no_connect"/>
+    </net>
+    <net code="104" name="unconnected-(U5-R6-PadJP4.9)" class="Default">
+      <node ref="U5" pin="JP4.9" pinfunction="R6_JP4.9" pintype="bidirectional+no_connect"/>
+    </net>
+    <net code="105" name="unconnected-(U5-R7-PadJP4.8)" class="Default">
+      <node ref="U5" pin="JP4.8" pinfunction="R7_JP4.8" pintype="bidirectional+no_connect"/>
+    </net>
+    <net code="106" name="unconnected-(U6-AUDIO1-3V3-PadJ1.1)" class="Default">
+      <node ref="U6-AUDIO1" pin="J1.1" pinfunction="3V3_J1.1" pintype="power_out"/>
+    </net>
+    <net code="107" name="unconnected-(U6-AUDIO1-3V3-PadJ1.2)" class="Default">
+      <node ref="U6-AUDIO1" pin="J1.2" pinfunction="3V3_J1.2" pintype="power_out"/>
+    </net>
+    <net code="108" name="unconnected-(U6-AUDIO1-EN-PadJ1.3)" class="Default">
+      <node ref="U6-AUDIO1" pin="J1.3" pinfunction="EN_J1.3" pintype="input"/>
+    </net>
+    <net code="109" name="unconnected-(U6-AUDIO1-GND-PadJ3.21)" class="Default">
+      <node ref="U6-AUDIO1" pin="J3.21" pinfunction="GND_J3.21" pintype="power_in"/>
+    </net>
+    <net code="110" name="unconnected-(U6-AUDIO1-GND-PadJ3.22)" class="Default">
+      <node ref="U6-AUDIO1" pin="J3.22" pinfunction="GND_J3.22" pintype="power_in"/>
+    </net>
+    <net code="111" name="unconnected-(U6-AUDIO1-IO0-PadJ3.14)" class="Default">
+      <node ref="U6-AUDIO1" pin="J3.14" pinfunction="IO0_J3.14" pintype="bidirectional"/>
+    </net>
+    <net code="112" name="unconnected-(U6-AUDIO1-IO3-PadJ1.13)" class="Default">
+      <node ref="U6-AUDIO1" pin="J1.13" pinfunction="IO3_J1.13" pintype="bidirectional"/>
+    </net>
+    <net code="113" name="unconnected-(U6-AUDIO1-IO4-PadJ1.4)" class="Default">
+      <node ref="U6-AUDIO1" pin="J1.4" pinfunction="IO4_J1.4" pintype="bidirectional"/>
+    </net>
+    <net code="114" name="unconnected-(U6-AUDIO1-IO5-PadJ1.5)" class="Default">
+      <node ref="U6-AUDIO1" pin="J1.5" pinfunction="IO5_J1.5" pintype="bidirectional"/>
+    </net>
+    <net code="115" name="unconnected-(U6-AUDIO1-IO6-PadJ1.6)" class="Default">
+      <node ref="U6-AUDIO1" pin="J1.6" pinfunction="IO6_J1.6" pintype="bidirectional"/>
+    </net>
+    <net code="116" name="unconnected-(U6-AUDIO1-IO7-PadJ1.7)" class="Default">
+      <node ref="U6-AUDIO1" pin="J1.7" pinfunction="IO7_J1.7" pintype="bidirectional"/>
+    </net>
+    <net code="117" name="unconnected-(U6-AUDIO1-IO8-PadJ1.12)" class="Default">
+      <node ref="U6-AUDIO1" pin="J1.12" pinfunction="IO8_J1.12" pintype="bidirectional"/>
+    </net>
+    <net code="118" name="unconnected-(U6-AUDIO1-IO10-PadJ1.16)" class="Default">
+      <node ref="U6-AUDIO1" pin="J1.16" pinfunction="IO10_J1.16" pintype="bidirectional"/>
+    </net>
+    <net code="119" name="unconnected-(U6-AUDIO1-IO15-PadJ1.8)" class="Default">
+      <node ref="U6-AUDIO1" pin="J1.8" pinfunction="IO15_J1.8" pintype="bidirectional"/>
+    </net>
+    <net code="120" name="unconnected-(U6-AUDIO1-IO16-PadJ1.9)" class="Default">
+      <node ref="U6-AUDIO1" pin="J1.9" pinfunction="IO16_J1.9" pintype="bidirectional"/>
+    </net>
+    <net code="121" name="unconnected-(U6-AUDIO1-IO17-PadJ1.10)" class="Default">
+      <node ref="U6-AUDIO1" pin="J1.10" pinfunction="IO17_J1.10" pintype="bidirectional"/>
+    </net>
+    <net code="122" name="unconnected-(U6-AUDIO1-IO18-PadJ1.11)" class="Default">
+      <node ref="U6-AUDIO1" pin="J1.11" pinfunction="IO18_J1.11" pintype="bidirectional"/>
+    </net>
+    <net code="123" name="unconnected-(U6-AUDIO1-IO19_USB_D--PadJ3.20)" class="Default">
+      <node ref="U6-AUDIO1" pin="J3.20" pinfunction="IO19_USB_D-_J3.20" pintype="bidirectional"/>
+    </net>
+    <net code="124" name="unconnected-(U6-AUDIO1-IO20_USB_D+-PadJ3.19)" class="Default">
+      <node ref="U6-AUDIO1" pin="J3.19" pinfunction="IO20_USB_D+_J3.19" pintype="bidirectional"/>
+    </net>
+    <net code="125" name="unconnected-(U6-AUDIO1-IO35_PSRAM-PadJ3.13)" class="Default">
+      <node ref="U6-AUDIO1" pin="J3.13" pinfunction="IO35_PSRAM_J3.13" pintype="no_connect"/>
+    </net>
+    <net code="126" name="unconnected-(U6-AUDIO1-IO36_PSRAM-PadJ3.12)" class="Default">
+      <node ref="U6-AUDIO1" pin="J3.12" pinfunction="IO36_PSRAM_J3.12" pintype="no_connect"/>
+    </net>
+    <net code="127" name="unconnected-(U6-AUDIO1-IO37_PSRAM-PadJ3.11)" class="Default">
+      <node ref="U6-AUDIO1" pin="J3.11" pinfunction="IO37_PSRAM_J3.11" pintype="no_connect"/>
+    </net>
+    <net code="128" name="unconnected-(U6-AUDIO1-IO38-PadJ3.10)" class="Default">
+      <node ref="U6-AUDIO1" pin="J3.10" pinfunction="IO38_J3.10" pintype="bidirectional"/>
+    </net>
+    <net code="129" name="unconnected-(U6-AUDIO1-IO39-PadJ3.9)" class="Default">
+      <node ref="U6-AUDIO1" pin="J3.9" pinfunction="IO39_J3.9" pintype="bidirectional"/>
+    </net>
+    <net code="130" name="unconnected-(U6-AUDIO1-IO45-PadJ3.15)" class="Default">
+      <node ref="U6-AUDIO1" pin="J3.15" pinfunction="IO45_J3.15" pintype="bidirectional"/>
+    </net>
+    <net code="131" name="unconnected-(U6-AUDIO1-IO46-PadJ1.14)" class="Default">
+      <node ref="U6-AUDIO1" pin="J1.14" pinfunction="IO46_J1.14" pintype="bidirectional"/>
+    </net>
+    <net code="132" name="unconnected-(U6-AUDIO1-IO48-PadJ3.16)" class="Default">
+      <node ref="U6-AUDIO1" pin="J3.16" pinfunction="IO48_J3.16" pintype="bidirectional"/>
+    </net>
+    <net code="133" name="unconnected-(U6-AUDIO1-RX_IO44-PadJ3.3)" class="Default">
+      <node ref="U6-AUDIO1" pin="J3.3" pinfunction="RX_IO44_J3.3" pintype="bidirectional"/>
+    </net>
+    <net code="134" name="unconnected-(U6-AUDIO1-TX_IO43-PadJ3.2)" class="Default">
+      <node ref="U6-AUDIO1" pin="J3.2" pinfunction="TX_IO43_J3.2" pintype="bidirectional"/>
+    </net>
+    <net code="135" name="unconnected-(U7-Pad8)" class="Default">
+      <node ref="U7" pin="8" pintype="tri_state"/>
+    </net>
+    <net code="136" name="unconnected-(U8-4Y-Pad11)" class="Default">
+      <node ref="U8" pin="11" pinfunction="4Y_11" pintype="output+no_connect"/>
+    </net>
+    <net code="137" name="unconnected-(U9-3Y-Pad8)" class="Default">
+      <node ref="U9" pin="8" pinfunction="3Y_8" pintype="output+no_connect"/>
+    </net>
+    <net code="138" name="unconnected-(U9-4Y-Pad11)" class="Default">
+      <node ref="U9" pin="11" pinfunction="4Y_11" pintype="output+no_connect"/>
+    </net>
+  </nets>
+</export>

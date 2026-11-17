@@ -1,0 +1,61 @@
+DAR-1000ES v3 - unchanged connector and power-jumper pin map
+
+Pad numbers are the KiCad footprint numbers. Check mating-cable orientation.
+Unnamed Net-(...) strings are exact schematic net names, not inferred Sony functions.
+
+J10: DAC CONTROL
+  Pin 1: GND
+  Pin 2: /ATT
+  Pin 3: /SHIFT
+  Pin 4: /LATCH
+  Pin 5: /INIT
+J11: Conn_01x04
+  Pin 1: GND
+  Pin 2: /BCKI
+  Pin 3: /DATA
+  Pin 4: /LRCK
+J12: SONY_5V_SENSE
+  Pin 1: GND
+  Pin 2: SONY_5V_SENSE
+J2: Conn_01x02
+  Pin 1: GND
+  Pin 2: LOCAL_5V
+J3: Conn_01x04
+  Pin 1: GND
+  Pin 2: /FLGDATA
+  Pin 3: /FLGCLK
+  Pin 4: /FLCLEAR
+J4: Conn_01x03
+  Pin 1: Net-(J4-Pin_1)
+  Pin 2: Net-(J4-Pin_2)
+  Pin 3: Net-(J4-Pin_3)
+J5: Conn_01x04
+  Pin 1: GND
+  Pin 2: /OUT0
+  Pin 3: /OUT1
+  Pin 4: /OUT2
+J6: Conn_01x04
+  Pin 1: /IN0
+  Pin 2: /IN1
+  Pin 3: /IN2
+  Pin 4: /IN3
+J7: Conn_01x04
+  Pin 1: /IN4
+  Pin 2: /IN5
+  Pin 3: /IN6
+  Pin 4: /IN7
+J8: Conn_01x03
+  Pin 1: /OUT3
+  Pin 2: /OUT4
+  Pin 3: /OUT5
+J9: Conn_01x04
+  Pin 1: GND
+  Pin 2: /A.MUTE
+  Pin 3: /D.MUTE
+  Pin 4: /RELAY
+JP1: Jumper_2_Bridged
+  Pin 1: LOCAL_5V
+  Pin 2: ESP_CTRL_5V
+JP2: Jumper_2_Bridged
+  Pin 1: LOCAL_5V
+  Pin 2: ESP_AUDIO_5V

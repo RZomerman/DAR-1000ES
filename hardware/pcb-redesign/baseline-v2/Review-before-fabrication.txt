@@ -1,0 +1,46 @@
+DAR-1000ES v2 - electrical and mechanical review
+
+This is a routing/layout revision, not a bench-qualified production release.
+The original project in DAR-1000ES-Production has not been edited.
+
+Existing non-connector component positions and orientations are retained.
+The outline is 100 x 210 mm. Six distinct 3.4 mm mounting holes remain.
+J2-J11 retain their labels and pin functions, with horizontal JST-XH
+footprints facing the nearby top/left edges. J12 is the new Sony sense input.
+Check enclosure, mating-housing, cable-bend and plugged-in module clearances.
+Review RF antenna clearance and fast-signal return paths with the actual
+modules fitted. No copper pours or unverified antenna keepout dimensions
+have been added.
+
+Read GPIO-and-interlock-v2.txt before updating firmware.
+All five ENABLE requests are now active HIGH; LOW/floating disables.
+The firmware request is qualified in hardware by Sony power, independently
+of either ESP. Boot/reset defaults must keep all requests LOW.
+
+Local 5 V and Sony 5 V are separate supplies with a common ground.
+J12 is sense-only: pin 1 GND, pin 2 Sony 5 V.
+The buffers and AHCT00 NANDs use local 5 V. The MCP100 uses Sony 5 V.
+Use the specified MCP100-475DI/TO D-pinout part, not an arbitrary TO-92
+supervisor. Check the flat-face pin orientation against the actual part.
+The added circuitry is all through-hole.
+
+This interlock does not add USB/external-supply ORing for the ESP dev boards.
+Verify their allowable power paths before applying USB and external 5 V
+simultaneously. Verify off-state leakage/back-powering and output disable
+timing with both supply orders and with each ESP USB-powered separately.
+Absolute input-voltage tolerance alone is not an Ioff guarantee.
+Bench-check Sony brownout, shutdown, startup delay and firmware reset.
+
+Pre-existing schematic issues remain for deliberate review:
+- 47 pins lack explicit connections/no-connect markers.
+- ESP EN inputs are represented as undriven; dev-board internals matter.
+- Power-source flags/internal module power paths are not fully represented.
+- FLSTB, FLSDATA and FLSCLK are dangling labels, not connected net names.
+  Their intended J4 mapping was not invented or silently reassigned.
+- An existing local/global net-label naming warning remains.
+
+Zero PCB shorts/clearance violations would not resolve these schematic
+issues or establish hardware functionality. Resolve/waive ERC items with
+the actual dev-board internals and Sony wiring before fabrication.
+Confirm passive values, connector pinouts, component ratings and actual
+module dimensions against the purchased parts.

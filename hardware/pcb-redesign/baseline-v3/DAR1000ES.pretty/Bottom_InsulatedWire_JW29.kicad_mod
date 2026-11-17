@@ -1,0 +1,42 @@
+(footprint
+	"Bottom_InsulatedWire_JW29"
+	(version 20260206)
+	(generator "pcbnew")
+	(layer "F.Cu")
+	(descr
+		"Physical insulated component-side wire; all numbered 1 pads are internally joined ONLY when the wire is installed."
+	)
+	(property
+		"Reference"
+		"JW29"
+		(at 0.0 -1.7999999999999972 0)
+		(layer "F.SilkS")
+		(effects (font (size 0.8 0.8) (thickness 0.1)))
+	)
+	(property "Value" "Insulated wire link" (at 0 0 0) (layer "F.Fab") (hide yes) (effects (font (size 1 1))))
+	(attr through_hole board_only exclude_from_pos_files)
+	(duplicate_pad_numbers_are_jumpers yes)
+	(pad "1" thru_hole circle (at 0.0 0.0) (size 1.8 1.8) (drill 1.0) (layers "*.Cu" "*.Mask"))
+	(pad
+		"1"
+		thru_hole
+		circle
+		(at 20.9962 -8.677499999999998)
+		(size 1.8 1.8)
+		(drill 1.0)
+		(layers "*.Cu" "*.Mask")
+	)
+	(fp_line (start 0.0 -0.7710000000000008) (end 0.0 0.0) (stroke (width 0.2) (type solid)) (layer "Dwgs.User"))
+	(fp_line
+		(start 0.0 -0.7710000000000008)
+		(end 7.906500000000001 -8.677499999999998)
+		(stroke (width 0.2) (type solid))
+		(layer "Dwgs.User")
+	)
+	(fp_line
+		(start 7.906500000000001 -8.677499999999998)
+		(end 20.9962 -8.677499999999998)
+		(stroke (width 0.2) (type solid))
+		(layer "Dwgs.User")
+	)
+)
