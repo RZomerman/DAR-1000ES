@@ -1,0 +1,13 @@
+{
+  "original_v2_files_unchanged": 18,
+  "original_footprints_preserved": 51,
+  "new_capacitors": 5,
+  "wire_links": 43,
+  "wire_holes": 87,
+  "bottom_tracks": 888,
+  "front_tracks": 0,
+  "normal_plated_through_hole_annuli": true,
+  "vias": 0,
+  "unconnected": 0,
+  "track_length_mm": 4358.12
+}

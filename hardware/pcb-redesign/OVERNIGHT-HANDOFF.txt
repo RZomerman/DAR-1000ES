@@ -1,0 +1,208 @@
+DAR-1000ES PCB v4: Sony-style, bottom-only redesign
+================================================
+
+This is an implementation task for a GitHub Copilot CLOUD agent. The user
+is turning off their laptop. Work entirely on GitHub's runner, autonomously;
+do not depend on a local terminal, local server or Windows filesystem.
+Deliver a pull request containing working KiCad files, not just a plan.
+Do not change firmware or unrelated repository files.
+
+USER DECISIONS (17 November 2026)
+-------------------------------
+V3 is rejected: its wire bridges are long, indirect and bend around the
+board. Sony uses short, STRAIGHT VERTICAL bridges. Merely rotating a drawing
+or replacing top copper with long wires does NOT satisfy this request.
+
+The user explicitly selected 30 x 10 cm, NOT 21 x 19 cm. Increase the existing
+210 mm long / 100 mm wide board to 300 mm long / 100 mm wide. With the
+baseline coordinate orientation, extend the Y axis from 210 to 300 mm.
+Move the cable connectors into that added 90 mm section. Keep their labels,
+connector identities, cable pin order and electrical functions.
+
+The user now ALLOWS moving components, unlike the earlier v2/v3 restriction.
+Make generous, Sony-style through-hole assembly space. Redistribute the
+ESP sockets, ICs, passives and jumpers to make a clean, practical layout.
+Keep the controller/display/keypad section and audio section physically
+separate, as they currently are. Keep the two connector groups distinct
+within the extension too. Keep high-speed/audio wiring away from display
+switching where practical. Respect RF antennas, USB access and enclosure
+hardware. Preserve connector outward-facing horizontal JST-XH footprints.
+
+All routed copper must be B.Cu. No F.Cu traces, no routing vias. Normal plated
+through-hole pads with annuli on both faces ARE approved. Top-side wire
+bridges are permitted ONLY as short, straight, north-south/Y-axis links:
+exactly two terminals per bridge, identical world X coordinate at both
+ends; no bends, diagonal links, horizontal links, long harnesses or multiway
+wire trees. Prefer short standard pitches (e.g. 2.54-15.24 mm); this range
+is a design target, not a user-specified hard numerical limit. Do not solve
+congestion with a long vertical wire instead of improving placement.
+Holes must be outside component bodies, sockets, insertion paths, screwhead
+envelopes and silkscreen. Bridges can cross bottom tracks but not component
+bodies or obstruct installed modules. Use the Sony photo as the style guide,
+not as a measured mechanical drawing.
+
+Preserve the five new power capacitors:
+  C9: 470 uF, 16 V, Panasonic EEU-FR1C471, input LOCAL_5V to GND;
+      D8 x 11.5 mm body, 3.5 mm lead pitch.
+  C10/C12: 100 uF, 16 V, Panasonic EEU-FR1C101, one per ESP;
+      D5 x 11 mm body, 2 mm pitch.
+  C11/C13: 100 nF ceramic, one per ESP; agreed D5/W2.5/P5 mm envelope.
+  C10/C11 are AFTER JP1 on ESP_CTRL_5V.
+  C12/C13 are AFTER JP2 on ESP_AUDIO_5V.
+  Electrolytic pin 1 positive; pin 2 GND. Place the 100 nF parts near supply
+  pins and provide short supply/return connections, not merely visual proximity.
+
+GPIO assignments, GPIO-to-SN74 inputs and equivalent SN74 gate/output
+assignments may be optimized if that genuinely improves routing, as already
+authorized earlier. Keep connector pin functions unchanged, synchronize
+schematic/PCB, and document the new map against the v2/v3 map. Do not silently
+change the firmware: current repository firmware may still use earlier maps.
+Exclude octal-PSRAM, USB, strapping and board-specific LED/UART-conflict pins
+unless independently verified safe. In particular reserve GPIO19/20 and
+GPIO35/36/37; check both dev-board revisions' LED and USB-UART wiring.
+
+ELECTRICAL INVARIANTS
+--------------------
+- Two Espressif ESP32-S3-DevKitC-1-N16R8 modules. Combined socket footprints
+  represent 2 x 1x22 P2.54 sockets with 22.86 mm row spacing. Do not substitute
+  a bare ESP module footprint or the incorrect "ESP3" name.
+- TI SN74AHCT125N uses PDIP-14, 7.62 mm rows.
+- Adafruit TCA8418 breakout product 4918 (NOT TCA4818) uses two 13-pin rows,
+  2.54 mm pitch, 12.70 mm row spacing, 35.56 x 17.78 mm module envelope.
+- Maintain the v2 Sony power hardware interlock. U8/U9 SN74AHCT00N and U10
+  MCP100-475 qualify all five buffer banks:
+      /OE = NAND(GPIO_ENABLE, SONY_POWER_GOOD).
+  Firmware ENABLE requests are ACTIVE HIGH, default LOW via 100k pulldowns.
+  OE pull-ups remain on local 5 V; never directly put those 5 V pull-ups
+  onto ESP GPIOs. Keep Sony power sense separate from local 5 V.
+- J2 pin 1 GND, pin 2 LOCAL_5V.
+  JP1/JP2 pin 1 LOCAL_5V; pin 2 respective post-jumper ESP supply.
+  J12 pin 1 common GND, pin 2 SONY_5V_SENSE ONLY, never a power feed.
+- Source ERC has 63 review items (47 pin_not_connected, 10 power_pin_not_driven,
+  2 pin_not_driven, 3 label_dangling, 1 same_local_global_label). Do not waive
+  or misrepresent these as electrical sign-off. FLSTB/FLSDATA/FLSCLK/J4 mapping
+  is unresolved; do not invent connector routing to make a report green.
+  Preserve intended original circuit behavior. Flag genuine electrical
+  ambiguities explicitly instead of guessing dangerous Sony-side mappings.
+- Existing minimum clearance is 0.20 mm, signal width 0.30 mm, power 0.80 mm;
+  min width 0.25 mm. More hand-soldering clearance is desirable where space
+  permits, but the existing TO-92 pads have only about 0.22 mm copper gap.
+- Keep six original mounting-hole locations if practical; the extension may
+  need additional mounting support. Document changes and do not claim Sony
+  chassis compatibility without dimensions/physical fit verification.
+
+WHAT IS PROVIDED
+----------------
+baseline-v2/: last accepted two-layer reference, complete custom libraries,
+  GPIO/interlock notes, electrical review and clean PCB DRC.
+baseline-v3/: five new capacitors and correct logical supply rails, plus the
+  REJECTED 43-wire bottom route. Do NOT ship that route as the new solution.
+  Its native KiCad DRC is 0 violations / 0 unconnected; nevertheless it fails
+  the user's assembly/layout requirements. Native DRC alone is insufficient.
+reference/sony-original-board.jpeg: the user's Sony board reference photo.
+reference/pcb-v3-placement-base.kicad_pcb: unrouted 56-footprint starting
+  snapshot (51 old plus 5 caps), before any board-only JW parts.
+reference/pcb-v3-netlist.xml and pcb-v2-final-netlist.xml: golden connectivity.
+reference/pcb-v3-capacitors.json: part, rail and original placement details.
+reference/pcb-v3-source-placements.json: old placement record, NOT a v4
+  placement constraint now that component movement is explicitly authorized.
+reference/pcb-v3-wire-links.json: rejected links, useful for understanding
+  why the old "convert arbitrary front paths" strategy is not acceptable.
+legacy-tools/: Windows-specific Python work from earlier revisions. These
+  use hard-coded C:\Dev roots and a session files/ convention. They are
+  reference code, not runnable cloud automation as-is. Port selected helpers;
+  do not execute preparation functions blindly or overwrite the baselines.
+
+IMPLEMENTATION GUIDANCE / KNOWN PITFALLS
+--------------------------------------
+Use KiCad 10 (source file format version 20260206), its footprint/symbol
+libraries, kicad-cli and pcbnew Python on Linux. KiCad 8/9 may not read these
+files correctly. Provision suitable tooling on the runner before editing.
+Keep all paths relocatable; supplied library tables already use KIPRJMOD
+and KICAD10_FOOTPRINT_DIR. Do not downgrade format or fake successful checks.
+
+Plan placement and routing together. Use a single-bottom-layer routing model
+with deliberately placed short vertical jumper components, or an equivalent
+constrained algorithm. Freerouting's preferred_direction=vertical is a COST,
+not a hard direction constraint. Do not rerun an unconstrained two-layer
+autorouter and convert its arbitrary F.Cu paths to long bent wire harnesses.
+
+The earlier working autorouter was official Freerouting 2.5.0 Java JAR:
+https://github.com/freerouting/freerouting/releases/tag/v2.5.0
+The downloaded freerouting-2.5.0.jar had SHA256
+f6f51bb02245e8e717f9359bd260cc9c5c0b1bc0acc8b7cb2cd5b8ffeb5de3c7.
+Use a compatible JRE (Temurin 25 worked); obtain Linux builds, not the
+earlier Windows JRE. Native Freerouting builds failed due to missing GraalVM
+serialization constructors (ComponentOutline, ObstacleArea); the JAR worked.
+Disable diagnostics, API server and GUI in every router process:
+  FREEROUTING__USAGE_AND_DIAGNOSTIC_DATA__DISABLE_ANALYTICS=true
+  FREEROUTING__API_SERVER__ENABLED=false
+  FREEROUTING__GUI__ENABLED=false
+Bound heap/workers (previously -Xmx2g, -mt 2).
+--router.automatic_neckdown=false avoids undersize routing, but inspect
+fanout too: it independently generated two 0.225 mm sections in v3.
+Match the 0.50 mm copper-to-board-edge constraint.
+
+Do NOT parse/re-emit entire Specctra DSNs with a generic KiCad S-expression
+emitter: quoted pin references have adjacent quoted/unquoted tokens and get
+silently corrupted. Make surgical text edits or use a genuine DSN parser.
+pcbnew.ImportSpecctraSES works, but import into a fresh untracked board so
+tracks do not accumulate. Repeated pcbnew.Remove(footprint) operations caused
+SWIG ownership corruption; AST editing plus fresh processes was reliable.
+
+Physical installed bridges can be represented accurately with two same-net,
+same-number through-hole pads and KiCad 10
+  (duplicate_pad_numbers_are_jumpers yes).
+This property was tested: turning it off creates a missing connection;
+turning it on models the INSTALLED WIRE. Do not use it to fabricate internal
+connectivity where no actual two-terminal straight bridge will be fitted.
+Provide project-local footprints, clear reference labels and a wire schedule.
+Distinguish soldered wire bridges from removable JP1/JP2 shunts.
+Temporary router-only via keepouts were exported with pcbnew rule areas:
+  SetIsRuleArea(True), SetDoNotAllowVias(True),
+  SetDoNotAllowTracks(False), SetDoNotAllowPads(False),
+  SetDoNotAllowZoneFills(False), SetDoNotAllowFootprints(False).
+Keepout bodies must include component courtyards, visible reference/value
+text and screwhead clearance. Temporary planning vias must all be removed
+from the final design and replaced by actual jumper holes when appropriate.
+Include existing jumper holes in clearance calculations for later jumpers.
+
+DELIVERABLES AND ACCEPTANCE
+--------------------------
+Create v4/ within this folder; leave both baselines and existing DevBoard/
+untouched. Include a self-contained v4 .kicad_pro, PCB, all schematic sheets,
+project-local footprints/symbols and relocatable library tables. Make sure
+project instance paths and linked sheet filenames refer to the v4 project.
+
+Run native KiCad PCB DRC on the saved FINAL board. Aim for 0 violations and
+0 unconnected items with all specified physical wire links installed. Do not
+hide courtyard, clearance or missing-connection errors with exclusions.
+Prove bottom-only track copper / zero vias, board dimensions 100 x 300 mm,
+all cable connector placement envelopes in the new Y=210..300 mm zone,
+two terminals per bridge with equal world X, no long/indirect wire routes,
+no terminal/body/screwhead conflicts, and meaningful control/audio separation.
+Report maximum bridge length and bridge count. If infeasible, iterate
+placement and channel assignment; do not call the old rejected layout done.
+
+Validate final schematic/PCB pin-to-net equivalence and connector function
+preservation, including any explicitly documented GPIO/gate remapping.
+Validate the five capacitor rails and Sony/local supply separation.
+Run ERC, documenting unresolved inherited items without claiming sign-off.
+Provide reproducible local validation/bridge-geometry checks and the real
+native reports. Confirm removing wire bridges introduces missing connections.
+
+Export schematic PDF, top component/straight-bridge assembly PDF, and mirrored
+bottom copper PDF. Fit drawings to pages without clipping; clearly state if
+they are not 1:1 fabrication artwork. Render and inspect them. Provide concise
+assembly notes, connector pin map, GPIO delta, capacitor BOM/polarity, board
+dimensions and mounting changes. Clearly flag unverified enclosure fit,
+RF clearance, supply/back-powering/inrush and real-hardware bench testing.
+Only package Gerbers/drills as manufacturing-ready if their own checks and
+remaining electrical/mechanical review justify that status.
+
+Commit all implementation and open a PR on GitHub so the user can inspect
+the result in the morning. Continue through placement, routing and actual
+verification; do not stop at an architecture proposal or delegate back to
+the powered-off laptop. If blocked by runner/tool access, save concrete
+progress and state the actual blocker plainly in the PR rather than
+inventing successful checks or claiming the design is fabrication-approved.

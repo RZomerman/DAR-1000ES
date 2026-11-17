@@ -1,0 +1,26 @@
+DAR-1000ES v2 - saved design verification
+
+KiCad PCB DRC: 0 violations; 0 unconnected items.
+Schematic ERC: 63 outstanding review items (not waived).
+  label_dangling: 3
+  pin_not_connected: 47
+  pin_not_driven: 2
+  power_pin_not_driven: 10
+  same_local_global_label: 1
+
+100 x 210 mm board; two copper layers; 51 footprints, including six unique mounting holes.
+All 37 prepared original footprint placements, orientations and pad positions retained.
+All ten original connector labels and pin functions retained.
+All 135 schematic nets match the intended GPIO/channel remapping; every PCB pad agrees.
+The Sony sense rail is separate from local 5 V; all five enable gates match the intended truth table.
+No direct ESP GPIO connection to a 5 V /OE pull-up remains.
+Routed copper: 596 track segments, 19 vias, 4499.94 mm total track length.
+Signal traces use 0.25 mm routing width; power-class routes use 0.8 mm.
+Minimum board trace width 0.20 mm and clearance 0.20 mm are checked by KiCad.
+Straight-line signal crossing objective: 233 -> 101.
+Signal MST length objective: 2958.1 -> 2623.1 mm.
+These optimization metrics are not final copper lengths or proof of a global optimum.
+Routing was performed locally; analytics and the router API server were disabled.
+Original production directory: all 11 recorded file hashes unchanged.
+
+This is design-file validation only. Read Review-before-fabrication.txt.

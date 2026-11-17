@@ -1,0 +1,996 @@
+{
+    "$schema": "https://schemas.kicad.org/erc.v1.json",
+    "coordinate_units": "mm",
+    "date": "2026-11-17T17:58:43",
+    "ignored_checks": [
+        {
+            "description": "Global label only appears once in the schematic",
+            "key": "single_global_label"
+        },
+        {
+            "description": "Four connection points are joined together",
+            "key": "four_way_junction"
+        },
+        {
+            "description": "SPICE model issue",
+            "key": "simulation_model_issue"
+        },
+        {
+            "description": "Assigned footprint doesn't match footprint filters",
+            "key": "footprint_filter"
+        }
+    ],
+    "included_severities": [
+        "error",
+        "warning"
+    ],
+    "kicad_version": "10.0.8",
+    "sheets": [
+        {
+            "path": "/",
+            "uuid_path": "/f34b12ab-7a38-51aa-83c5-08118ee179c8",
+            "violations": [
+                {
+                    "description": "Label not connected",
+                    "items": [
+                        {
+                            "description": "Label 'FLSTB'",
+                            "pos": {
+                                "x": 74.93,
+                                "y": 218.44
+                            },
+                            "uuid": "1dd63661-b629-479b-a89a-21121d5900c1"
+                        }
+                    ],
+                    "severity": "error",
+                    "type": "label_dangling"
+                },
+                {
+                    "description": "Label not connected",
+                    "items": [
+                        {
+                            "description": "Label 'FLSDATA'",
+                            "pos": {
+                                "x": 74.93,
+                                "y": 220.98
+                            },
+                            "uuid": "99e23144-db45-4e1d-8e4c-583ff1a28513"
+                        }
+                    ],
+                    "severity": "error",
+                    "type": "label_dangling"
+                },
+                {
+                    "description": "Label not connected",
+                    "items": [
+                        {
+                            "description": "Label 'FLSCLK'",
+                            "pos": {
+                                "x": 74.93,
+                                "y": 223.52
+                            },
+                            "uuid": "029d056b-4794-4f93-8bc3-7e8ec99ffbae"
+                        }
+                    ],
+                    "severity": "error",
+                    "type": "label_dangling"
+                },
+                {
+                    "description": "Pin not connected",
+                    "items": [
+                        {
+                            "description": "Symbol U4 Pin 6 [Tri-state, Line]",
+                            "pos": {
+                                "x": 82.55,
+                                "y": 210.82
+                            },
+                            "uuid": "08c5ebc6-b1f2-4d30-a0c9-fc9eb6b06741"
+                        }
+                    ],
+                    "severity": "error",
+                    "type": "pin_not_connected"
+                },
+                {
+                    "description": "Pin not connected",
+                    "items": [
+                        {
+                            "description": "Symbol U7 Pin 8 [Tri-state, Line]",
+                            "pos": {
+                                "x": 83.82,
+                                "y": 57.15
+                            },
+                            "uuid": "7b6590f1-4024-499c-873b-defc7a2a1add"
+                        }
+                    ],
+                    "severity": "error",
+                    "type": "pin_not_connected"
+                },
+                {
+                    "description": "Pin not connected",
+                    "items": [
+                        {
+                            "description": "Symbol U3 Pin 6 [Tri-state, Line]",
+                            "pos": {
+                                "x": 116.84,
+                                "y": 190.5
+                            },
+                            "uuid": "2f528f80-d83a-45bb-a37b-9291125fb036"
+                        }
+                    ],
+                    "severity": "error",
+                    "type": "pin_not_connected"
+                },
+                {
+                    "description": "Pin not connected",
+                    "items": [
+                        {
+                            "description": "Symbol U6-AUDIO1 Pin J1.1 [3V3, Power output, Line]",
+                            "pos": {
+                                "x": 158.75,
+                                "y": 54.61
+                            },
+                            "uuid": "e143f6de-1b9c-4baa-91ae-668e73305714"
+                        }
+                    ],
+                    "severity": "error",
+                    "type": "pin_not_connected"
+                },
+                {
+                    "description": "Pin not connected",
+                    "items": [
+                        {
+                            "description": "Symbol U6-AUDIO1 Pin J1.2 [3V3, Power output, Line]",
+                            "pos": {
+                                "x": 158.75,
+                                "y": 57.15
+                            },
+                            "uuid": "3ab58e70-3af7-43b8-b33b-5335827c30f9"
+                        }
+                    ],
+                    "severity": "error",
+                    "type": "pin_not_connected"
+                },
+                {
+                    "description": "Pin not connected",
+                    "items": [
+                        {
+                            "description": "Symbol U6-AUDIO1 Pin J1.3 [EN, Input, Line]",
+                            "pos": {
+                                "x": 158.75,
+                                "y": 59.69
+                            },
+                            "uuid": "1b2199e2-f737-4f8b-983b-e3b896dfb37a"
+                        }
+                    ],
+                    "severity": "error",
+                    "type": "pin_not_connected"
+                },
+                {
+                    "description": "Input pin not driven by any Output pins",
+                    "items": [
+                        {
+                            "description": "Symbol U6-AUDIO1 Pin J1.3 [EN, Input, Line]",
+                            "pos": {
+                                "x": 158.75,
+                                "y": 59.69
+                            },
+                            "uuid": "1b2199e2-f737-4f8b-983b-e3b896dfb37a"
+                        }
+                    ],
+                    "severity": "error",
+                    "type": "pin_not_driven"
+                },
+                {
+                    "description": "Pin not connected",
+                    "items": [
+                        {
+                            "description": "Symbol U6-AUDIO1 Pin J1.8 [IO15, Bidirectional, Line]",
+                            "pos": {
+                                "x": 158.75,
+                                "y": 72.39
+                            },
+                            "uuid": "0f620d14-5601-44cc-be8b-27ba2e4e079c"
+                        }
+                    ],
+                    "severity": "error",
+                    "type": "pin_not_connected"
+                },
+                {
+                    "description": "Pin not connected",
+                    "items": [
+                        {
+                            "description": "Symbol U6-AUDIO1 Pin J1.9 [IO16, Bidirectional, Line]",
+                            "pos": {
+                                "x": 158.75,
+                                "y": 74.93
+                            },
+                            "uuid": "0cdc3a98-e975-4225-905e-458cf2b62355"
+                        }
+                    ],
+                    "severity": "error",
+                    "type": "pin_not_connected"
+                },
+                {
+                    "description": "Pin not connected",
+                    "items": [
+                        {
+                            "description": "Symbol U6-AUDIO1 Pin J1.10 [IO17, Bidirectional, Line]",
+                            "pos": {
+                                "x": 158.75,
+                                "y": 77.47
+                            },
+                            "uuid": "c52e9dad-6f00-47bb-94e9-d920b76cc906"
+                        }
+                    ],
+                    "severity": "error",
+                    "type": "pin_not_connected"
+                },
+                {
+                    "description": "Pin not connected",
+                    "items": [
+                        {
+                            "description": "Symbol U6-AUDIO1 Pin J1.11 [IO18, Bidirectional, Line]",
+                            "pos": {
+                                "x": 158.75,
+                                "y": 80.01
+                            },
+                            "uuid": "4a341917-2e84-45d8-8048-d3a8a81b81ca"
+                        }
+                    ],
+                    "severity": "error",
+                    "type": "pin_not_connected"
+                },
+                {
+                    "description": "Pin not connected",
+                    "items": [
+                        {
+                            "description": "Symbol U6-AUDIO1 Pin J1.13 [IO3, Bidirectional, Line]",
+                            "pos": {
+                                "x": 158.75,
+                                "y": 85.09
+                            },
+                            "uuid": "729959e3-7e41-4255-971f-cc4109930174"
+                        }
+                    ],
+                    "severity": "error",
+                    "type": "pin_not_connected"
+                },
+                {
+                    "description": "Pin not connected",
+                    "items": [
+                        {
+                            "description": "Symbol U6-AUDIO1 Pin J1.14 [IO46, Bidirectional, Line]",
+                            "pos": {
+                                "x": 158.75,
+                                "y": 87.63
+                            },
+                            "uuid": "2132b4ba-70f9-4af7-90ba-14ca021288c6"
+                        }
+                    ],
+                    "severity": "error",
+                    "type": "pin_not_connected"
+                },
+                {
+                    "description": "Pin not connected",
+                    "items": [
+                        {
+                            "description": "Symbol U6-AUDIO1 Pin J1.16 [IO10, Bidirectional, Line]",
+                            "pos": {
+                                "x": 158.75,
+                                "y": 92.71
+                            },
+                            "uuid": "ef6792a1-4090-48f7-a558-85c5f07ecaee"
+                        }
+                    ],
+                    "severity": "error",
+                    "type": "pin_not_connected"
+                },
+                {
+                    "description": "Pin not connected",
+                    "items": [
+                        {
+                            "description": "Symbol U6-AUDIO1 Pin J1.4 [IO4, Bidirectional, Line]",
+                            "pos": {
+                                "x": 158.75,
+                                "y": 95.25
+                            },
+                            "uuid": "dfecd7ef-4db9-4668-bbd4-f8f00d82ec43"
+                        }
+                    ],
+                    "severity": "error",
+                    "type": "pin_not_connected"
+                },
+                {
+                    "description": "Pin not connected",
+                    "items": [
+                        {
+                            "description": "Symbol U6-AUDIO1 Pin J1.5 [IO5, Bidirectional, Line]",
+                            "pos": {
+                                "x": 158.75,
+                                "y": 97.79
+                            },
+                            "uuid": "6cf6e3d4-75c3-40a5-8949-cb4c17b3bd16"
+                        }
+                    ],
+                    "severity": "error",
+                    "type": "pin_not_connected"
+                },
+                {
+                    "description": "Pin not connected",
+                    "items": [
+                        {
+                            "description": "Symbol U6-AUDIO1 Pin J1.6 [IO6, Bidirectional, Line]",
+                            "pos": {
+                                "x": 158.75,
+                                "y": 100.33
+                            },
+                            "uuid": "03e7a3e5-76b9-4158-a99b-21bb4ad8d072"
+                        }
+                    ],
+                    "severity": "error",
+                    "type": "pin_not_connected"
+                },
+                {
+                    "description": "Pin not connected",
+                    "items": [
+                        {
+                            "description": "Symbol U6-AUDIO1 Pin J1.7 [IO7, Bidirectional, Line]",
+                            "pos": {
+                                "x": 158.75,
+                                "y": 102.87
+                            },
+                            "uuid": "bc8f33a0-b417-46ee-a192-b6da10e54093"
+                        }
+                    ],
+                    "severity": "error",
+                    "type": "pin_not_connected"
+                },
+                {
+                    "description": "Input Power pin not driven by any Output Power pins",
+                    "items": [
+                        {
+                            "description": "Symbol U6-AUDIO1 Pin J1.21 [5V, Power input, Line]",
+                            "pos": {
+                                "x": 158.75,
+                                "y": 105.41
+                            },
+                            "uuid": "fd5dc03c-e357-44e3-b624-f0d09fa1ca21"
+                        }
+                    ],
+                    "severity": "error",
+                    "type": "power_pin_not_driven"
+                },
+                {
+                    "description": "Pin not connected",
+                    "items": [
+                        {
+                            "description": "Symbol U1-CONTROLLER1 Pin J1.2 [3V3, Power output, Line]",
+                            "pos": {
+                                "x": 160.02,
+                                "y": 167.64
+                            },
+                            "uuid": "3364b5dc-b45d-560c-aefd-2e011effd24b"
+                        }
+                    ],
+                    "severity": "error",
+                    "type": "pin_not_connected"
+                },
+                {
+                    "description": "Pin not connected",
+                    "items": [
+                        {
+                            "description": "Symbol U1-CONTROLLER1 Pin J1.3 [EN, Input, Line]",
+                            "pos": {
+                                "x": 160.02,
+                                "y": 170.18
+                            },
+                            "uuid": "950efdc1-6f7b-5ae8-9df4-550ef4579c54"
+                        }
+                    ],
+                    "severity": "error",
+                    "type": "pin_not_connected"
+                },
+                {
+                    "description": "Input pin not driven by any Output pins",
+                    "items": [
+                        {
+                            "description": "Symbol U1-CONTROLLER1 Pin J1.3 [EN, Input, Line]",
+                            "pos": {
+                                "x": 160.02,
+                                "y": 170.18
+                            },
+                            "uuid": "950efdc1-6f7b-5ae8-9df4-550ef4579c54"
+                        }
+                    ],
+                    "severity": "error",
+                    "type": "pin_not_driven"
+                },
+                {
+                    "description": "Pin not connected",
+                    "items": [
+                        {
+                            "description": "Symbol U1-CONTROLLER1 Pin J1.14 [IO46, Bidirectional, Line]",
+                            "pos": {
+                                "x": 160.02,
+                                "y": 198.12
+                            },
+                            "uuid": "619f2e11-b347-528f-9c73-cfa49f2bac81"
+                        }
+                    ],
+                    "severity": "error",
+                    "type": "pin_not_connected"
+                },
+                {
+                    "description": "Pin not connected",
+                    "items": [
+                        {
+                            "description": "Symbol U1-CONTROLLER1 Pin J1.10 [IO17, Bidirectional, Line]",
+                            "pos": {
+                                "x": 160.02,
+                                "y": 200.66
+                            },
+                            "uuid": "a3e0d399-28d1-5f65-a7de-46471e128ffb"
+                        }
+                    ],
+                    "severity": "error",
+                    "type": "pin_not_connected"
+                },
+                {
+                    "description": "Pin not connected",
+                    "items": [
+                        {
+                            "description": "Symbol U1-CONTROLLER1 Pin J1.13 [IO3, Bidirectional, Line]",
+                            "pos": {
+                                "x": 160.02,
+                                "y": 213.36
+                            },
+                            "uuid": "3ff11cb5-d62b-5616-8ed0-d7c624e504ea"
+                        }
+                    ],
+                    "severity": "error",
+                    "type": "pin_not_connected"
+                },
+                {
+                    "description": "Input Power pin not driven by any Output Power pins",
+                    "items": [
+                        {
+                            "description": "Symbol U1-CONTROLLER1 Pin J1.21 [5V, Power input, Line]",
+                            "pos": {
+                                "x": 160.02,
+                                "y": 215.9
+                            },
+                            "uuid": "ce116884-921f-5c74-a01d-b7835aad16c4"
+                        }
+                    ],
+                    "severity": "error",
+                    "type": "power_pin_not_driven"
+                },
+                {
+                    "description": "Pin not connected",
+                    "items": [
+                        {
+                            "description": "Symbol U6-AUDIO1 Pin J1.12 [IO8, Bidirectional, Line]",
+                            "pos": {
+                                "x": 214.63,
+                                "y": 72.39
+                            },
+                            "uuid": "eeebb753-0a2d-4339-b940-d7821d0377af"
+                        }
+                    ],
+                    "severity": "error",
+                    "type": "pin_not_connected"
+                },
+                {
+                    "description": "Pin not connected",
+                    "items": [
+                        {
+                            "description": "Symbol U6-AUDIO1 Pin J3.9 [IO39, Bidirectional, Line]",
+                            "pos": {
+                                "x": 214.63,
+                                "y": 74.93
+                            },
+                            "uuid": "d381cc5e-b804-483d-8e93-504231b8cb6c"
+                        }
+                    ],
+                    "severity": "error",
+                    "type": "pin_not_connected"
+                },
+                {
+                    "description": "Pin not connected",
+                    "items": [
+                        {
+                            "description": "Symbol U6-AUDIO1 Pin J3.10 [IO38, Bidirectional, Line]",
+                            "pos": {
+                                "x": 214.63,
+                                "y": 77.47
+                            },
+                            "uuid": "d48b19ea-6d65-4475-9511-81c023512eaf"
+                        }
+                    ],
+                    "severity": "error",
+                    "type": "pin_not_connected"
+                },
+                {
+                    "description": "Pin not connected",
+                    "items": [
+                        {
+                            "description": "Symbol U6-AUDIO1 Pin J3.14 [IO0, Bidirectional, Line]",
+                            "pos": {
+                                "x": 214.63,
+                                "y": 87.63
+                            },
+                            "uuid": "e0375aa3-5440-41d1-97fb-6f88935534ff"
+                        }
+                    ],
+                    "severity": "error",
+                    "type": "pin_not_connected"
+                },
+                {
+                    "description": "Pin not connected",
+                    "items": [
+                        {
+                            "description": "Symbol U6-AUDIO1 Pin J3.15 [IO45, Bidirectional, Line]",
+                            "pos": {
+                                "x": 214.63,
+                                "y": 90.17
+                            },
+                            "uuid": "257feec9-d4e6-4504-ba87-5644c81d8b97"
+                        }
+                    ],
+                    "severity": "error",
+                    "type": "pin_not_connected"
+                },
+                {
+                    "description": "Pin not connected",
+                    "items": [
+                        {
+                            "description": "Symbol U6-AUDIO1 Pin J3.16 [IO48, Bidirectional, Line]",
+                            "pos": {
+                                "x": 214.63,
+                                "y": 92.71
+                            },
+                            "uuid": "1955cb39-85d5-434c-a974-c8005f075ab7"
+                        }
+                    ],
+                    "severity": "error",
+                    "type": "pin_not_connected"
+                },
+                {
+                    "description": "Pin not connected",
+                    "items": [
+                        {
+                            "description": "Symbol U6-AUDIO1 Pin J3.2 [TX_IO43, Bidirectional, Line]",
+                            "pos": {
+                                "x": 214.63,
+                                "y": 95.25
+                            },
+                            "uuid": "ebb654df-6d46-49d9-b1a5-dea34a8dc856"
+                        }
+                    ],
+                    "severity": "error",
+                    "type": "pin_not_connected"
+                },
+                {
+                    "description": "Pin not connected",
+                    "items": [
+                        {
+                            "description": "Symbol U6-AUDIO1 Pin J3.3 [RX_IO44, Bidirectional, Line]",
+                            "pos": {
+                                "x": 214.63,
+                                "y": 97.79
+                            },
+                            "uuid": "06ec683a-4315-4d60-b7e7-9fea038f518a"
+                        }
+                    ],
+                    "severity": "error",
+                    "type": "pin_not_connected"
+                },
+                {
+                    "description": "Pin not connected",
+                    "items": [
+                        {
+                            "description": "Symbol U6-AUDIO1 Pin J3.19 [IO20_USB_D+, Bidirectional, Line]",
+                            "pos": {
+                                "x": 214.63,
+                                "y": 100.33
+                            },
+                            "uuid": "960448e3-59b6-4483-be3f-8437de7a93af"
+                        }
+                    ],
+                    "severity": "error",
+                    "type": "pin_not_connected"
+                },
+                {
+                    "description": "Pin not connected",
+                    "items": [
+                        {
+                            "description": "Symbol U6-AUDIO1 Pin J3.20 [IO19_USB_D-, Bidirectional, Line]",
+                            "pos": {
+                                "x": 214.63,
+                                "y": 102.87
+                            },
+                            "uuid": "db5dc25d-d78f-4564-9041-5f45186cbfe6"
+                        }
+                    ],
+                    "severity": "error",
+                    "type": "pin_not_connected"
+                },
+                {
+                    "description": "Pin not connected",
+                    "items": [
+                        {
+                            "description": "Symbol U6-AUDIO1 Pin J3.21 [GND, Power input, Line]",
+                            "pos": {
+                                "x": 214.63,
+                                "y": 105.41
+                            },
+                            "uuid": "b5d2d318-9bb2-492e-9533-d961a3537396"
+                        }
+                    ],
+                    "severity": "error",
+                    "type": "pin_not_connected"
+                },
+                {
+                    "description": "Input Power pin not driven by any Output Power pins",
+                    "items": [
+                        {
+                            "description": "Symbol U6-AUDIO1 Pin J3.21 [GND, Power input, Line]",
+                            "pos": {
+                                "x": 214.63,
+                                "y": 105.41
+                            },
+                            "uuid": "b5d2d318-9bb2-492e-9533-d961a3537396"
+                        }
+                    ],
+                    "severity": "error",
+                    "type": "power_pin_not_driven"
+                },
+                {
+                    "description": "Pin not connected",
+                    "items": [
+                        {
+                            "description": "Symbol U6-AUDIO1 Pin J3.22 [GND, Power input, Line]",
+                            "pos": {
+                                "x": 214.63,
+                                "y": 107.95
+                            },
+                            "uuid": "9f2a10a9-9c87-4dd2-804b-8c94e9d3efef"
+                        }
+                    ],
+                    "severity": "error",
+                    "type": "pin_not_connected"
+                },
+                {
+                    "description": "Input Power pin not driven by any Output Power pins",
+                    "items": [
+                        {
+                            "description": "Symbol U6-AUDIO1 Pin J3.22 [GND, Power input, Line]",
+                            "pos": {
+                                "x": 214.63,
+                                "y": 107.95
+                            },
+                            "uuid": "9f2a10a9-9c87-4dd2-804b-8c94e9d3efef"
+                        }
+                    ],
+                    "severity": "error",
+                    "type": "power_pin_not_driven"
+                },
+                {
+                    "description": "Input Power pin not driven by any Output Power pins",
+                    "items": [
+                        {
+                            "description": "Symbol U1-CONTROLLER1 Pin J3.1 [GND, Power input, Line]",
+                            "pos": {
+                                "x": 215.9,
+                                "y": 165.1
+                            },
+                            "uuid": "6a309067-631e-5cc9-91d1-24957c0adce8"
+                        }
+                    ],
+                    "severity": "error",
+                    "type": "power_pin_not_driven"
+                },
+                {
+                    "description": "Pin not connected",
+                    "items": [
+                        {
+                            "description": "Symbol U1-CONTROLLER1 Pin J3.2 [TX_IO43, Bidirectional, Line]",
+                            "pos": {
+                                "x": 215.9,
+                                "y": 185.42
+                            },
+                            "uuid": "2e1f5ce0-8366-54fe-be56-ecf77a91167e"
+                        }
+                    ],
+                    "severity": "error",
+                    "type": "pin_not_connected"
+                },
+                {
+                    "description": "Pin not connected",
+                    "items": [
+                        {
+                            "description": "Symbol U1-CONTROLLER1 Pin J3.10 [IO38, Bidirectional, Line]",
+                            "pos": {
+                                "x": 215.9,
+                                "y": 187.96
+                            },
+                            "uuid": "6a4d0f1e-3ddf-5d5a-a6a8-981e30de7c42"
+                        }
+                    ],
+                    "severity": "error",
+                    "type": "pin_not_connected"
+                },
+                {
+                    "description": "Pin not connected",
+                    "items": [
+                        {
+                            "description": "Symbol U1-CONTROLLER1 Pin J3.14 [IO0, Bidirectional, Line]",
+                            "pos": {
+                                "x": 215.9,
+                                "y": 198.12
+                            },
+                            "uuid": "0ca1dd65-dfcc-5504-a38e-5b476ce51876"
+                        }
+                    ],
+                    "severity": "error",
+                    "type": "pin_not_connected"
+                },
+                {
+                    "description": "Pin not connected",
+                    "items": [
+                        {
+                            "description": "Symbol U1-CONTROLLER1 Pin J3.15 [IO45, Bidirectional, Line]",
+                            "pos": {
+                                "x": 215.9,
+                                "y": 200.66
+                            },
+                            "uuid": "9c505a6d-8280-5a72-a583-c652e052aa20"
+                        }
+                    ],
+                    "severity": "error",
+                    "type": "pin_not_connected"
+                },
+                {
+                    "description": "Pin not connected",
+                    "items": [
+                        {
+                            "description": "Symbol U1-CONTROLLER1 Pin J3.16 [IO48, Bidirectional, Line]",
+                            "pos": {
+                                "x": 215.9,
+                                "y": 203.2
+                            },
+                            "uuid": "6b5764b0-ec32-5d6c-9411-20c469f1e8a2"
+                        }
+                    ],
+                    "severity": "error",
+                    "type": "pin_not_connected"
+                },
+                {
+                    "description": "Pin not connected",
+                    "items": [
+                        {
+                            "description": "Symbol U1-CONTROLLER1 Pin J3.3 [RX_IO44, Bidirectional, Line]",
+                            "pos": {
+                                "x": 215.9,
+                                "y": 205.74
+                            },
+                            "uuid": "e1325889-3b26-54cb-924d-59e8b71361a6"
+                        }
+                    ],
+                    "severity": "error",
+                    "type": "pin_not_connected"
+                },
+                {
+                    "description": "Pin not connected",
+                    "items": [
+                        {
+                            "description": "Symbol U1-CONTROLLER1 Pin J3.7 [IO41, Bidirectional, Line]",
+                            "pos": {
+                                "x": 215.9,
+                                "y": 208.28
+                            },
+                            "uuid": "560a785b-5194-5367-bc2c-f1c05d3794ff"
+                        }
+                    ],
+                    "severity": "error",
+                    "type": "pin_not_connected"
+                },
+                {
+                    "description": "Pin not connected",
+                    "items": [
+                        {
+                            "description": "Symbol U1-CONTROLLER1 Pin J3.19 [IO20_USB_D+, Bidirectional, Line]",
+                            "pos": {
+                                "x": 215.9,
+                                "y": 210.82
+                            },
+                            "uuid": "1db01b27-904c-5143-8376-c2fc4019879a"
+                        }
+                    ],
+                    "severity": "error",
+                    "type": "pin_not_connected"
+                },
+                {
+                    "description": "Pin not connected",
+                    "items": [
+                        {
+                            "description": "Symbol U1-CONTROLLER1 Pin J3.20 [IO19_USB_D-, Bidirectional, Line]",
+                            "pos": {
+                                "x": 215.9,
+                                "y": 213.36
+                            },
+                            "uuid": "88fdf302-e7f6-5eb2-bdd6-72f625ca7ea4"
+                        }
+                    ],
+                    "severity": "error",
+                    "type": "pin_not_connected"
+                },
+                {
+                    "description": "Pin not connected",
+                    "items": [
+                        {
+                            "description": "Symbol U1-CONTROLLER1 Pin J3.21 [GND, Power input, Line]",
+                            "pos": {
+                                "x": 215.9,
+                                "y": 215.9
+                            },
+                            "uuid": "024dc926-7884-5aaf-b5be-59ffaddfc8ef"
+                        }
+                    ],
+                    "severity": "error",
+                    "type": "pin_not_connected"
+                },
+                {
+                    "description": "Input Power pin not driven by any Output Power pins",
+                    "items": [
+                        {
+                            "description": "Symbol U1-CONTROLLER1 Pin J3.21 [GND, Power input, Line]",
+                            "pos": {
+                                "x": 215.9,
+                                "y": 215.9
+                            },
+                            "uuid": "024dc926-7884-5aaf-b5be-59ffaddfc8ef"
+                        }
+                    ],
+                    "severity": "error",
+                    "type": "power_pin_not_driven"
+                },
+                {
+                    "description": "Pin not connected",
+                    "items": [
+                        {
+                            "description": "Symbol U1-CONTROLLER1 Pin J3.22 [GND, Power input, Line]",
+                            "pos": {
+                                "x": 215.9,
+                                "y": 218.44
+                            },
+                            "uuid": "2bc1aa2e-3471-5d96-99b3-371db4b9533e"
+                        }
+                    ],
+                    "severity": "error",
+                    "type": "pin_not_connected"
+                },
+                {
+                    "description": "Input Power pin not driven by any Output Power pins",
+                    "items": [
+                        {
+                            "description": "Symbol U1-CONTROLLER1 Pin J3.22 [GND, Power input, Line]",
+                            "pos": {
+                                "x": 215.9,
+                                "y": 218.44
+                            },
+                            "uuid": "2bc1aa2e-3471-5d96-99b3-371db4b9533e"
+                        }
+                    ],
+                    "severity": "error",
+                    "type": "power_pin_not_driven"
+                },
+                {
+                    "description": "Input Power pin not driven by any Output Power pins",
+                    "items": [
+                        {
+                            "description": "Symbol #PWR01 Pin 1 [Power input, Line]",
+                            "pos": {
+                                "x": 278.13,
+                                "y": 255.27
+                            },
+                            "uuid": "e94e5b17-b389-41d1-ab70-0a06e54e3ad1"
+                        }
+                    ],
+                    "severity": "error",
+                    "type": "power_pin_not_driven"
+                },
+                {
+                    "description": "Pin not connected",
+                    "items": [
+                        {
+                            "description": "Symbol U5 Pin JP4.2 [3Vo, Power output, Line]",
+                            "pos": {
+                                "x": 283.21,
+                                "y": 217.17
+                            },
+                            "uuid": "1042897c-0bf2-574a-97cd-d16da54f6fb4"
+                        }
+                    ],
+                    "severity": "error",
+                    "type": "pin_not_connected"
+                },
+                {
+                    "description": "Pin not connected",
+                    "items": [
+                        {
+                            "description": "Symbol U2 Pin 6 [Tri-state, Line]",
+                            "pos": {
+                                "x": 308.61,
+                                "y": 189.23
+                            },
+                            "uuid": "028721ce-511b-5038-b8c6-f79773a176c8"
+                        }
+                    ],
+                    "severity": "error",
+                    "type": "pin_not_connected"
+                },
+                {
+                    "description": "Input Power pin not driven by any Output Power pins",
+                    "items": [
+                        {
+                            "description": "Symbol U2 Pin 14 [VCC, Power input, Line]",
+                            "pos": {
+                                "x": 336.55,
+                                "y": 167.64
+                            },
+                            "uuid": "9f6c32c1-130d-52b5-91f6-5f5a32dc43e6"
+                        }
+                    ],
+                    "severity": "error",
+                    "type": "power_pin_not_driven"
+                }
+            ]
+        },
+        {
+            "path": "/Sony power interlock/",
+            "uuid_path": "/f34b12ab-7a38-51aa-83c5-08118ee179c8/55e31ced-cf75-50f1-83ff-24354f1944ad",
+            "violations": [
+                {
+                    "description": "Input Power pin not driven by any Output Power pins",
+                    "items": [
+                        {
+                            "description": "Symbol U10 Pin 2 [VDD_SONY, Power input, Line]",
+                            "pos": {
+                                "x": 50.8,
+                                "y": 165.1
+                            },
+                            "uuid": "a64b010e-6b68-57d8-85bf-fdcfdd7595bc"
+                        }
+                    ],
+                    "severity": "error",
+                    "type": "power_pin_not_driven"
+                },
+                {
+                    "description": "Local and global labels have same name",
+                    "items": [
+                        {
+                            "description": "Global Label 'GND'",
+                            "pos": {
+                                "x": 350.52,
+                                "y": 156.21
+                            },
+                            "uuid": "0a025d35-aca9-538e-9c9b-1788b8d4bb5d"
+                        },
+                        {
+                            "description": "Label 'GND'",
+                            "pos": {
+                                "x": 346.71,
+                                "y": 208.28
+                            },
+                            "uuid": "9a2b7ffd-c1b7-43ee-9ec8-a464a2b7704e"
+                        }
+                    ],
+                    "severity": "warning",
+                    "type": "same_local_global_label"
+                }
+            ]
+        }
+    ],
+    "source": "DAR-1000ES-v2.kicad_sch"
+}

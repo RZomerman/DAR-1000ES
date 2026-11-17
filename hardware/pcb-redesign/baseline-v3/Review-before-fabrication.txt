@@ -1,0 +1,55 @@
+DAR-1000ES v3 - bottom routing and ESP power capacitors
+
+Construction confirmed: bottom-layer tracks with normal PLATED through-hole
+pads. Copper annular rings on both faces are intentional. This is NOT a
+non-plated Sony phenolic-board fabrication file.
+
+All routed copper must be B.Cu. No top-side tracks or routing vias are
+permitted. Component-side insulated wire links are real assembly parts,
+not copper tracks; install every link in Wire-links-v3.txt. A link with
+more than two terminals joins ALL of its listed holes with insulated
+wire; insulate any off-board wire junction. The assembly PDF shows the
+links. The drawn bends are an assembly guide, not copper.
+
+Wire links are board-only same-net routing components, like physical bus
+links, using KiCad 10's explicit internal-jumper connectivity property.
+They do not change the logical schematic. Do not remove them as spares.
+Use KiCad 10 or later and retain the supplied project footprint library.
+
+Keep insulated wire clear of component bodies, socket insertion paths,
+antenna regions and enclosure hardware. Fit any links that would become
+inaccessible before installing sockets/components. Check actual assembly
+clearances; a copper DRC cannot validate three-dimensional wire placement.
+
+Five capacitors have been added:
+C9: 470uF 16V, Panasonic EEU-FR1C471, across LOCAL_5V/GND at the input.
+    Body diameter 8 mm, body length 11.5 mm, lead pitch 3.5 mm.
+C10/C12: 100uF 16V, Panasonic EEU-FR1C101, one per ESP after its
+         power jumper. Body diameter 5 mm, length 11 mm, pitch 2 mm.
+C11/C13: 100nF ceramic, one per ESP after its power jumper.
+         Match the existing D5 mm, W2.5 mm, 5 mm lead-pitch envelope.
+Electrolytic pad 1 is POSITIVE; pad 2 is NEGATIVE/GND. Check actual seated
+height including tolerances against the enclosure.
+
+C10/C11 connect to ESP_CTRL_5V (JP1 output), C12/C13 to ESP_AUDIO_5V
+(JP2 output). Opening a power jumper isolates its ESP capacitors from
+LOCAL_5V. No new capacitor connects local 5 V to Sony's separate supply.
+These are decoupling/reservoir capacitors, not regulators or supply ORing.
+The added capacitance increases startup/hot-plug inrush. Check the supply,
+current limiting and dev-board USB/external-power paths before use.
+
+GPIO assignments and original component placements are retained from v2.
+All five buffer ENABLE requests remain ACTIVE HIGH, qualified by Sony
+power in hardware. Initialize requests LOW; leave LOW during reset.
+J12 remains sense-only: pin 1 common GND, pin 2 Sony 5 V.
+
+The original v2 schematic issues remain for deliberate electrical review:
+undriven abstract dev-board power/EN pins, pins without explicit
+connections/no-connect marks, and dangling FLSTB/FLSDATA/FLSCLK labels.
+Their intended J4 mapping was not invented or silently reassigned.
+
+Review-before-fabrication is still required: actual connector pinouts,
+passive values (including original generic-value capacitors), supply
+sequencing, off-state back-powering/leakage, brownout behavior, RF antenna
+clearances, fast-signal return paths and enclosure fit. This revision
+has not been bench tested. A clean PCB DRC is not an electrical sign-off.

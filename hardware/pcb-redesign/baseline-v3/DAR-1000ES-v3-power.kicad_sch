@@ -1,0 +1,488 @@
+(kicad_sch
+	(version 20260306)
+	(generator "eeschema")
+	(generator_version "10.0")
+	(uuid "42a98c05-b669-585e-8d49-93d2bcf7ad08")
+	(paper "A4")
+	(title_block (title "DAR-1000ES v3 - local 5 V and ESP decoupling"))
+	(lib_symbols
+		(symbol
+			"Device:C_Polarized"
+			(pin_numbers (hide yes))
+			(pin_names (offset 0.254))
+			(exclude_from_sim no)
+			(in_bom yes)
+			(on_board yes)
+			(in_pos_files yes)
+			(duplicate_pin_numbers_are_jumpers no)
+			(property
+				"Reference"
+				"C"
+				(at 0.635 2.54 0)
+				(show_name no)
+				(do_not_autoplace no)
+				(effects (font (size 1.27 1.27)) (justify left))
+			)
+			(property
+				"Value"
+				"C_Polarized"
+				(at 0.635 -2.54 0)
+				(show_name no)
+				(do_not_autoplace no)
+				(effects (font (size 1.27 1.27)) (justify left))
+			)
+			(property
+				"Footprint"
+				""
+				(at 0.9652 -3.81 0)
+				(show_name no)
+				(do_not_autoplace no)
+				(hide yes)
+				(effects (font (size 1.27 1.27)))
+			)
+			(property
+				"Datasheet"
+				""
+				(at 0 0 0)
+				(show_name no)
+				(do_not_autoplace no)
+				(hide yes)
+				(effects (font (size 1.27 1.27)))
+			)
+			(property
+				"Description"
+				"Polarized capacitor"
+				(at 0 0 0)
+				(show_name no)
+				(do_not_autoplace no)
+				(hide yes)
+				(effects (font (size 1.27 1.27)))
+			)
+			(property
+				"ki_keywords"
+				"cap capacitor"
+				(at 0 0 0)
+				(show_name no)
+				(do_not_autoplace no)
+				(hide yes)
+				(effects (font (size 1.27 1.27)))
+			)
+			(property
+				"ki_fp_filters"
+				"CP_*"
+				(at 0 0 0)
+				(show_name no)
+				(do_not_autoplace no)
+				(hide yes)
+				(effects (font (size 1.27 1.27)))
+			)
+			(symbol
+				"C_Polarized_0_1"
+				(rectangle (start -2.286 0.508) (end 2.286 1.016) (stroke (width 0) (type default)) (fill (type none)))
+				(polyline (pts (xy -1.778 2.286) (xy -0.762 2.286)) (stroke (width 0) (type default)) (fill (type none)))
+				(polyline (pts (xy -1.27 2.794) (xy -1.27 1.778)) (stroke (width 0) (type default)) (fill (type none)))
+				(rectangle (start 2.286 -0.508) (end -2.286 -1.016) (stroke (width 0) (type default)) (fill (type outline)))
+			)
+			(symbol
+				"C_Polarized_1_1"
+				(pin
+					passive
+					line
+					(at 0 3.81 270)
+					(length 2.794)
+					(name "" (effects (font (size 1.27 1.27))))
+					(number "1" (effects (font (size 1.27 1.27))))
+				)
+				(pin
+					passive
+					line
+					(at 0 -3.81 90)
+					(length 2.794)
+					(name "" (effects (font (size 1.27 1.27))))
+					(number "2" (effects (font (size 1.27 1.27))))
+				)
+			)
+			(embedded_fonts no)
+		)
+		(symbol
+			"Device:C"
+			(pin_numbers (hide yes))
+			(pin_names (offset 0.254))
+			(exclude_from_sim no)
+			(in_bom yes)
+			(on_board yes)
+			(in_pos_files yes)
+			(duplicate_pin_numbers_are_jumpers no)
+			(property
+				"Reference"
+				"C"
+				(at 0.635 2.54 0)
+				(show_name no)
+				(do_not_autoplace no)
+				(effects (font (size 1.27 1.27)) (justify left))
+			)
+			(property
+				"Value"
+				"C"
+				(at 0.635 -2.54 0)
+				(show_name no)
+				(do_not_autoplace no)
+				(effects (font (size 1.27 1.27)) (justify left))
+			)
+			(property
+				"Footprint"
+				""
+				(at 0.9652 -3.81 0)
+				(show_name no)
+				(do_not_autoplace no)
+				(hide yes)
+				(effects (font (size 1.27 1.27)))
+			)
+			(property
+				"Datasheet"
+				""
+				(at 0 0 0)
+				(show_name no)
+				(do_not_autoplace no)
+				(hide yes)
+				(effects (font (size 1.27 1.27)))
+			)
+			(property
+				"Description"
+				"Unpolarized capacitor"
+				(at 0 0 0)
+				(show_name no)
+				(do_not_autoplace no)
+				(hide yes)
+				(effects (font (size 1.27 1.27)))
+			)
+			(property
+				"ki_keywords"
+				"cap capacitor"
+				(at 0 0 0)
+				(show_name no)
+				(do_not_autoplace no)
+				(hide yes)
+				(effects (font (size 1.27 1.27)))
+			)
+			(property
+				"ki_fp_filters"
+				"C_*"
+				(at 0 0 0)
+				(show_name no)
+				(do_not_autoplace no)
+				(hide yes)
+				(effects (font (size 1.27 1.27)))
+			)
+			(symbol
+				"C_0_1"
+				(polyline (pts (xy -2.032 0.762) (xy 2.032 0.762)) (stroke (width 0.508) (type default)) (fill (type none)))
+				(polyline
+					(pts (xy -2.032 -0.762) (xy 2.032 -0.762))
+					(stroke (width 0.508) (type default))
+					(fill (type none))
+				)
+			)
+			(symbol
+				"C_1_1"
+				(pin
+					passive
+					line
+					(at 0 3.81 270)
+					(length 2.794)
+					(name "" (effects (font (size 1.27 1.27))))
+					(number "1" (effects (font (size 1.27 1.27))))
+				)
+				(pin
+					passive
+					line
+					(at 0 -3.81 90)
+					(length 2.794)
+					(name "" (effects (font (size 1.27 1.27))))
+					(number "2" (effects (font (size 1.27 1.27))))
+				)
+			)
+			(embedded_fonts no)
+		)
+	)
+	(symbol
+		(lib_id "Device:C_Polarized")
+		(at 50.8 81.28 0)
+		(unit 1)
+		(in_bom yes)
+		(on_board yes)
+		(dnp no)
+		(uuid "cc4eeaf0-e97c-5443-9d7a-aa6dd4b50c72")
+		(property "Reference" "C9" (at 58.419999999999995 80.01 0) (effects (font (size 1 1))))
+		(property "Value" "470uF 16V" (at 62.23 82.55 0) (effects (font (size 1 1))))
+		(property
+			"Footprint"
+			"DAR1000ES:Bottom_Capacitor_THT__CP_Radial_D8.0mm_P3.50mm"
+			(at 50.8 81.28 0)
+			(hide yes)
+			(effects (font (size 1 1)))
+		)
+		(property
+			"Datasheet"
+			"https://industrial.panasonic.com/ww/products/pt/aluminum-cap-lead/models/EEUFR1C471"
+			(at 50.8 81.28 0)
+			(hide yes)
+			(effects (font (size 1 1)))
+		)
+		(property "Manufacturer" "Panasonic" (at 50.8 81.28 0) (hide yes) (effects (font (size 1 1))))
+		(property "MPN" "EEU-FR1C471" (at 50.8 81.28 0) (hide yes) (effects (font (size 1 1))))
+		(pin "1" (uuid "3c1195fc-b904-5f60-aff1-09d4cb96fda1"))
+		(pin "2" (uuid "15782c6c-4135-558d-b664-e92afaf18f61"))
+		(instances
+			(project
+				"DAR-1000ES-v3"
+				(path "/f34b12ab-7a38-51aa-83c5-08118ee179c8/7ff00684-cf6b-5432-9d30-58fea8dadedd" (reference "C9") (unit 1))
+			)
+		)
+	)
+	(global_label
+		"LOCAL_5V"
+		(shape bidirectional)
+		(at 50.8 77.47 0)
+		(effects (font (size 0.8 0.8)) (justify left))
+		(uuid "b644dded-2918-5148-97b9-68654f594b7a")
+	)
+	(global_label
+		"GND"
+		(shape bidirectional)
+		(at 50.8 85.09 0)
+		(effects (font (size 0.8 0.8)) (justify left))
+		(uuid "a33be243-4978-5251-9b9d-eac0db18328e")
+	)
+	(symbol
+		(lib_id "Device:C_Polarized")
+		(at 111.76 81.28 0)
+		(unit 1)
+		(in_bom yes)
+		(on_board yes)
+		(dnp no)
+		(uuid "716fd735-0fe0-5dc0-8d8f-a161766abf2e")
+		(property "Reference" "C10" (at 119.38000000000001 80.01 0) (effects (font (size 1 1))))
+		(property "Value" "100uF 16V" (at 123.19 82.55 0) (effects (font (size 1 1))))
+		(property
+			"Footprint"
+			"DAR1000ES:Bottom_Capacitor_THT__CP_Radial_D5.0mm_P2.00mm"
+			(at 111.76 81.28 0)
+			(hide yes)
+			(effects (font (size 1 1)))
+		)
+		(property
+			"Datasheet"
+			"https://industrial.panasonic.com/ww/products/pt/aluminum-cap-lead/models/EEUFR1C101"
+			(at 111.76 81.28 0)
+			(hide yes)
+			(effects (font (size 1 1)))
+		)
+		(property "Manufacturer" "Panasonic" (at 111.76 81.28 0) (hide yes) (effects (font (size 1 1))))
+		(property "MPN" "EEU-FR1C101" (at 111.76 81.28 0) (hide yes) (effects (font (size 1 1))))
+		(pin "1" (uuid "3f4bf018-4344-5e57-afb2-c9b558bdd8d2"))
+		(pin "2" (uuid "9b5ab6ca-5aaa-5219-972f-cad74768b3a4"))
+		(instances
+			(project
+				"DAR-1000ES-v3"
+				(path
+					"/f34b12ab-7a38-51aa-83c5-08118ee179c8/7ff00684-cf6b-5432-9d30-58fea8dadedd"
+					(reference "C10")
+					(unit 1)
+				)
+			)
+		)
+	)
+	(global_label
+		"ESP_CTRL_5V"
+		(shape bidirectional)
+		(at 111.76 77.47 0)
+		(effects (font (size 0.8 0.8)) (justify left))
+		(uuid "04ae2440-ab12-5458-9d82-8a6fb593f547")
+	)
+	(global_label
+		"GND"
+		(shape bidirectional)
+		(at 111.76 85.09 0)
+		(effects (font (size 0.8 0.8)) (justify left))
+		(uuid "7858e09f-f0be-5548-9e98-999b7e26caf6")
+	)
+	(symbol
+		(lib_id "Device:C")
+		(at 111.76 132.08 0)
+		(unit 1)
+		(in_bom yes)
+		(on_board yes)
+		(dnp no)
+		(uuid "b2427661-4fd4-5dc7-b0fb-40da734c037e")
+		(property "Reference" "C11" (at 119.38000000000001 130.81 0) (effects (font (size 1 1))))
+		(property "Value" "100nF" (at 123.19 133.35000000000002 0) (effects (font (size 1 1))))
+		(property
+			"Footprint"
+			"DAR1000ES:Bottom_Capacitor_THT__C_Disc_D5.0mm_W2.5mm_P5.00mm"
+			(at 111.76 132.08 0)
+			(hide yes)
+			(effects (font (size 1 1)))
+		)
+		(property "Datasheet" "" (at 111.76 132.08 0) (hide yes) (effects (font (size 1 1))))
+		(property "Manufacturer" "" (at 111.76 132.08 0) (hide yes) (effects (font (size 1 1))))
+		(property "MPN" "" (at 111.76 132.08 0) (hide yes) (effects (font (size 1 1))))
+		(pin "1" (uuid "63baea10-ce65-597c-946c-3d70e0bcd26d"))
+		(pin "2" (uuid "4005e922-e806-59f4-8db7-41011aad7573"))
+		(instances
+			(project
+				"DAR-1000ES-v3"
+				(path
+					"/f34b12ab-7a38-51aa-83c5-08118ee179c8/7ff00684-cf6b-5432-9d30-58fea8dadedd"
+					(reference "C11")
+					(unit 1)
+				)
+			)
+		)
+	)
+	(global_label
+		"ESP_CTRL_5V"
+		(shape bidirectional)
+		(at 111.76 128.27 0)
+		(effects (font (size 0.8 0.8)) (justify left))
+		(uuid "da9e7bd7-a652-56f0-9dc3-7f430d2e0a47")
+	)
+	(global_label
+		"GND"
+		(shape bidirectional)
+		(at 111.76 135.89 0)
+		(effects (font (size 0.8 0.8)) (justify left))
+		(uuid "9c2f3b17-f5b7-5cc9-a6c9-d913e635e3f1")
+	)
+	(symbol
+		(lib_id "Device:C_Polarized")
+		(at 172.72 81.28 0)
+		(unit 1)
+		(in_bom yes)
+		(on_board yes)
+		(dnp no)
+		(uuid "ad759402-1c79-5284-8b0d-4a525966ecc5")
+		(property "Reference" "C12" (at 180.34 80.01 0) (effects (font (size 1 1))))
+		(property "Value" "100uF 16V" (at 184.15 82.55 0) (effects (font (size 1 1))))
+		(property
+			"Footprint"
+			"DAR1000ES:Bottom_Capacitor_THT__CP_Radial_D5.0mm_P2.00mm"
+			(at 172.72 81.28 0)
+			(hide yes)
+			(effects (font (size 1 1)))
+		)
+		(property
+			"Datasheet"
+			"https://industrial.panasonic.com/ww/products/pt/aluminum-cap-lead/models/EEUFR1C101"
+			(at 172.72 81.28 0)
+			(hide yes)
+			(effects (font (size 1 1)))
+		)
+		(property "Manufacturer" "Panasonic" (at 172.72 81.28 0) (hide yes) (effects (font (size 1 1))))
+		(property "MPN" "EEU-FR1C101" (at 172.72 81.28 0) (hide yes) (effects (font (size 1 1))))
+		(pin "1" (uuid "5a0e258d-707a-5e2e-82a3-eb229bbbbca9"))
+		(pin "2" (uuid "b15a7e66-4332-5598-9dff-c6ddb7d9d26d"))
+		(instances
+			(project
+				"DAR-1000ES-v3"
+				(path
+					"/f34b12ab-7a38-51aa-83c5-08118ee179c8/7ff00684-cf6b-5432-9d30-58fea8dadedd"
+					(reference "C12")
+					(unit 1)
+				)
+			)
+		)
+	)
+	(global_label
+		"ESP_AUDIO_5V"
+		(shape bidirectional)
+		(at 172.72 77.47 0)
+		(effects (font (size 0.8 0.8)) (justify left))
+		(uuid "5746039b-b2a6-5b26-9986-088c38d48a26")
+	)
+	(global_label
+		"GND"
+		(shape bidirectional)
+		(at 172.72 85.09 0)
+		(effects (font (size 0.8 0.8)) (justify left))
+		(uuid "308d7a79-3bb1-54ee-884a-247c534dedc8")
+	)
+	(symbol
+		(lib_id "Device:C")
+		(at 172.72 132.08 0)
+		(unit 1)
+		(in_bom yes)
+		(on_board yes)
+		(dnp no)
+		(uuid "932d7582-00cf-50fd-a5a7-6992e05ac7bf")
+		(property "Reference" "C13" (at 180.34 130.81 0) (effects (font (size 1 1))))
+		(property "Value" "100nF" (at 184.15 133.35000000000002 0) (effects (font (size 1 1))))
+		(property
+			"Footprint"
+			"DAR1000ES:Bottom_Capacitor_THT__C_Disc_D5.0mm_W2.5mm_P5.00mm"
+			(at 172.72 132.08 0)
+			(hide yes)
+			(effects (font (size 1 1)))
+		)
+		(property "Datasheet" "" (at 172.72 132.08 0) (hide yes) (effects (font (size 1 1))))
+		(property "Manufacturer" "" (at 172.72 132.08 0) (hide yes) (effects (font (size 1 1))))
+		(property "MPN" "" (at 172.72 132.08 0) (hide yes) (effects (font (size 1 1))))
+		(pin "1" (uuid "904192e5-be36-586b-908a-8f53a0070a78"))
+		(pin "2" (uuid "bba7544d-804c-5eb3-ba71-2e0d3741f1f5"))
+		(instances
+			(project
+				"DAR-1000ES-v3"
+				(path
+					"/f34b12ab-7a38-51aa-83c5-08118ee179c8/7ff00684-cf6b-5432-9d30-58fea8dadedd"
+					(reference "C13")
+					(unit 1)
+				)
+			)
+		)
+	)
+	(global_label
+		"ESP_AUDIO_5V"
+		(shape bidirectional)
+		(at 172.72 128.27 0)
+		(effects (font (size 0.8 0.8)) (justify left))
+		(uuid "b13db039-da0c-57c7-9152-6c11ae4ecf37")
+	)
+	(global_label
+		"GND"
+		(shape bidirectional)
+		(at 172.72 135.89 0)
+		(effects (font (size 0.8 0.8)) (justify left))
+		(uuid "81eb6fbc-25c5-5ee0-bf2d-74743076a285")
+	)
+	(text
+		"C9: local 5 V input reservoir. C10/C11: controller ESP. C12/C13: audio ESP."
+		(at 25.4 25.4 0)
+		(effects (font (size 1 1)) (justify left))
+		(uuid "cfdf4b67-63f9-53d2-b942-1765d8ee6425")
+	)
+	(text
+		"ESP capacitors connect AFTER their respective power jumpers. Sony sense supply stays separate."
+		(at 25.4 30.48 0)
+		(effects (font (size 1 1)) (justify left))
+		(uuid "572b2d20-8ed5-508c-aa4e-333caa1dc769")
+	)
+	(text
+		"Electrolytics: pin 1 POSITIVE to the named 5 V rail; pin 2 NEGATIVE to GND."
+		(at 25.4 35.56 0)
+		(effects (font (size 1 1)) (justify left))
+		(uuid "27a1a76f-7fb0-540e-9365-8c4ab79b6f74")
+	)
+	(text
+		"470uF: Panasonic EEU-FR1C471, D8 x 11.5 mm, pitch 3.5 mm."
+		(at 25.4 40.64 0)
+		(effects (font (size 1 1)) (justify left))
+		(uuid "0112a75d-21b7-5840-9a95-9a4a22f427ad")
+	)
+	(text
+		"100uF: Panasonic EEU-FR1C101, D5 x 11 mm, pitch 2.0 mm. Ceramics: existing D5/P5 envelope."
+		(at 25.4 45.72 0)
+		(effects (font (size 1 1)) (justify left))
+		(uuid "5636bb8d-f434-5c03-8f2d-a3b68e54c545")
+	)
+	(embedded_fonts no)
+)

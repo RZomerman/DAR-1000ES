@@ -1,0 +1,107 @@
+DAR-1000ES v2 - firmware and hardware interface changes
+
+HARDWARE ENABLE CONTRACT
+ENABLE_U2/U3/U4/U6/U7 are ACTIVE HIGH firmware requests.
+Initialize every request LOW before configuring data outputs; leave LOW during boot/reset.
+The AHCT00 NAND interlock asserts /OE LOW only when its request is HIGH AND SONY_POWER_GOOD is HIGH.
+Do not use the former active-low direct-GPIO /OE logic.
+J12 pin 1 = common GND, pin 2 = Sony 5 V SENSE ONLY.
+Sony 5 V is never connected to LOCAL_5V. Grounds are intentionally common.
+MCP100-475DI/TO: trip 4.50-4.75 V, release delay 150-700 ms.
+The interlock uses TTL-compatible NAND ICs rather than five discrete transistor level shifters.
+USB/external ESP power isolation/ORing is NOT supplied by this interlock; retain only verified power paths.
+
+DIRECT FIRMWARE SIGNAL MAP
+
+U1-CONTROLLER1
+  ENABLE_U3: GPIO15 (J1.8)
+  FLGCLK [J3.3]: GPIO1 (J3.4)
+  FLGDATA [J3.2]: GPIO2 (J3.5)
+  FLCLEAR [J3.4]: GPIO42 (J3.6)
+  U3 spare buffered output (unconnected): GPIO4 (J1.4)
+  ENABLE_U4: GPIO16 (J1.9)
+  J4.1 (existing unnamed signal): GPIO7 (J1.7)
+  U4 spare buffered output (unconnected): GPIO18 (J1.11)
+  J4.2 (existing unnamed signal): GPIO8 (J1.12)
+  J4.3 (existing unnamed signal): GPIO5 (J1.5)
+  TCA8418_SDA: GPIO14 (J1.20)
+  TCA8418_SCL: GPIO39 (J3.9)
+  TCA8418_RESET_N: GPIO40 (J3.8)
+  TCA8418_INT_N: GPIO13 (J1.19)
+  INTER_ESP_UART_TX: GPIO21 (J3.18)
+  INTER_ESP_UART_RX: GPIO47 (J3.17)
+  ENABLE_U2: GPIO6 (J1.6)
+  A.MUTE [J9.2]: GPIO9 (J1.15)
+  D.MUTE [J9.3]: GPIO12 (J1.18)
+  RELAY [J9.4]: GPIO10 (J1.16)
+  U2 spare buffered output (unconnected): GPIO11 (J1.17)
+
+U6-AUDIO1
+  LRCK [J11.4]: GPIO42 (J3.6)
+  BCKI [J11.2]: GPIO2 (J3.5)
+  DATA [J11.3]: GPIO1 (J3.4)
+  U7 spare buffered output (unconnected): GPIO40 (J3.8)
+  ENABLE_U6: GPIO21 (J3.18)
+  ENABLE_U7: GPIO41 (J3.7)
+  INTER_ESP_UART_TX: GPIO14 (J1.20)
+  INTER_ESP_UART_RX: GPIO13 (J1.19)
+  ATT [J10.2]: GPIO11 (J1.17)
+  SHIFT [J10.3]: GPIO12 (J1.18)
+  LATCH [J10.4]: GPIO47 (J3.17)
+  INIT [J10.5]: GPIO9 (J1.15)
+
+GPIO ASSIGNMENTS (original circuit role -> new physical GPIO)
+
+U1-CONTROLLER1
+  ENABLE_U3: GPIO4 -> GPIO15 (J1.8); connects R8.1, U8.4
+  Net-(U1-CONTROLLER1-IO5): GPIO5 -> GPIO1 (J3.4); connects U3.9
+  Net-(U1-CONTROLLER1-IO6): GPIO6 -> GPIO2 (J3.5); connects U3.12
+  Net-(U1-CONTROLLER1-IO7): GPIO7 -> GPIO42 (J3.6); connects U3.2
+  Net-(U1-CONTROLLER1-IO15): GPIO15 -> GPIO4 (J1.4); connects U3.5
+  ENABLE_U4: GPIO16 -> GPIO16 (J1.9); connects R9.1, U8.9
+  Net-(U1-CONTROLLER1-IO17): GPIO17 -> GPIO7 (J1.7); connects U4.9
+  Net-(U1-CONTROLLER1-IO18): GPIO18 -> GPIO18 (J1.11); connects U4.5
+  Net-(U1-CONTROLLER1-IO8): GPIO8 -> GPIO8 (J1.12); connects U4.2
+  Net-(U1-CONTROLLER1-IO3): GPIO3 -> GPIO5 (J1.5); connects U4.12
+  Net-(U1-CONTROLLER1-IO10): GPIO10 -> GPIO14 (J1.20); connects U5.JP4.5
+  Net-(U1-CONTROLLER1-IO11): GPIO11 -> GPIO39 (J3.9); connects U5.JP4.4
+  Net-(U1-CONTROLLER1-IO12): GPIO12 -> GPIO40 (J3.8); connects U5.JP4.7
+  Net-(U1-CONTROLLER1-IO13): GPIO13 -> GPIO13 (J1.19); connects U5.JP4.6
+  Net-(U1-CONTROLLER1-TX_IO43): GPIO43 -> GPIO21 (J3.18); connects U6-AUDIO1.J1.19
+  Net-(U1-CONTROLLER1-RX_IO44): GPIO44 -> GPIO47 (J3.17); connects U6-AUDIO1.J1.20
+  ENABLE_U2: GPIO1 -> GPIO6 (J1.6); connects R7.1, U8.1
+  Net-(U1-CONTROLLER1-IO2): GPIO2 -> GPIO9 (J1.15); connects U2.9
+  Net-(U1-CONTROLLER1-IO42): GPIO42 -> GPIO12 (J1.18); connects U2.2
+  Net-(U1-CONTROLLER1-IO41): GPIO41 -> GPIO10 (J1.16); connects U2.12
+  Net-(U1-CONTROLLER1-IO40): GPIO40 -> GPIO11 (J1.17); connects U2.5
+
+U6-AUDIO1
+  Net-(U6-AUDIO1-IO4): GPIO4 -> GPIO42 (J3.6); connects U7.5
+  Net-(U6-AUDIO1-IO5): GPIO5 -> GPIO2 (J3.5); connects U7.12
+  Net-(U6-AUDIO1-IO6): GPIO6 -> GPIO1 (J3.4); connects U7.2
+  Net-(U6-AUDIO1-IO7): GPIO7 -> GPIO40 (J3.8); connects U7.9
+  ENABLE_U6: GPIO8 -> GPIO21 (J3.18); connects R10.1, U9.1
+  ENABLE_U7: GPIO9 -> GPIO41 (J3.7); connects R11.1, U9.4
+  Net-(U1-CONTROLLER1-RX_IO44): GPIO43 -> GPIO14 (J1.20); connects U1-CONTROLLER1.J3.17
+  Net-(U1-CONTROLLER1-TX_IO43): GPIO44 -> GPIO13 (J1.19); connects U1-CONTROLLER1.J3.18
+  Net-(U6-AUDIO1-IO1): GPIO1 -> GPIO11 (J1.17); connects U6.12
+  Net-(U6-AUDIO1-IO2): GPIO2 -> GPIO12 (J1.18); connects U6.9
+  Net-(U6-AUDIO1-IO42): GPIO42 -> GPIO47 (J3.17); connects U6.5
+  Net-(U6-AUDIO1-IO41): GPIO41 -> GPIO9 (J1.15); connects U6.2
+
+AHCT125 CHANNEL PERMUTATIONS (old gate -> new gate)
+U2: 1->3, 2->1, 3->4, 4->2
+U3: 1->2, 2->1, 3->3, 4->4
+U4: 1->4, 2->1, 3->3, 4->2
+U6: 1->4, 2->3, 3->2, 4->1
+U7: 1->4, 2->1, 3->2, 4->3
+
+CONNECTOR PIN FUNCTIONS AND LABELS ARE UNCHANGED.
+ESP symbol pin order is presentation-only in v2: read each printed GPIO name and physical header pin number.
+Reserved PSRAM, USB, strapping, on-board LED and USB-UART GPIOs are excluded from newly assigned signals.
+
+Straight-line signal crossing metric: 233 -> 101
+Signal minimum-spanning-tree length metric: 2958.1 -> 2623.1 mm
+These are optimization metrics, not final copper lengths or a proof of a global optimum.
+
+Hardware timing, power sequencing and optical/audio operation require bench validation.

@@ -1,0 +1,1298 @@
+(kicad_sch
+	(version 20260306)
+	(generator "eeschema")
+	(generator_version "10.0")
+	(uuid "e7fcca49-cc54-59d7-a0eb-83c7d26cab83")
+	(paper "A3")
+	(title_block (title "Sony power interlock - independent bank enables"))
+	(lib_symbols
+		(symbol
+			"Device:R"
+			(pin_numbers (hide yes))
+			(pin_names (offset 0))
+			(exclude_from_sim no)
+			(in_bom yes)
+			(on_board yes)
+			(in_pos_files yes)
+			(duplicate_pin_numbers_are_jumpers no)
+			(property
+				"Reference"
+				"R"
+				(at 2.032 0 90)
+				(show_name no)
+				(do_not_autoplace no)
+				(effects (font (size 1.27 1.27)))
+			)
+			(property "Value" "R" (at 0 0 90) (show_name no) (do_not_autoplace no) (effects (font (size 1.27 1.27))))
+			(property
+				"Footprint"
+				""
+				(at -1.778 0 90)
+				(show_name no)
+				(do_not_autoplace no)
+				(hide yes)
+				(effects (font (size 1.27 1.27)))
+			)
+			(property
+				"Datasheet"
+				""
+				(at 0 0 0)
+				(show_name no)
+				(do_not_autoplace no)
+				(hide yes)
+				(effects (font (size 1.27 1.27)))
+			)
+			(property
+				"Description"
+				"Resistor"
+				(at 0 0 0)
+				(show_name no)
+				(do_not_autoplace no)
+				(hide yes)
+				(effects (font (size 1.27 1.27)))
+			)
+			(property
+				"ki_keywords"
+				"R res resistor"
+				(at 0 0 0)
+				(show_name no)
+				(do_not_autoplace no)
+				(hide yes)
+				(effects (font (size 1.27 1.27)))
+			)
+			(property
+				"ki_fp_filters"
+				"R_*"
+				(at 0 0 0)
+				(show_name no)
+				(do_not_autoplace no)
+				(hide yes)
+				(effects (font (size 1.27 1.27)))
+			)
+			(symbol
+				"R_0_1"
+				(rectangle (start -1.016 -2.54) (end 1.016 2.54) (stroke (width 0.254) (type default)) (fill (type none)))
+			)
+			(symbol
+				"R_1_1"
+				(pin
+					passive
+					line
+					(at 0 3.81 270)
+					(length 1.27)
+					(name "" (effects (font (size 1.27 1.27))))
+					(number "1" (effects (font (size 1.27 1.27))))
+				)
+				(pin
+					passive
+					line
+					(at 0 -3.81 90)
+					(length 1.27)
+					(name "" (effects (font (size 1.27 1.27))))
+					(number "2" (effects (font (size 1.27 1.27))))
+				)
+			)
+			(embedded_fonts no)
+		)
+		(symbol
+			"Device:C"
+			(pin_numbers (hide yes))
+			(pin_names (offset 0.254))
+			(exclude_from_sim no)
+			(in_bom yes)
+			(on_board yes)
+			(in_pos_files yes)
+			(duplicate_pin_numbers_are_jumpers no)
+			(property
+				"Reference"
+				"C"
+				(at 0.635 2.54 0)
+				(show_name no)
+				(do_not_autoplace no)
+				(effects (font (size 1.27 1.27)) (justify left))
+			)
+			(property
+				"Value"
+				"C"
+				(at 0.635 -2.54 0)
+				(show_name no)
+				(do_not_autoplace no)
+				(effects (font (size 1.27 1.27)) (justify left))
+			)
+			(property
+				"Footprint"
+				""
+				(at 0.9652 -3.81 0)
+				(show_name no)
+				(do_not_autoplace no)
+				(hide yes)
+				(effects (font (size 1.27 1.27)))
+			)
+			(property
+				"Datasheet"
+				""
+				(at 0 0 0)
+				(show_name no)
+				(do_not_autoplace no)
+				(hide yes)
+				(effects (font (size 1.27 1.27)))
+			)
+			(property
+				"Description"
+				"Unpolarized capacitor"
+				(at 0 0 0)
+				(show_name no)
+				(do_not_autoplace no)
+				(hide yes)
+				(effects (font (size 1.27 1.27)))
+			)
+			(property
+				"ki_keywords"
+				"cap capacitor"
+				(at 0 0 0)
+				(show_name no)
+				(do_not_autoplace no)
+				(hide yes)
+				(effects (font (size 1.27 1.27)))
+			)
+			(property
+				"ki_fp_filters"
+				"C_*"
+				(at 0 0 0)
+				(show_name no)
+				(do_not_autoplace no)
+				(hide yes)
+				(effects (font (size 1.27 1.27)))
+			)
+			(symbol
+				"C_0_1"
+				(polyline (pts (xy -2.032 0.762) (xy 2.032 0.762)) (stroke (width 0.508) (type default)) (fill (type none)))
+				(polyline
+					(pts (xy -2.032 -0.762) (xy 2.032 -0.762))
+					(stroke (width 0.508) (type default))
+					(fill (type none))
+				)
+			)
+			(symbol
+				"C_1_1"
+				(pin
+					passive
+					line
+					(at 0 3.81 270)
+					(length 2.794)
+					(name "" (effects (font (size 1.27 1.27))))
+					(number "1" (effects (font (size 1.27 1.27))))
+				)
+				(pin
+					passive
+					line
+					(at 0 -3.81 90)
+					(length 2.794)
+					(name "" (effects (font (size 1.27 1.27))))
+					(number "2" (effects (font (size 1.27 1.27))))
+				)
+			)
+			(embedded_fonts no)
+		)
+		(symbol
+			"Connector_Generic:Conn_01x02"
+			(pin_names (offset 1.016) (hide yes))
+			(exclude_from_sim no)
+			(in_bom yes)
+			(on_board yes)
+			(in_pos_files yes)
+			(duplicate_pin_numbers_are_jumpers no)
+			(property
+				"Reference"
+				"J"
+				(at 0 2.54 0)
+				(show_name no)
+				(do_not_autoplace no)
+				(effects (font (size 1.27 1.27)))
+			)
+			(property
+				"Value"
+				"Conn_01x02"
+				(at 0 -5.08 0)
+				(show_name no)
+				(do_not_autoplace no)
+				(effects (font (size 1.27 1.27)))
+			)
+			(property
+				"Footprint"
+				""
+				(at 0 0 0)
+				(show_name no)
+				(do_not_autoplace no)
+				(hide yes)
+				(effects (font (size 1.27 1.27)))
+			)
+			(property
+				"Datasheet"
+				""
+				(at 0 0 0)
+				(show_name no)
+				(do_not_autoplace no)
+				(hide yes)
+				(effects (font (size 1.27 1.27)))
+			)
+			(property
+				"Description"
+				"Generic connector, single row, 01x02, script generated (kicad-library-utils/schlib/autogen/connector/)"
+				(at 0 0 0)
+				(show_name no)
+				(do_not_autoplace no)
+				(hide yes)
+				(effects (font (size 1.27 1.27)))
+			)
+			(property
+				"ki_keywords"
+				"connector"
+				(at 0 0 0)
+				(show_name no)
+				(do_not_autoplace no)
+				(hide yes)
+				(effects (font (size 1.27 1.27)))
+			)
+			(property
+				"ki_fp_filters"
+				"Connector*:*_1x??_*"
+				(at 0 0 0)
+				(show_name no)
+				(do_not_autoplace no)
+				(hide yes)
+				(effects (font (size 1.27 1.27)))
+			)
+			(symbol
+				"Conn_01x02_1_1"
+				(rectangle
+					(start -1.27 1.27)
+					(end 1.27 -3.81)
+					(stroke (width 0.254) (type default))
+					(fill (type background))
+				)
+				(rectangle (start -1.27 0.127) (end 0 -0.127) (stroke (width 0.1524) (type default)) (fill (type none)))
+				(rectangle (start -1.27 -2.413) (end 0 -2.667) (stroke (width 0.1524) (type default)) (fill (type none)))
+				(pin
+					passive
+					line
+					(at -5.08 0 0)
+					(length 3.81)
+					(name "Pin_1" (effects (font (size 1.27 1.27))))
+					(number "1" (effects (font (size 1.27 1.27))))
+				)
+				(pin
+					passive
+					line
+					(at -5.08 -2.54 0)
+					(length 3.81)
+					(name "Pin_2" (effects (font (size 1.27 1.27))))
+					(number "2" (effects (font (size 1.27 1.27))))
+				)
+			)
+			(embedded_fonts no)
+		)
+		(symbol
+			"DAR1000ES:SN74AHCT00N"
+			(pin_names (offset 1.016))
+			(exclude_from_sim no)
+			(in_bom yes)
+			(on_board yes)
+			(property "Reference" "U" (at 0 0 0) (effects (font (size 1 1))))
+			(property "Value" "SN74AHCT00N" (at 0 0 0) (effects (font (size 1 1))))
+			(property
+				"Footprint"
+				"DAR1000ES:Bottom_Package_DIP__DIP-14_W7.62mm"
+				(at 0 0 0)
+				(hide yes)
+				(effects (font (size 1 1)))
+			)
+			(property
+				"Datasheet"
+				"https://www.ti.com/lit/ds/symlink/sn74ahct00.pdf"
+				(at 0 0 0)
+				(hide yes)
+				(effects (font (size 1 1)))
+			)
+			(symbol
+				"SN74AHCT00N_0_1"
+				(rectangle
+					(start -15.24 17.78)
+					(end 15.24 -17.78)
+					(stroke (width 0.254) (type default))
+					(fill (type background))
+				)
+			)
+			(symbol
+				"SN74AHCT00N_1_1"
+				(pin
+					input
+					line
+					(at -20.32 12.7 0)
+					(length 5.08)
+					(name "1A" (effects (font (size 1 1))))
+					(number "1" (effects (font (size 0.8 0.8))))
+				)
+				(pin
+					input
+					line
+					(at -20.32 10.16 0)
+					(length 5.08)
+					(name "1B" (effects (font (size 1 1))))
+					(number "2" (effects (font (size 0.8 0.8))))
+				)
+				(pin
+					input
+					line
+					(at -20.32 5.08 0)
+					(length 5.08)
+					(name "2A" (effects (font (size 1 1))))
+					(number "4" (effects (font (size 0.8 0.8))))
+				)
+				(pin
+					input
+					line
+					(at -20.32 2.54 0)
+					(length 5.08)
+					(name "2B" (effects (font (size 1 1))))
+					(number "5" (effects (font (size 0.8 0.8))))
+				)
+				(pin
+					input
+					line
+					(at -20.32 -2.54 0)
+					(length 5.08)
+					(name "3A" (effects (font (size 1 1))))
+					(number "9" (effects (font (size 0.8 0.8))))
+				)
+				(pin
+					input
+					line
+					(at -20.32 -5.08 0)
+					(length 5.08)
+					(name "3B" (effects (font (size 1 1))))
+					(number "10" (effects (font (size 0.8 0.8))))
+				)
+				(pin
+					input
+					line
+					(at -20.32 -10.16 0)
+					(length 5.08)
+					(name "4A" (effects (font (size 1 1))))
+					(number "12" (effects (font (size 0.8 0.8))))
+				)
+				(pin
+					input
+					line
+					(at -20.32 -12.7 0)
+					(length 5.08)
+					(name "4B" (effects (font (size 1 1))))
+					(number "13" (effects (font (size 0.8 0.8))))
+				)
+				(pin
+					output
+					line
+					(at 20.32 11.43 180)
+					(length 5.08)
+					(name "1Y" (effects (font (size 1 1))))
+					(number "3" (effects (font (size 0.8 0.8))))
+				)
+				(pin
+					output
+					line
+					(at 20.32 3.81 180)
+					(length 5.08)
+					(name "2Y" (effects (font (size 1 1))))
+					(number "6" (effects (font (size 0.8 0.8))))
+				)
+				(pin
+					output
+					line
+					(at 20.32 -3.81 180)
+					(length 5.08)
+					(name "3Y" (effects (font (size 1 1))))
+					(number "8" (effects (font (size 0.8 0.8))))
+				)
+				(pin
+					output
+					line
+					(at 20.32 -11.43 180)
+					(length 5.08)
+					(name "4Y" (effects (font (size 1 1))))
+					(number "11" (effects (font (size 0.8 0.8))))
+				)
+				(pin
+					power_in
+					line
+					(at 0 22.86 270)
+					(length 5.08)
+					(name "VCC" (effects (font (size 1 1))))
+					(number "14" (effects (font (size 0.8 0.8))))
+				)
+				(pin
+					power_in
+					line
+					(at 0 -22.86 90)
+					(length 5.08)
+					(name "GND" (effects (font (size 1 1))))
+					(number "7" (effects (font (size 0.8 0.8))))
+				)
+			)
+		)
+		(symbol
+			"DAR1000ES:MCP100-475DI_TO"
+			(pin_names (offset 1.016))
+			(exclude_from_sim no)
+			(in_bom yes)
+			(on_board yes)
+			(property "Reference" "U" (at 0 0 0) (effects (font (size 1 1))))
+			(property "Value" "MCP100-475DI_TO" (at 0 0 0) (effects (font (size 1 1))))
+			(property
+				"Footprint"
+				"DAR1000ES:Bottom_Package_TO_SOT_THT__TO-92_Inline"
+				(at 0 0 0)
+				(hide yes)
+				(effects (font (size 1 1)))
+			)
+			(property
+				"Datasheet"
+				"https://ww1.microchip.com/downloads/en/DeviceDoc/11187F.pdf"
+				(at 0 0 0)
+				(hide yes)
+				(effects (font (size 1 1)))
+			)
+			(symbol
+				"MCP100-475DI_TO_0_1"
+				(rectangle
+					(start -5.08 7.62)
+					(end 5.08 -7.62)
+					(stroke (width 0.254) (type default))
+					(fill (type background))
+				)
+			)
+			(symbol
+				"MCP100-475DI_TO_1_1"
+				(pin
+					output
+					line
+					(at 10.16 0 180)
+					(length 5.08)
+					(name "~{RESET}" (effects (font (size 1 1))))
+					(number "1" (effects (font (size 0.8 0.8))))
+				)
+				(pin
+					power_in
+					line
+					(at 0 12.7 270)
+					(length 5.08)
+					(name "VDD_SONY" (effects (font (size 1 1))))
+					(number "2" (effects (font (size 0.8 0.8))))
+				)
+				(pin
+					power_in
+					line
+					(at 0 -12.7 90)
+					(length 5.08)
+					(name "GND" (effects (font (size 1 1))))
+					(number "3" (effects (font (size 0.8 0.8))))
+				)
+			)
+		)
+	)
+	(symbol
+		(lib_id "DAR1000ES:SN74AHCT00N")
+		(at 99.06 88.9 0)
+		(unit 1)
+		(in_bom yes)
+		(on_board yes)
+		(dnp no)
+		(uuid "ed38621c-aeed-5519-a5b7-66854b8448c7")
+		(property "Reference" "U8" (at 99.06 60.96000000000001 0) (effects (font (size 1 1))))
+		(property "Value" "SN74AHCT00N" (at 99.06 63.50000000000001 0) (effects (font (size 1 1))))
+		(property
+			"Footprint"
+			"DAR1000ES:Bottom_Package_DIP__DIP-14_W7.62mm"
+			(at 99.06 88.9 0)
+			(hide yes)
+			(effects (font (size 1 1)))
+		)
+		(pin "1" (uuid "477464d2-af64-5810-9bc1-308a5301a805"))
+		(pin "2" (uuid "d517216e-f389-59a1-a3d1-1db84c5bc942"))
+		(pin "4" (uuid "1bf323d5-d2c2-5f30-a2ea-c4b8c4ff1ece"))
+		(pin "5" (uuid "a71ce975-8093-57c9-9195-a85508bc9a1b"))
+		(pin "9" (uuid "ed176d8e-8147-5038-8f2f-e4a759c1b200"))
+		(pin "10" (uuid "b6711842-4afd-544b-8106-21166b2cc7f9"))
+		(pin "12" (uuid "2d646043-2e7b-53cc-aabe-2e54446f3a9e"))
+		(pin "13" (uuid "3e1d4d55-9d85-5e9e-a47e-a26bc0a91337"))
+		(pin "3" (uuid "e612df5a-3c3f-57d6-b702-be858f82025c"))
+		(pin "6" (uuid "0924a166-d902-5a25-bc5b-8d4bab8fd170"))
+		(pin "8" (uuid "81b69453-6abf-5485-a30c-91c5e08f00c1"))
+		(pin "11" (uuid "c7abe264-bd28-5411-8100-5f05c46fbfaa"))
+		(pin "14" (uuid "565a022a-697a-597a-aa4a-69609dd2044b"))
+		(pin "7" (uuid "247b9371-29c7-51b8-ac54-1d444d07caa6"))
+		(instances
+			(project
+				"DAR-1000ES-v3"
+				(path "/f34b12ab-7a38-51aa-83c5-08118ee179c8/55e31ced-cf75-50f1-83ff-24354f1944ad" (reference "U8") (unit 1))
+			)
+		)
+	)
+	(global_label
+		"ENABLE_U2"
+		(shape bidirectional)
+		(at 78.74 76.2 180)
+		(effects (font (size 0.8 0.8)) (justify right))
+		(uuid "3e5b194c-addb-5a7a-920c-1c4c32483350")
+	)
+	(global_label
+		"SONY_POWER_GOOD"
+		(shape bidirectional)
+		(at 78.74 78.74 180)
+		(effects (font (size 0.8 0.8)) (justify right))
+		(uuid "91acf430-dd92-574c-80ae-cfd379a38f03")
+	)
+	(global_label
+		"ENABLE_U3"
+		(shape bidirectional)
+		(at 78.74 83.82 180)
+		(effects (font (size 0.8 0.8)) (justify right))
+		(uuid "d0a437b2-fa9e-50dc-b99c-d6a756a9d106")
+	)
+	(global_label
+		"SONY_POWER_GOOD"
+		(shape bidirectional)
+		(at 78.74 86.36 180)
+		(effects (font (size 0.8 0.8)) (justify right))
+		(uuid "4ee3eb9a-24b6-59aa-8723-870700a42976")
+	)
+	(global_label
+		"ENABLE_U4"
+		(shape bidirectional)
+		(at 78.74 91.44 180)
+		(effects (font (size 0.8 0.8)) (justify right))
+		(uuid "55a3e8a7-7078-5d55-adbb-72de5cc3c1d9")
+	)
+	(global_label
+		"SONY_POWER_GOOD"
+		(shape bidirectional)
+		(at 78.74 93.98 180)
+		(effects (font (size 0.8 0.8)) (justify right))
+		(uuid "4155b5ba-cea1-5a5c-9b42-a2dc33f16abd")
+	)
+	(global_label
+		"GND"
+		(shape bidirectional)
+		(at 78.74 99.06 180)
+		(effects (font (size 0.8 0.8)) (justify right))
+		(uuid "50a3c484-e41e-5f71-898c-c67f295cdcfa")
+	)
+	(global_label
+		"GND"
+		(shape bidirectional)
+		(at 78.74 101.6 180)
+		(effects (font (size 0.8 0.8)) (justify right))
+		(uuid "620e22d2-2303-54f3-b400-92fd68addaca")
+	)
+	(global_label
+		"U2_OE_N"
+		(shape bidirectional)
+		(at 119.38 77.47 0)
+		(effects (font (size 0.8 0.8)) (justify left))
+		(uuid "c6ef342f-6c8d-56e7-8437-00ecb2d58bc7")
+	)
+	(global_label
+		"U3_OE_N"
+		(shape bidirectional)
+		(at 119.38 85.09 0)
+		(effects (font (size 0.8 0.8)) (justify left))
+		(uuid "0832fb78-2ac1-5ada-944f-293ee8aa94f0")
+	)
+	(global_label
+		"U4_OE_N"
+		(shape bidirectional)
+		(at 119.38 92.71 0)
+		(effects (font (size 0.8 0.8)) (justify left))
+		(uuid "820da95c-18b0-519e-b9e6-1df18eb6bdc7")
+	)
+	(no_connect (at 119.38 100.33) (uuid "32dc96bc-e4b9-5f47-b26c-9a024b01a406"))
+	(global_label
+		"LOCAL_5V"
+		(shape bidirectional)
+		(at 99.06 66.04 0)
+		(effects (font (size 0.8 0.8)) (justify left))
+		(uuid "23b6f4d7-e24f-56b1-bddc-271298b398b0")
+	)
+	(global_label
+		"GND"
+		(shape bidirectional)
+		(at 99.06 111.76 0)
+		(effects (font (size 0.8 0.8)) (justify left))
+		(uuid "5d6d06c5-7002-5ff6-b1bd-9aa28d728563")
+	)
+	(symbol
+		(lib_id "DAR1000ES:SN74AHCT00N")
+		(at 276.86 88.9 0)
+		(unit 1)
+		(in_bom yes)
+		(on_board yes)
+		(dnp no)
+		(uuid "981cd9b6-1c59-570c-8ef6-614ed9653629")
+		(property "Reference" "U9" (at 276.86 60.96000000000001 0) (effects (font (size 1 1))))
+		(property "Value" "SN74AHCT00N" (at 276.86 63.50000000000001 0) (effects (font (size 1 1))))
+		(property
+			"Footprint"
+			"DAR1000ES:Bottom_Package_DIP__DIP-14_W7.62mm"
+			(at 276.86 88.9 0)
+			(hide yes)
+			(effects (font (size 1 1)))
+		)
+		(pin "1" (uuid "f223cce4-c3a7-5ca4-98b4-615e7db1bca2"))
+		(pin "2" (uuid "c1f3a2f0-71e8-5f00-92ba-6187c16316cc"))
+		(pin "4" (uuid "da6abc6e-8f19-50e9-b6fc-2b83aa9a917c"))
+		(pin "5" (uuid "30ff1332-485d-52ed-a69f-89532488722d"))
+		(pin "9" (uuid "7db4d537-fbb7-55a0-a6d0-d5a373bdad27"))
+		(pin "10" (uuid "641b9629-3618-5a48-be54-22bfd737cacb"))
+		(pin "12" (uuid "baff5c87-f64b-57e4-ba09-cf0ebfaa3169"))
+		(pin "13" (uuid "be743e4d-1a47-588d-b177-284c6f20fcae"))
+		(pin "3" (uuid "23bb7002-ee58-5a07-a8ee-0dbd678c1c24"))
+		(pin "6" (uuid "eff50d76-fc5e-5daf-94fa-5b29aa9cbd18"))
+		(pin "8" (uuid "4c88c428-899f-57f6-a777-206c0f75019e"))
+		(pin "11" (uuid "46a30487-1c8e-5f82-bfcb-5d74edac1560"))
+		(pin "14" (uuid "9090f126-50c0-5738-abb5-496b268efe99"))
+		(pin "7" (uuid "bd61b828-f0d6-5dec-849d-1464a8def3f7"))
+		(instances
+			(project
+				"DAR-1000ES-v3"
+				(path "/f34b12ab-7a38-51aa-83c5-08118ee179c8/55e31ced-cf75-50f1-83ff-24354f1944ad" (reference "U9") (unit 1))
+			)
+		)
+	)
+	(global_label
+		"ENABLE_U6"
+		(shape bidirectional)
+		(at 256.54 76.2 180)
+		(effects (font (size 0.8 0.8)) (justify right))
+		(uuid "7a66a132-b12e-5c62-b35c-721997d690b3")
+	)
+	(global_label
+		"SONY_POWER_GOOD"
+		(shape bidirectional)
+		(at 256.54 78.74 180)
+		(effects (font (size 0.8 0.8)) (justify right))
+		(uuid "81614764-e2b8-520c-abf4-818b6186a6d8")
+	)
+	(global_label
+		"ENABLE_U7"
+		(shape bidirectional)
+		(at 256.54 83.82 180)
+		(effects (font (size 0.8 0.8)) (justify right))
+		(uuid "a95c9893-2f4d-5296-9ae9-b0bcaaf2f50f")
+	)
+	(global_label
+		"SONY_POWER_GOOD"
+		(shape bidirectional)
+		(at 256.54 86.36 180)
+		(effects (font (size 0.8 0.8)) (justify right))
+		(uuid "4e7288bd-9231-5f06-b92d-08e7c3bdd77a")
+	)
+	(global_label
+		"GND"
+		(shape bidirectional)
+		(at 256.54 91.44 180)
+		(effects (font (size 0.8 0.8)) (justify right))
+		(uuid "5b177da4-58ee-58da-baf4-7a42e24da603")
+	)
+	(global_label
+		"GND"
+		(shape bidirectional)
+		(at 256.54 93.98 180)
+		(effects (font (size 0.8 0.8)) (justify right))
+		(uuid "5f94cc30-b474-5f68-a867-a6de0eda888b")
+	)
+	(global_label
+		"GND"
+		(shape bidirectional)
+		(at 256.54 99.06 180)
+		(effects (font (size 0.8 0.8)) (justify right))
+		(uuid "4fc5e635-4cf2-59b1-96a9-62650cf9b28b")
+	)
+	(global_label
+		"GND"
+		(shape bidirectional)
+		(at 256.54 101.6 180)
+		(effects (font (size 0.8 0.8)) (justify right))
+		(uuid "b778c4a8-cf81-5a29-bfc7-de79ee4aa8d7")
+	)
+	(global_label
+		"U6_OE_N"
+		(shape bidirectional)
+		(at 297.18 77.47 0)
+		(effects (font (size 0.8 0.8)) (justify left))
+		(uuid "ad9352e5-9304-54ea-9485-8f521848e36e")
+	)
+	(global_label
+		"U7_OE_N"
+		(shape bidirectional)
+		(at 297.18 85.09 0)
+		(effects (font (size 0.8 0.8)) (justify left))
+		(uuid "8520cce4-90d0-5ba7-94a0-49b638f1b917")
+	)
+	(no_connect (at 297.18 92.71) (uuid "107a0ac4-2b8b-56d2-b4e3-6e4d8bf53b3d"))
+	(no_connect (at 297.18 100.33) (uuid "9dd908f0-67d0-5a32-a10d-b4e98a573b5f"))
+	(global_label
+		"LOCAL_5V"
+		(shape bidirectional)
+		(at 276.86 66.04 0)
+		(effects (font (size 0.8 0.8)) (justify left))
+		(uuid "9a8ff509-db0d-59a2-9941-72b126b3343d")
+	)
+	(global_label
+		"GND"
+		(shape bidirectional)
+		(at 276.86 111.76 0)
+		(effects (font (size 0.8 0.8)) (justify left))
+		(uuid "13e44740-7084-50b0-844f-a3c40d0a8d56")
+	)
+	(symbol
+		(lib_id "DAR1000ES:MCP100-475DI_TO")
+		(at 50.8 177.8 0)
+		(unit 1)
+		(in_bom yes)
+		(on_board yes)
+		(dnp no)
+		(uuid "3e679f9e-a52e-582e-a177-8c7227c1c282")
+		(property "Reference" "U10" (at 50.8 160.02 0) (effects (font (size 1 1))))
+		(property "Value" "MCP100-475DI/TO" (at 50.8 162.56 0) (effects (font (size 1 1))))
+		(property
+			"Footprint"
+			"DAR1000ES:Bottom_Package_TO_SOT_THT__TO-92_Inline"
+			(at 50.8 177.8 0)
+			(hide yes)
+			(effects (font (size 1 1)))
+		)
+		(pin "1" (uuid "d8ad3368-7e4a-59f6-b6b8-dac552399cce"))
+		(pin "2" (uuid "a64b010e-6b68-57d8-85bf-fdcfdd7595bc"))
+		(pin "3" (uuid "efe94ff8-b9db-5ea3-b819-ae98522c495a"))
+		(instances
+			(project
+				"DAR-1000ES-v3"
+				(path
+					"/f34b12ab-7a38-51aa-83c5-08118ee179c8/55e31ced-cf75-50f1-83ff-24354f1944ad"
+					(reference "U10")
+					(unit 1)
+				)
+			)
+		)
+	)
+	(global_label
+		"SONY_RESET_N_RAW"
+		(shape bidirectional)
+		(at 60.96 177.8 0)
+		(effects (font (size 0.8 0.8)) (justify left))
+		(uuid "4ba9547b-9e4a-5784-ab46-12f23e972f19")
+	)
+	(global_label
+		"SONY_5V_SENSE"
+		(shape bidirectional)
+		(at 50.8 165.1 0)
+		(effects (font (size 0.8 0.8)) (justify left))
+		(uuid "4aa009f7-2c64-543d-b667-cc8e9a28ee14")
+	)
+	(global_label
+		"GND"
+		(shape bidirectional)
+		(at 50.8 190.5 0)
+		(effects (font (size 0.8 0.8)) (justify left))
+		(uuid "b8d93c97-cb5f-545f-8e7e-5403ed64ea21")
+	)
+	(symbol
+		(lib_id "Connector_Generic:Conn_01x02")
+		(at 40.64 236.22 0)
+		(unit 1)
+		(in_bom yes)
+		(on_board yes)
+		(dnp no)
+		(uuid "2a88d88b-9ef0-5ee0-8148-18f912b512f7")
+		(property "Reference" "J12" (at 43.18 231.14 0) (effects (font (size 1 1))))
+		(property "Value" "SONY_5V_SENSE" (at 43.18 233.68 0) (effects (font (size 1 1))))
+		(property
+			"Footprint"
+			"DAR1000ES:Bottom_Connector_JST__JST_XH_S2B-XH-A_1x02_P2.50mm_Horizontal"
+			(at 40.64 236.22 0)
+			(hide yes)
+			(effects (font (size 1 1)))
+		)
+		(pin "1" (uuid "9d1c4a5c-306a-572a-a77c-91b9ea0b2bdc"))
+		(pin "2" (uuid "a1bbf37a-5f95-5a7e-bfb8-669b3b150bd8"))
+		(instances
+			(project
+				"DAR-1000ES-v3"
+				(path
+					"/f34b12ab-7a38-51aa-83c5-08118ee179c8/55e31ced-cf75-50f1-83ff-24354f1944ad"
+					(reference "J12")
+					(unit 1)
+				)
+			)
+		)
+	)
+	(global_label
+		"GND"
+		(shape bidirectional)
+		(at 35.56 236.22 180)
+		(effects (font (size 0.8 0.8)) (justify right))
+		(uuid "d08cbaf0-76ed-533b-9bd5-36a94f6ae15a")
+	)
+	(global_label
+		"SONY_5V_SENSE"
+		(shape bidirectional)
+		(at 35.56 238.76 180)
+		(effects (font (size 0.8 0.8)) (justify right))
+		(uuid "e8d54b7f-016d-5c1d-8d80-d8d7c5e5b600")
+	)
+	(symbol
+		(lib_id "Device:R")
+		(at 147.32 152.4 0)
+		(unit 1)
+		(in_bom yes)
+		(on_board yes)
+		(dnp no)
+		(uuid "160cebde-a4a7-5fb9-815c-13a7e2cc0150")
+		(property "Reference" "R7" (at 154.94 151.13 0) (effects (font (size 1 1)) (justify left)))
+		(property "Value" "100k" (at 154.94 153.67000000000002 0) (effects (font (size 1 1)) (justify left)))
+		(property
+			"Footprint"
+			"DAR1000ES:Bottom_Resistor_THT__R_Axial_DIN0207_L6.3mm_D2.5mm_P7.62mm_Horizontal"
+			(at 147.32 152.4 0)
+			(hide yes)
+			(effects (font (size 1 1)))
+		)
+		(pin "1" (uuid "69e7dd93-bafb-5c49-893d-eb692b39425a"))
+		(pin "2" (uuid "20e06b05-6e59-5f9c-a638-bfe5578914d3"))
+		(instances
+			(project
+				"DAR-1000ES-v3"
+				(path "/f34b12ab-7a38-51aa-83c5-08118ee179c8/55e31ced-cf75-50f1-83ff-24354f1944ad" (reference "R7") (unit 1))
+			)
+		)
+	)
+	(global_label
+		"ENABLE_U2"
+		(shape bidirectional)
+		(at 147.32 148.59 0)
+		(effects (font (size 0.8 0.8)) (justify left))
+		(uuid "9ab755ab-a1a8-5987-b24e-9d78e347b768")
+	)
+	(global_label
+		"GND"
+		(shape bidirectional)
+		(at 147.32 156.21 0)
+		(effects (font (size 0.8 0.8)) (justify left))
+		(uuid "efad448f-9a54-559a-b1d0-f0a2281ac923")
+	)
+	(symbol
+		(lib_id "Device:R")
+		(at 172.72 152.4 0)
+		(unit 1)
+		(in_bom yes)
+		(on_board yes)
+		(dnp no)
+		(uuid "6c496464-b6c7-512c-a349-493b01144dc8")
+		(property "Reference" "R8" (at 180.34 151.13 0) (effects (font (size 1 1)) (justify left)))
+		(property "Value" "100k" (at 180.34 153.67000000000002 0) (effects (font (size 1 1)) (justify left)))
+		(property
+			"Footprint"
+			"DAR1000ES:Bottom_Resistor_THT__R_Axial_DIN0207_L6.3mm_D2.5mm_P7.62mm_Horizontal"
+			(at 172.72 152.4 0)
+			(hide yes)
+			(effects (font (size 1 1)))
+		)
+		(pin "1" (uuid "3db4ad1a-f3cb-5f2a-9ee3-c0e88a4a1640"))
+		(pin "2" (uuid "a152b7ed-bd0a-5312-b8c5-d3824b9697f6"))
+		(instances
+			(project
+				"DAR-1000ES-v3"
+				(path "/f34b12ab-7a38-51aa-83c5-08118ee179c8/55e31ced-cf75-50f1-83ff-24354f1944ad" (reference "R8") (unit 1))
+			)
+		)
+	)
+	(global_label
+		"ENABLE_U3"
+		(shape bidirectional)
+		(at 172.72 148.59 0)
+		(effects (font (size 0.8 0.8)) (justify left))
+		(uuid "c4972f32-0824-55f8-9472-10c062e6a251")
+	)
+	(global_label
+		"GND"
+		(shape bidirectional)
+		(at 172.72 156.21 0)
+		(effects (font (size 0.8 0.8)) (justify left))
+		(uuid "725288ba-9ed0-5145-9c94-3012c65791b1")
+	)
+	(symbol
+		(lib_id "Device:R")
+		(at 198.12 152.4 0)
+		(unit 1)
+		(in_bom yes)
+		(on_board yes)
+		(dnp no)
+		(uuid "3f78aef5-0fa2-54ef-ba22-d438531b0995")
+		(property "Reference" "R9" (at 205.74 151.13 0) (effects (font (size 1 1)) (justify left)))
+		(property "Value" "100k" (at 205.74 153.67000000000002 0) (effects (font (size 1 1)) (justify left)))
+		(property
+			"Footprint"
+			"DAR1000ES:Bottom_Resistor_THT__R_Axial_DIN0207_L6.3mm_D2.5mm_P7.62mm_Horizontal"
+			(at 198.12 152.4 0)
+			(hide yes)
+			(effects (font (size 1 1)))
+		)
+		(pin "1" (uuid "3b0410c1-fe21-5652-a0ed-8e1a60629d67"))
+		(pin "2" (uuid "1d3c5e85-dd22-5e44-825c-a82c81c4954a"))
+		(instances
+			(project
+				"DAR-1000ES-v3"
+				(path "/f34b12ab-7a38-51aa-83c5-08118ee179c8/55e31ced-cf75-50f1-83ff-24354f1944ad" (reference "R9") (unit 1))
+			)
+		)
+	)
+	(global_label
+		"ENABLE_U4"
+		(shape bidirectional)
+		(at 198.12 148.59 0)
+		(effects (font (size 0.8 0.8)) (justify left))
+		(uuid "7b7a347c-965a-59ba-9186-d3b04064e39a")
+	)
+	(global_label
+		"GND"
+		(shape bidirectional)
+		(at 198.12 156.21 0)
+		(effects (font (size 0.8 0.8)) (justify left))
+		(uuid "78ef59cd-1072-5e57-ae43-54694cd4b2b4")
+	)
+	(symbol
+		(lib_id "Device:R")
+		(at 325.12 152.4 0)
+		(unit 1)
+		(in_bom yes)
+		(on_board yes)
+		(dnp no)
+		(uuid "a50985e8-117d-5b78-9a46-4d754f5e411d")
+		(property "Reference" "R10" (at 332.74 151.13 0) (effects (font (size 1 1)) (justify left)))
+		(property "Value" "100k" (at 332.74 153.67000000000002 0) (effects (font (size 1 1)) (justify left)))
+		(property
+			"Footprint"
+			"DAR1000ES:Bottom_Resistor_THT__R_Axial_DIN0207_L6.3mm_D2.5mm_P7.62mm_Horizontal"
+			(at 325.12 152.4 0)
+			(hide yes)
+			(effects (font (size 1 1)))
+		)
+		(pin "1" (uuid "38e5c819-a77f-5cee-9d79-d624bb35100c"))
+		(pin "2" (uuid "18ffaa62-6518-50c7-b622-4a372ef5c290"))
+		(instances
+			(project
+				"DAR-1000ES-v3"
+				(path
+					"/f34b12ab-7a38-51aa-83c5-08118ee179c8/55e31ced-cf75-50f1-83ff-24354f1944ad"
+					(reference "R10")
+					(unit 1)
+				)
+			)
+		)
+	)
+	(global_label
+		"ENABLE_U6"
+		(shape bidirectional)
+		(at 325.12 148.59 0)
+		(effects (font (size 0.8 0.8)) (justify left))
+		(uuid "408be8ff-61e6-5607-bf62-c7ba7fc45dd1")
+	)
+	(global_label
+		"GND"
+		(shape bidirectional)
+		(at 325.12 156.21 0)
+		(effects (font (size 0.8 0.8)) (justify left))
+		(uuid "c54f2e50-1f6c-5a08-b735-e35dfcdf08f6")
+	)
+	(symbol
+		(lib_id "Device:R")
+		(at 350.52 152.4 0)
+		(unit 1)
+		(in_bom yes)
+		(on_board yes)
+		(dnp no)
+		(uuid "7df3acee-c46f-5253-813f-898c97666e8e")
+		(property "Reference" "R11" (at 358.14 151.13 0) (effects (font (size 1 1)) (justify left)))
+		(property "Value" "100k" (at 358.14 153.67000000000002 0) (effects (font (size 1 1)) (justify left)))
+		(property
+			"Footprint"
+			"DAR1000ES:Bottom_Resistor_THT__R_Axial_DIN0207_L6.3mm_D2.5mm_P7.62mm_Horizontal"
+			(at 350.52 152.4 0)
+			(hide yes)
+			(effects (font (size 1 1)))
+		)
+		(pin "1" (uuid "7b4ff728-820e-549c-8979-10e698d077a4"))
+		(pin "2" (uuid "d232e73b-3162-5d92-9a67-b13f8a348c2f"))
+		(instances
+			(project
+				"DAR-1000ES-v3"
+				(path
+					"/f34b12ab-7a38-51aa-83c5-08118ee179c8/55e31ced-cf75-50f1-83ff-24354f1944ad"
+					(reference "R11")
+					(unit 1)
+				)
+			)
+		)
+	)
+	(global_label
+		"ENABLE_U7"
+		(shape bidirectional)
+		(at 350.52 148.59 0)
+		(effects (font (size 0.8 0.8)) (justify left))
+		(uuid "d4ec3662-a502-5c1e-b286-85d8fedbc453")
+	)
+	(global_label
+		"GND"
+		(shape bidirectional)
+		(at 350.52 156.21 0)
+		(effects (font (size 0.8 0.8)) (justify left))
+		(uuid "0a025d35-aca9-538e-9c9b-1788b8d4bb5d")
+	)
+	(symbol
+		(lib_id "Device:R")
+		(at 99.06 177.8 0)
+		(unit 1)
+		(in_bom yes)
+		(on_board yes)
+		(dnp no)
+		(uuid "8998cf5d-efc3-5415-8913-0efec6e74f55")
+		(property "Reference" "R12" (at 106.68 176.53 0) (effects (font (size 1 1)) (justify left)))
+		(property "Value" "1k" (at 106.68 179.07000000000002 0) (effects (font (size 1 1)) (justify left)))
+		(property
+			"Footprint"
+			"DAR1000ES:Bottom_Resistor_THT__R_Axial_DIN0207_L6.3mm_D2.5mm_P7.62mm_Horizontal"
+			(at 99.06 177.8 0)
+			(hide yes)
+			(effects (font (size 1 1)))
+		)
+		(pin "1" (uuid "cddd38a0-5885-52e0-8e2e-e197bc4b9e06"))
+		(pin "2" (uuid "27eee856-6d83-555a-a0c5-edf2820aee26"))
+		(instances
+			(project
+				"DAR-1000ES-v3"
+				(path
+					"/f34b12ab-7a38-51aa-83c5-08118ee179c8/55e31ced-cf75-50f1-83ff-24354f1944ad"
+					(reference "R12")
+					(unit 1)
+				)
+			)
+		)
+	)
+	(global_label
+		"SONY_RESET_N_RAW"
+		(shape bidirectional)
+		(at 99.06 173.99 0)
+		(effects (font (size 0.8 0.8)) (justify left))
+		(uuid "9cf0a41d-897f-5399-a193-04c00465db39")
+	)
+	(global_label
+		"SONY_POWER_GOOD"
+		(shape bidirectional)
+		(at 99.06 181.61 0)
+		(effects (font (size 0.8 0.8)) (justify left))
+		(uuid "568b6d4a-2e6d-54d7-b47b-085f6780d78b")
+	)
+	(symbol
+		(lib_id "Device:R")
+		(at 147.32 203.2 0)
+		(unit 1)
+		(in_bom yes)
+		(on_board yes)
+		(dnp no)
+		(uuid "f003ece9-b187-5e69-8033-693deb5eb8fa")
+		(property "Reference" "R13" (at 154.94 201.92999999999998 0) (effects (font (size 1 1)) (justify left)))
+		(property "Value" "100k" (at 154.94 204.47 0) (effects (font (size 1 1)) (justify left)))
+		(property
+			"Footprint"
+			"DAR1000ES:Bottom_Resistor_THT__R_Axial_DIN0207_L6.3mm_D2.5mm_P7.62mm_Horizontal"
+			(at 147.32 203.2 0)
+			(hide yes)
+			(effects (font (size 1 1)))
+		)
+		(pin "1" (uuid "31c15c98-43b1-5a1c-801a-9daff4e8f57e"))
+		(pin "2" (uuid "417cdd4e-2941-5609-833e-94a8d330b862"))
+		(instances
+			(project
+				"DAR-1000ES-v3"
+				(path
+					"/f34b12ab-7a38-51aa-83c5-08118ee179c8/55e31ced-cf75-50f1-83ff-24354f1944ad"
+					(reference "R13")
+					(unit 1)
+				)
+			)
+		)
+	)
+	(global_label
+		"SONY_POWER_GOOD"
+		(shape bidirectional)
+		(at 147.32 199.39 0)
+		(effects (font (size 0.8 0.8)) (justify left))
+		(uuid "8eb4f912-1d5e-5664-b2f7-0808f007efc7")
+	)
+	(global_label
+		"GND"
+		(shape bidirectional)
+		(at 147.32 207.01 0)
+		(effects (font (size 0.8 0.8)) (justify left))
+		(uuid "4af0a11a-b064-5ae2-be8e-ee685ca9e98e")
+	)
+	(symbol
+		(lib_id "Device:C")
+		(at 198.12 228.6 0)
+		(unit 1)
+		(in_bom yes)
+		(on_board yes)
+		(dnp no)
+		(uuid "3c5331ae-b6be-57cb-ad05-6a84fa7c4eee")
+		(property "Reference" "C6" (at 205.74 227.32999999999998 0) (effects (font (size 1 1)) (justify left)))
+		(property "Value" "100nF" (at 205.74 229.87 0) (effects (font (size 1 1)) (justify left)))
+		(property
+			"Footprint"
+			"DAR1000ES:Bottom_Capacitor_THT__C_Disc_D5.0mm_W2.5mm_P5.00mm"
+			(at 198.12 228.6 0)
+			(hide yes)
+			(effects (font (size 1 1)))
+		)
+		(pin "1" (uuid "0063d026-78af-5dd9-9e35-2b3c914a387c"))
+		(pin "2" (uuid "7d5fac95-f309-5ea9-8fe9-19439675c4bc"))
+		(instances
+			(project
+				"DAR-1000ES-v3"
+				(path "/f34b12ab-7a38-51aa-83c5-08118ee179c8/55e31ced-cf75-50f1-83ff-24354f1944ad" (reference "C6") (unit 1))
+			)
+		)
+	)
+	(global_label
+		"LOCAL_5V"
+		(shape bidirectional)
+		(at 198.12 224.79 0)
+		(effects (font (size 0.8 0.8)) (justify left))
+		(uuid "94cc965e-3f9f-5241-9e73-dfbe0a7a54d9")
+	)
+	(global_label
+		"GND"
+		(shape bidirectional)
+		(at 198.12 232.41 0)
+		(effects (font (size 0.8 0.8)) (justify left))
+		(uuid "bdae18be-8d00-50ee-9075-885330308d5e")
+	)
+	(symbol
+		(lib_id "Device:C")
+		(at 248.92 228.6 0)
+		(unit 1)
+		(in_bom yes)
+		(on_board yes)
+		(dnp no)
+		(uuid "d2266e61-d6fc-5c47-8dd1-4470c1f588a5")
+		(property
+			"Reference"
+			"C7"
+			(at 256.53999999999996 227.32999999999998 0)
+			(effects (font (size 1 1)) (justify left))
+		)
+		(property "Value" "100nF" (at 256.53999999999996 229.87 0) (effects (font (size 1 1)) (justify left)))
+		(property
+			"Footprint"
+			"DAR1000ES:Bottom_Capacitor_THT__C_Disc_D5.0mm_W2.5mm_P5.00mm"
+			(at 248.92 228.6 0)
+			(hide yes)
+			(effects (font (size 1 1)))
+		)
+		(pin "1" (uuid "d3d64089-5230-5074-923d-ca6202047e81"))
+		(pin "2" (uuid "4041a06e-f9d6-50e6-b6bd-93a1f4bef97c"))
+		(instances
+			(project
+				"DAR-1000ES-v3"
+				(path "/f34b12ab-7a38-51aa-83c5-08118ee179c8/55e31ced-cf75-50f1-83ff-24354f1944ad" (reference "C7") (unit 1))
+			)
+		)
+	)
+	(global_label
+		"LOCAL_5V"
+		(shape bidirectional)
+		(at 248.92 224.79 0)
+		(effects (font (size 0.8 0.8)) (justify left))
+		(uuid "cf2ae7e1-fea8-5a9b-93ec-d430d397e9c6")
+	)
+	(global_label
+		"GND"
+		(shape bidirectional)
+		(at 248.92 232.41 0)
+		(effects (font (size 0.8 0.8)) (justify left))
+		(uuid "eb1cc9cc-8e24-5d15-8d14-13399c7cc3d9")
+	)
+	(symbol
+		(lib_id "Device:C")
+		(at 99.06 228.6 0)
+		(unit 1)
+		(in_bom yes)
+		(on_board yes)
+		(dnp no)
+		(uuid "5fa2f90e-e125-53a4-aa26-f8a5d90addfb")
+		(property "Reference" "C8" (at 106.68 227.32999999999998 0) (effects (font (size 1 1)) (justify left)))
+		(property "Value" "100nF" (at 106.68 229.87 0) (effects (font (size 1 1)) (justify left)))
+		(property
+			"Footprint"
+			"DAR1000ES:Bottom_Capacitor_THT__C_Disc_D5.0mm_W2.5mm_P5.00mm"
+			(at 99.06 228.6 0)
+			(hide yes)
+			(effects (font (size 1 1)))
+		)
+		(pin "1" (uuid "103910d2-b3c3-5f46-8380-6fed4e3a3737"))
+		(pin "2" (uuid "7cf51247-0be0-5bb7-864c-aa60aaa6aa94"))
+		(instances
+			(project
+				"DAR-1000ES-v3"
+				(path "/f34b12ab-7a38-51aa-83c5-08118ee179c8/55e31ced-cf75-50f1-83ff-24354f1944ad" (reference "C8") (unit 1))
+			)
+		)
+	)
+	(global_label
+		"SONY_5V_SENSE"
+		(shape bidirectional)
+		(at 99.06 224.79 0)
+		(effects (font (size 0.8 0.8)) (justify left))
+		(uuid "5282800a-4196-56b4-9e33-29dc884c5d83")
+	)
+	(global_label
+		"GND"
+		(shape bidirectional)
+		(at 99.06 232.41 0)
+		(effects (font (size 0.8 0.8)) (justify left))
+		(uuid "3ca50354-9250-5c0c-b387-b36012cda9db")
+	)
+	(text
+		"ENABLE_x HIGH requests output; LOW / floating disables. Sony power must also be qualified."
+		(at 25.4 25.4 0)
+		(effects (font (size 1.1 1.1)) (justify left))
+		(uuid "afec204a-4402-5c1e-b029-bff9752b3857")
+	)
+	(text
+		"MCP100-475: trip range 4.50-4.75 V; release delay 150-700 ms. No connection between the two 5 V rails."
+		(at 25.4 30.48 0)
+		(effects (font (size 1.1 1.1)) (justify left))
+		(uuid "465bf96c-c7c5-5acc-9cf9-9cb81a67e653")
+	)
+	(text
+		"AHCT00 TTL inputs accept 3.3 V GPIOs; NAND outputs drive the 5 V /OE nets. Retain all existing /OE pull-ups."
+		(at 25.4 35.56 0)
+		(effects (font (size 1.1 1.1)) (justify left))
+		(uuid "26097b3b-ccd6-5852-90e4-f2ad6e208c76")
+	)
+	(text
+		"J12 is sense-only: pin 1 common GND, pin 2 Sony 5 V. It must NOT power the local rail."
+		(at 25.4 40.64 0)
+		(effects (font (size 1.1 1.1)) (justify left))
+		(uuid "fe454d51-28a6-5ebc-a0d4-bc6f914e404f")
+	)
+	(embedded_fonts no)
+)
