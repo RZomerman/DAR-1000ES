@@ -14,16 +14,19 @@ The requested experience is:
 1. The user powers the unit on; the ESPs boot.
 2. Once display hardware is safely ready, falling-pixel snow fills the whole
    matrix area.
-3. Snow falls away to reveal `Sony DAR-1000ES`.
-4. That title drops down/off the display, revealing `Elevated Standard`.
-5. Restore the last used radio station, brightness and selected display mode
+3. Snow falls away to reveal `SONY DAR-1000ES`; hold the title briefly.
+4. Star-like dot noise replaces the title, revealing **E** and **S** first in
+   their final positions. The remaining letters build `Elevated Standard`.
+5. Hold the full phrase, then dissolve it back into star-like dots. Clear
+   every dot and show a blank matrix before releasing the overlay.
+6. Restore the last used radio station, brightness and selected display mode
    from a persistent status file; do not reset playback to NPO Radio 2.
 
 The sequence/content and persistence of all three selections above are user
 requirements. Timings, density, startup-artwork brightness limits, skip
 controls and when station audio starts remain recommendations or open decisions.
 The startup sound direction is light, short and high fidelity: high bells for
-the first two stages and an airy swoosh for the final title/tagline transition.
+the snow entry and title reveal, and a soft, airy swoosh for the star transition.
 
 ### Current implementation versus target
 
@@ -59,30 +62,30 @@ within a cell `bit = row * 5 + column`, top-left origin.
 
 | Content | ASCII glyphs, including spaces/hyphen | Placement in cells, numbered left to right |
 | --- | ---: | --- |
-| `Sony DAR-1000ES` | 15 | Text in 4-18; three blank cells left, four right |
-| `Elevated Standard` | 17 | Text in 3-19; two blank cells left, three right |
+| `SONY DAR-1000ES` | 15 | Text in 4-18; three blank cells left, four right |
+| `Elevated Standard` | 17 | Text in 2-18; one blank cell left, four right (browser preview) |
 
 Render the exact case and ASCII hyphen shown, using the existing 5x7 font.
 The 15-cell title leaves seven spare cells: exact symmetric whole-cell
 centering is impossible; the placement above chooses the left-biased nearest
-center. The 17-cell tagline also uses the left-biased nearest center, with
-two blank cells left and three right.
+center. The tagline uses the browser preview's placement: **E** in cell 2 and
+**S** in cell 11. Both stay in place as the other letters appear.
 Each phrase fits on its own across one row of cells without horizontal
-scrolling. This is pixel animation, **not** an assumption that the existing
-text marquee implements vertical movement.
+scrolling. Apply effects to matrix dots only.
 
 - **Fill:** spawn falling dots across all 110 logical columns and accumulate
   snow through all seven rows until the entire matrix area is filled.
   Physical cell gaps remain dark; fixed icons, numeric fields and meters
   are not snow and must not be all illuminated.
-- **Reveal:** drain/fall the snow down beyond row 6, uncovering a stationary
-  centered title mask. Finish with the title alone.
-- **Drop:** translate the title mask down one pixel row per animation step,
-  clipping to rows 0-6. Seven downward steps move it completely below the
-  display. Reveal the stationary tagline as the title leaves; do not imply
-  a taller canvas, simultaneous stacked lines or a simulated second display.
-- **Finish:** hold the tagline, then release the temporary overlay to current
-  connection status or the restored display mode.
+- **Drain / title:** drain the snow down beyond row 6, uncovering a stationary
+  title mask. Hold the unobscured title before starting the star reveal.
+- **Star reveal:** replace the title with sparse, twinkling dots. Resolve **E**
+  and **S** first, then build the remaining letters from left to right while
+  the noise thins out. Hold the full phrase without noise.
+- **Star dissolve / blank:** break the letters back into twinkling dots, let
+  the dots fade out, and submit a fully blank matrix frame before handing off
+  to connection status or the restored display mode. On cancellation or safety
+  loss, use the existing stop path immediately; do not wait for a blank frame.
 
 Keep fixed-element fields blank during the artwork; after it, use only
 truthful source/status indicators. Preserve the existing 26-slot scan,
@@ -91,14 +94,16 @@ transfer/blanking timing and physical stop/output-disable mechanisms.
 ### Recommended animation budget (not settled)
 
 Use elapsed-time scheduling rather than blocking sleeps or per-dot work in
-the real-time scan. Suggested phases: fill 1.0-1.5 s, drain/reveal 0.8-1.2 s,
-title dwell 0.8-1.2 s, seven-row drop 0.35-0.7 s, tagline dwell 1.0-1.5 s.
+the real-time scan. The browser preview uses a **6.25 s** timeline: snow fill
+1.25 s, drain/title reveal 0.90 s, title hold 0.85 s, star reveal 1.25 s,
+phrase hold 1.00 s, and star dissolve 1.00 s, ending on a blank frame.
 Recommended hard artwork deadline: **7 s from its first frame**; finish or
 abort the overlay by then regardless of random snow distribution or network
-state. The full-fill endpoint must be deterministic and brief, not wait
-indefinitely for every randomly chosen dot.
+state. Schedule the blank frame within the deadline on normal completion.
+The full-fill endpoint must be deterministic and brief, not wait indefinitely
+for every randomly chosen dot.
 
-Snow density, easing, refresh/update rate and final dwell need visual review
+Snow and star density, easing, refresh/update rate and dwell need visual review
 on the actual seven-row display. Brightness is **not selected here**: use only
 a subsequently validated startup duty/load limit, not a guessed percentage.
 Existing low-duty text/held-grid tests do not certify a full 770-dot frame.
@@ -108,7 +113,7 @@ the specification rather than silently treating sparse snow as full fill.
 
 ## Startup sound direction
 
-**Required creative direction, not an implemented audio asset:** a short,
+**Required creative direction, not installed behavior:** a short,
 light, high-fidelity sonic signature synchronized with the animation. Use
 delicate high bells in the first and second stages, followed by a soft swoosh
 for the final stage. Avoid a loud boot jingle, heavy bass impact, harsh
@@ -120,8 +125,13 @@ timing:
 | Visual stage | Proposed sound |
 | --- | --- |
 | Snow starts falling and filling the screen | A sparse, soft high-bell shimmer; leave space between notes rather than sounding every falling dot. |
-| Snow falls away to reveal `Sony DAR-1000ES` | A second clear, complementary bell accent as the name becomes readable, with a short, clean decay. |
-| Title drops and `Elevated Standard` appears | A brief, airy swoosh following the downward movement, settling gently as the tagline is revealed. No impact or additional loud sting. |
+| Snow falls away to reveal `SONY DAR-1000ES` | A second clear, complementary bell accent as the name becomes readable, with a short, clean decay. |
+| Stars reveal `Elevated Standard`, then dissolve to blank | Audition a brief, airy swoosh for the star transition; let the tail finish by the return to normal display. No impact or additional loud sting. |
+
+The browser preview uses the repository's
+[`media/dar-startup-sound-v1.wav`](media/dar-startup-sound-v1.wav), a 6.8 s
+stereo PCM clip, synchronized to the preview timeline. This is a candidate for
+audition, not an approved firmware asset, playback level or cue mix.
 
 Keep the complete signature within the artwork sequence; its tail should
 finish before normal station listening begins in the recommended mix. Exact
@@ -170,15 +180,11 @@ INHIBITED ---- gate/init fault or deadline ----> SAFE-STOPPED
         | verified hardware permission + controller ready
         | + accepted saved-OFF policy
         v
-SNOW-FILL -> DRAIN / TITLE -> TITLE-DROP -> TAGLINE
-        |                                  |
-        +---- artwork deadline ------------+
-                                           v
-                                      RESTORE-STATUS
-                                           |
-                       current-generation playback/data valid
-                                           v
-                                      RESTORED-MODE
+SNOW-FILL -> DRAIN / TITLE -> TITLE-HOLD -> STAR-REVEAL
+        -> PHRASE-HOLD -> STAR-DISSOLVE -> BLANK -> RESTORE-STATUS
+
+Artwork deadline: abort unfinished artwork -> RESTORE-STATUS
+RESTORE-STATUS -> current-generation playback/data valid -> RESTORED-MODE
 
 Any state: gate loss / Stop / safety action -> SAFE-STOPPED
 Parallel: load saved station -> audio/link wait -> connecting -> playing/error
@@ -187,7 +193,7 @@ Parallel: load saved station -> audio/link wait -> connecting -> playing/error
 | State | Entry/output and readiness conditions | Exit/failure target |
 | --- | --- | --- |
 | INHIBITED | No display output. Validate settings and initialize bounded rendering tasks. Independently request the saved radio station when the playback service is ready. | Start artwork only with a fresh authorized boot event, verified hardware permission, controller scan readiness and resolved OFF policy. Timeout remains stopped. |
-| SNOW-FILL / DRAIN / TITLE-DROP / TAGLINE | Temporary matrix overlay under current output authorization; no preference writes. Check cancellation/authorization before every submission. | Advance on finite deadlines, not network events; any safety loss invalidates queued work. |
+| SNOW-FILL / DRAIN / TITLE / TITLE-HOLD / STAR-REVEAL / PHRASE-HOLD / STAR-DISSOLVE / BLANK | Temporary matrix overlay under current output authorization; no preference writes. Check cancellation/authorization before every submission. | Advance on finite deadlines, not network events. On normal completion, present BLANK before RESTORE-STATUS. Any safety loss invalidates queued work immediately. |
 | RESTORE-STATUS | Release artwork. If still connecting, show `Connecting`, `Retrying` or `Offline` as appropriate, subject to OFF/stop state. | Current-generation valid data permits the selected mode. Failure stays explicit; no stale “playing” state. |
 | RESTORED-MODE | Render the saved mode with truthful current data; unavailable metadata gets explicit unavailable/station fallback, never invented song details. | Normal UI takes over; future reconnects do not replay artwork. |
 | SAFE-STOPPED | Stop scan through existing stop path; independent hardware gate disables outputs on electrical faults. Clear overlay ownership and pending startup submissions. | No automatic retry/frame may restart output. Require a fresh valid authorization/recovery action under the eventual interlock policy. |
@@ -522,7 +528,7 @@ flashing/reset/service is safe without a separately verified procedure.
 
 ### Today
 
-The snow startup is a proposal, not something already installed. An ESP
+The startup animation is a proposal, not something already installed. An ESP
 reboot currently leaves the display stopped; radio normally starts at NPO
 Radio 2 rather than restoring your last station. Do not remove the
 hardware-ready check or repeatedly reset the connected ESP to try the effect.
@@ -535,10 +541,11 @@ do not sense Sony power or buffer readiness.
 1. Power the unit on normally. The two ESPs may finish booting at different
    times; the display waits for verified hardware permission.
 2. Snow falls across the entire matrix area, fills it and falls away to show
-   **Sony DAR-1000ES**, accompanied by delicate high bells for those two stages
-   once audio is ready.
-3. The title drops out through the bottom of the seven-pixel-high display,
-   revealing **Elevated Standard**, with a short, soft airy swoosh.
+   **SONY DAR-1000ES**. In the browser preview, the startup soundtrack plays
+   under the animation; hardware playback is not yet approved.
+3. The title gives way to sparkling dots. **E** and **S** appear first, then
+   the other letters fill in **Elevated Standard**. After a short hold, the
+   phrase dissolves back into dots and the display clears completely.
 4. Your last radio station, brightness and display mode are restored from the
    status file; playback does not reset to the hardcoded NPO Radio 2 station.
    If connection is not ready, you see an honest connecting/retrying/offline
@@ -561,7 +568,7 @@ Exact sound timing, level and any optional skip gesture are not yet finalized.
   persistence itself is required.
 - Saved OFF versus the one-time artwork; first-use/invalid-record behavior
   and restoration after preset edits/deletion.
-- Snow density, exact timing/dwell and optional skip input without changing
+- Snow and star density, exact timing/dwell and optional skip input without changing
   existing DISPLAY/CHECK, DIM, preset or Stop semantics.
 - When audible station playback begins; startup-sound notes, timbre, exact
   timing/mix, asset format, level and mute preference; future READY protocol
