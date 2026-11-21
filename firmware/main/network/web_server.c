@@ -1,4 +1,7 @@
 #include "web_server.h"
+#ifdef CONFIG_SONY_OPTICAL_BENCH
+#include "sony_optical_bench.h"
+#endif
 
 #include "esp_log.h"
 #include "esp_http_server.h"
@@ -20,6 +23,9 @@
 #include "log_stream.h"
 #include "rtsp_server.h"
 #include "audio_output.h"
+#ifdef SONY_PCM_BENCH_CONTROLS
+#include "dar_radio_html.h"
+#endif
 #include "radio.h"
 #ifdef CONFIG_SONY_UART_LINK
 #include "sony_uart_link.h"
@@ -99,7 +105,13 @@ static esp_err_t serve_spiffs_file(httpd_req_t *req, const char *path,
 
 // API handlers
 static esp_err_t root_handler(httpd_req_t *req) {
+#ifdef SONY_PCM_BENCH_CONTROLS
+  httpd_resp_set_type(req, "text/html");
+  httpd_resp_set_hdr(req, "Cache-Control", "no-store");
+  return httpd_resp_send(req, dar_radio_html, sizeof(dar_radio_html) - 1);
+#else
   return serve_spiffs_file(req, "/spiffs/www/radio.html", "text/html");
+#endif
 }
 
 #ifdef CONFIG_SONY_SCREEN_BENCH
@@ -904,6 +916,9 @@ static esp_err_t biamp_post_handler(httpd_req_t *req) {
 }
 #endif /* CONFIG_DAC_TAS58XX */
 
+#ifdef CONFIG_SONY_SPLIT_AUDIO_NODE
+#include "sony_ota.h"
+#else
 static esp_err_t ota_update_handler(httpd_req_t *req) {
   if (req->content_len == 0) {
     httpd_resp_send_err(req, HTTPD_400_BAD_REQUEST, "No firmware uploaded");
@@ -929,6 +944,8 @@ static esp_err_t ota_update_handler(httpd_req_t *req) {
 
   return ESP_OK;
 }
+
+#endif
 
 static const char *reset_reason_str(esp_reset_reason_t r) {
   switch (r) {
@@ -1340,13 +1357,16 @@ esp_err_t web_server_start(uint16_t port) {
   config.lru_purge_enable = true; // Reclaim stale sockets when all are in use
   config.max_uri_handlers =
       36; // Includes radio controls and the original settings page.
-#ifdef CONFIG_SONY_UART_LINK
+#ifdef CONFIG_SONY_OPTICAL_BENCH
+  config.max_uri_handlers += 1;
+#endif
+#if defined(CONFIG_SONY_UART_LINK) && !defined(CONFIG_SONY_SPLIT_AUDIO_NODE)
   config.max_uri_handlers += 2;
 #endif
 #ifdef CONFIG_SONY_SCREEN_BENCH
   config.max_uri_handlers += 4;
 #endif
-#ifdef CONFIG_SONY_MANUAL_CONTROLS
+#if defined(CONFIG_SONY_MANUAL_CONTROLS) || defined(SONY_PCM_BENCH_CONTROLS)
   config.max_uri_handlers += 1;
 #endif
 #ifdef DAC_HAS_SUB_OFFSET
@@ -1366,7 +1386,7 @@ esp_err_t web_server_start(uint16_t port) {
   }
 
   // Register handlers
-#ifdef CONFIG_SONY_UART_LINK
+#if defined(CONFIG_SONY_UART_LINK) && !defined(CONFIG_SONY_SPLIT_AUDIO_NODE)
   err = sony_uart_link_register_http(s_server);
   if (err != ESP_OK)
     return err;
@@ -1517,9 +1537,18 @@ esp_err_t web_server_start(uint16_t port) {
   httpd_register_uri_handler(s_server, &biamp_post_uri);
 #endif
 
+#ifdef CONFIG_SONY_OPTICAL_BENCH
+  const httpd_uri_t optical = {.uri = "/api/bench/optical", .method = HTTP_POST,
+                              .handler = sony_optical_bench_run};
+  ESP_ERROR_CHECK(httpd_register_uri_handler(s_server, &optical));
+#endif
   httpd_uri_t ota_uri = {.uri = "/api/ota/update",
                          .method = HTTP_POST,
+#ifdef CONFIG_SONY_SPLIT_AUDIO_NODE
+                         .handler = sony_ota_update};
+#else
                          .handler = ota_update_handler};
+#endif
   httpd_register_uri_handler(s_server, &ota_uri);
 
   httpd_uri_t system_info_uri = {.uri = "/api/system/info",

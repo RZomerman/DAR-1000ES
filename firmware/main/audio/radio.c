@@ -407,6 +407,7 @@ static void decode_task(void *unused) {
 }
 
 bool radio_airplay_active(void) { return atomic_load(&airplay); }
+bool radio_pcm_active(void) { return atomic_load(&decoding); }
 uint32_t radio_generation(void) { return atomic_load(&generation); }
 
 #ifdef CONFIG_SONY_SCREEN_BENCH
@@ -539,6 +540,58 @@ static void selection_changed(void) {
   atomic_store(&decoding, false);
   atomic_fetch_add(&generation, 1);
 }
+
+#ifdef CONFIG_SONY_SPLIT_AUDIO_NODE
+void radio_link_status(radio_link_status_t *status) {
+  if (!status || !lock)
+    return;
+  xSemaphoreTake(lock, portMAX_DELAY);
+  memset(status, 0, sizeof(*status));
+  status->airplay = atomic_load(&airplay);
+  strlcpy(status->title, status->airplay ? airplay_metadata.title : radio_title,
+          sizeof(status->title));
+  status->generation = atomic_load(&generation);
+  status->sample_rate = status->airplay ? 0 : radio_rate;
+  status->channels = status->airplay ? 0 : radio_channels;
+  status->playing = status->airplay ? audio_receiver_is_playing() :
+                    atomic_load(&decoding) && !error_text[0];
+  status->failed = !status->airplay && error_text[0] != 0;
+  xSemaphoreGive(lock);
+}
+
+void radio_link_metadata(sony_uart_metadata_t *metadata) {
+  memset(metadata, 0, sizeof(*metadata));
+  if (wifi_is_connected())
+    wifi_get_ip_str(metadata->ip, sizeof(metadata->ip));
+  if (!lock) return;
+  xSemaphoreTake(lock, portMAX_DELAY);
+  if (!atomic_load(&airplay)) {
+    int current_codec = atomic_load(&codec);
+    strlcpy(metadata->codec,
+            current_codec == ESP_AUDIO_SIMPLE_DEC_TYPE_MP3 ? "MP3" :
+            current_codec == ESP_AUDIO_SIMPLE_DEC_TYPE_AAC ? "AAC" : "",
+            sizeof(metadata->codec));
+    strlcpy(metadata->bitrate, stream_bitrate, sizeof(metadata->bitrate));
+    strlcpy(metadata->genre, stream_genre, sizeof(metadata->genre));
+    strlcpy(metadata->url, stream_url, sizeof(metadata->url));
+  }
+  xSemaphoreGive(lock);
+}
+
+esp_err_t radio_select_url(const char *name, const char *url) {
+  if (!lock)
+    return ESP_ERR_INVALID_STATE;
+  if (!name || !*name || strlen(name) >= sizeof(preset_name) || !valid_url(url))
+    return ESP_ERR_INVALID_ARG;
+  xSemaphoreTake(lock, portMAX_DELAY);
+  strlcpy(preset_name, name, sizeof(preset_name));
+  strlcpy(preset_url, url, sizeof(preset_url));
+  selected = 5;
+  selection_changed();
+  xSemaphoreGive(lock);
+  return ESP_OK;
+}
+#endif
 
 esp_err_t radio_select_preset(unsigned number) {
   radio_preset_t preset;
@@ -703,6 +756,20 @@ static esp_err_t status_handler(httpd_req_t *req) {
   cJSON_AddStringToObject(i2s, "format", "Philips I2S");
   cJSON_AddNumberToObject(i2s, "write_errors", audio_output_get_i2s_write_errors());
 #endif
+#ifdef SONY_PCM_BENCH_CONTROLS
+  cJSON *bench = cJSON_AddObjectToObject(root, "pcm_bench_controls");
+  if (!bench) {
+    cJSON_Delete(root);
+    return httpd_resp_send_err(req, HTTPD_500_INTERNAL_SERVER_ERROR, "Out of memory");
+  }
+  int dmute, override, amute, relay;
+  audio_output_get_bench_controls(&dmute, &override, &amute, &relay);
+  cJSON_AddNumberToObject(bench, "d_mute", dmute);
+  cJSON_AddNumberToObject(bench, "d_mute_mode", override);
+  cJSON_AddNumberToObject(bench, "a_mute", amute);
+  cJSON_AddNumberToObject(bench, "relay", relay);
+  cJSON_AddNumberToObject(bench, "pcm_mirror", audio_output_bench_mirror_active());
+#endif
 #ifdef CONFIG_SONY_MANUAL_CONTROLS
   if (sony_manual_controls_status(root) != ESP_OK) {
     cJSON_Delete(root);
@@ -712,6 +779,10 @@ static esp_err_t status_handler(httpd_req_t *req) {
 #endif
   cJSON_AddNumberToObject(root, "spdif_errors", audio_output_get_write_errors());
   cJSON_AddNumberToObject(root, "spdif_dma_underruns", audio_output_get_underruns());
+#ifdef CONFIG_AUDIO_OUTPUT_SPDIF
+  cJSON_AddNumberToObject(root, "radio_pcm_gap_frames", audio_output_get_radio_pcm_gap_frames());
+  cJSON_AddNumberToObject(root, "spdif_frames_sent", audio_output_get_sent_frames());
+#endif
   cJSON_AddNumberToObject(root, "internal_heap", heap_caps_get_free_size(MALLOC_CAP_INTERNAL));
   cJSON_AddStringToObject(now_playing, "codec", ap ? diagnostics.format.codec :
       (atomic_load(&codec) == ESP_AUDIO_SIMPLE_DEC_TYPE_MP3 ? "MP3" :
@@ -795,8 +866,14 @@ static esp_err_t select_handler(httpd_req_t *req) {
   return status_handler(req);
 }
 
-#ifdef CONFIG_SONY_MANUAL_CONTROLS
+#if defined(CONFIG_SONY_MANUAL_CONTROLS) || defined(SONY_PCM_BENCH_CONTROLS)
 static esp_err_t sony_control_handler(httpd_req_t *req) {
+#ifdef SONY_PCM_BENCH_CONTROLS
+  char confirm[sizeof("outputs-disconnected")];
+  if (httpd_req_get_hdr_value_str(req, "X-Sony-Bench", confirm, sizeof(confirm)) != ESP_OK ||
+      strcmp(confirm, "outputs-disconnected"))
+    return httpd_resp_send_err(req, HTTPD_400_BAD_REQUEST, "Confirm isolated outputs");
+#endif
   char body[128];
   if (!req->content_len || req->content_len >= sizeof(body))
     return httpd_resp_send_err(req, HTTPD_400_BAD_REQUEST, "Invalid request size");
@@ -808,6 +885,7 @@ static esp_err_t sony_control_handler(httpd_req_t *req) {
   }
   body[received] = '\0';
   cJSON *json = cJSON_Parse(body);
+#ifndef SONY_PCM_BENCH_CONTROLS
   cJSON *action = cJSON_GetObjectItemCaseSensitive(json, "action");
   if (cJSON_IsString(action) &&
       strcmp(action->valuestring, "replay_captured_startup") == 0) {
@@ -823,15 +901,25 @@ static esp_err_t sony_control_handler(httpd_req_t *req) {
     }
     return status_handler(req);
   }
+#endif
   cJSON *signal = cJSON_GetObjectItemCaseSensitive(json, "signal");
   cJSON *level = cJSON_GetObjectItemCaseSensitive(json, "level");
   if (!cJSON_IsString(signal) || !cJSON_IsNumber(level) ||
-      level->valuedouble != level->valueint || level->valueint < 0 ||
+      level->valuedouble != level->valueint ||
+#ifdef SONY_PCM_BENCH_CONTROLS
+      level->valueint < -1 ||
+#else
+      level->valueint < 0 ||
+#endif
       level->valueint > 1) {
     cJSON_Delete(json);
     return httpd_resp_send_err(req, HTTPD_400_BAD_REQUEST, "Invalid signal or level");
   }
+#ifdef SONY_PCM_BENCH_CONTROLS
+  esp_err_t err = audio_output_set_bench_control(signal->valuestring, level->valueint);
+#else
   esp_err_t err = sony_manual_controls_set(signal->valuestring, level->valueint);
+#endif
   cJSON_Delete(json);
   if (err == ESP_ERR_INVALID_ARG)
     return httpd_resp_send_err(req, HTTPD_400_BAD_REQUEST, "Unknown signal");
@@ -855,7 +943,7 @@ esp_err_t radio_register_http(httpd_handle_t server) {
     presets.handler = presets_post_handler;
     if (result == ESP_OK) result = httpd_register_uri_handler(server, &presets);
   }
-#ifdef CONFIG_SONY_MANUAL_CONTROLS
+#if defined(CONFIG_SONY_MANUAL_CONTROLS) || defined(SONY_PCM_BENCH_CONTROLS)
   if (result == ESP_OK) {
     httpd_uri_t control = {.uri = "/api/sony-control", .method = HTTP_POST,
                            .handler = sony_control_handler};
@@ -888,10 +976,16 @@ esp_err_t radio_init(void) {
       esp_audio_simple_dec_register_default() != ESP_AUDIO_ERR_OK) return ESP_FAIL;
   if (rtsp_events_register(airplay_event, NULL) != 0) return ESP_FAIL;
   /* HTTP callbacks nest normalization below the stream task's audio buffers. */
+#ifdef CONFIG_SONY_SPLIT_AUDIO_NODE
+  /* Keep decoding off the core that resamples and feeds S/PDIF. */
+  const BaseType_t decode_core = 0;
+#else
+  const BaseType_t decode_core = 1;
+#endif
   if (xTaskCreatePinnedToCore(fetch_task, "radio_net", 12288, NULL, 3,
                              NULL, 0) != pdPASS ||
       xTaskCreatePinnedToCore(decode_task, "radio_dec", 8192, NULL, 4,
-                             NULL, 1) != pdPASS) return ESP_ERR_NO_MEM;
+                             NULL, decode_core) != pdPASS) return ESP_ERR_NO_MEM;
 #ifdef CONFIG_SONY_SCREEN_BENCH
   if (xTaskCreatePinnedToCore(display_task, "radio_vfd", 8192, NULL, 2,
                              NULL, 0) != pdPASS) return ESP_ERR_NO_MEM;

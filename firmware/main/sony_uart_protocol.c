@@ -1,6 +1,9 @@
 #include "sony_uart_protocol.h"
 #include <string.h>
 
+_Static_assert(sizeof(sony_uart_metadata_t) % 4 == 0 &&
+               SONY_UART_METADATA_LAST <= UINT8_MAX, "Metadata frame range");
+
 static uint16_t checksum(const uint8_t *data, size_t size) {
   uint16_t crc = 0xffff;
   for (size_t i = 0; i < size; ++i) {
@@ -37,12 +40,15 @@ bool sony_uart_feed(sony_uart_parser_t *parser, uint8_t byte,
     return false;
   const uint8_t *data = parser->bytes;
   uint16_t received = (uint16_t)data[12] | (uint16_t)data[13] << 8;
-  if (data[2] != 1 || data[3] < SONY_UART_PING || data[3] > SONY_UART_ACK ||
+  if (data[2] != 1 || data[3] < SONY_UART_PING ||
+      (data[3] > SONY_UART_STARTUP &&
+       (data[3] < SONY_UART_TITLE0 || data[3] > SONY_UART_METADATA_LAST)) ||
       checksum(data, 12) != received) {
     ++parser->bad_frames;
     memmove(parser->bytes, parser->bytes + 1, --parser->used);
     return false;
   }
+
   *message = (sony_uart_message_t){.type = data[3]};
   for (unsigned i = 0; i < 4; ++i) {
     message->sequence |= (uint32_t)data[4 + i] << (8 * i);
@@ -50,4 +56,21 @@ bool sony_uart_feed(sony_uart_parser_t *parser, uint8_t byte,
   }
   parser->used = 0;
   return true;
+}
+
+bool sony_uart_metadata_feed(sony_uart_metadata_t *staging, unsigned *next,
+                             const sony_uart_message_t *message) {
+  if (message->type < SONY_UART_METADATA0 || message->type > SONY_UART_METADATA_LAST)
+    return false;
+  unsigned part = message->type - SONY_UART_METADATA0;
+  if (part == 0) *next = 0;
+  if (part != *next) return false;
+  for (unsigned i = 0; i < 4; ++i)
+    ((unsigned char *)staging)[part * 4 + i] = (uint8_t)(message->value >> (8 * i));
+  if (++*next != SONY_UART_METADATA_PARTS) return false;
+  return !staging->codec[sizeof(staging->codec) - 1] &&
+         !staging->bitrate[sizeof(staging->bitrate) - 1] &&
+         !staging->genre[sizeof(staging->genre) - 1] &&
+         !staging->ip[sizeof(staging->ip) - 1] &&
+         !staging->url[sizeof(staging->url) - 1];
 }

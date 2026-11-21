@@ -2,7 +2,17 @@
 
 ## Status and scope
 
-**Design specification, not installed behavior.** This chapter specifies a
+Controller firmware 0.3.49 adds a **manual, isolated bench test** of the
+display artwork only. It does not change boot behavior. With Sony-side
+display signals disconnected and the buffers disabled, stop output, select
+AHCT v2, confirm isolation on `/screen`, then click **Arm MONO startup test**.
+Press physical or virtual **MONO MODE** within 30 seconds; the virtual keypad
+must be armed separately. Each arm allows one run. The controller queues a
+blank matrix at the end and returns to stopped output. This does not start
+audio, tune a station, or restore saved state. Do not reconnect the Sony
+display for this test: its full-fill load limit remains unvalidated.
+
+**The automatic procedure below is a design specification.** It specifies a
 future authorized power-on sequence. It does not implement firmware, establish
 an electrical interlock, or authorize connected reset, flashing or automatic
 display start. The present AHCT-v2 display must remain **boot-stopped** until
@@ -38,7 +48,7 @@ the snow entry and title reveal, and a soft, airy swoosh for the star transition
 | Saved radio data | Custom URL and assigned preset records are stored in NVS; this is not last-station restore | Persistent status file containing station identity/name/direct stream URL, brightness and display mode; never rewrite presets during startup |
 | Two ESPs | Controller still decodes radio locally; UART is diagnostic PING/PONG/MAP/ACK, not playback control | Controller renders/keypad/UI; audio ESP eventually connects, decodes and reports actual playback |
 | Power button | POWER mapping unverified/disabled in the 0.3.48 virtual panel | Verified power-event detection/coordination remains to be designed |
-| Startup artwork | No sequence specified here is implemented | Temporary, bounded matrix overlay; no persistent “startup display mode” |
+| Startup artwork | 0.3.49 prepares the manual, isolated MONO bench test above | Temporary, bounded matrix overlay; no persistent “startup display mode” |
 
 Primary evidence: [operating guide](13-screen-driver-operating-guide.md),
 [display specification](08-esp-display-driver-specification.md) and

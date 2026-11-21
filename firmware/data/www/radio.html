@@ -108,6 +108,34 @@ dd { margin: 0; overflow-wrap: anywhere; }
   <p id="detail" class="muted">NPO Radio 2 is the default on every boot.</p>
   <p id="error" role="alert" hidden></p>
 </section>
+<section class="card" id="pcm-bench-controls" hidden>
+  <h2>Audio GPIO bench controls</h2>
+  <p class="muted">Sony disconnected only. These are commanded levels, not measured voltages.
+    Settings reset on reboot. Chip 4 /OE is unchanged.</p>
+  <p>D.MUTE (GPIO4): <strong id="bench-d_mute"></strong></p>
+  <div class="stations">
+    <button type="button" data-bench="d_mute" data-level="-1">Auto</button>
+    <button type="button" data-bench="d_mute" data-level="0">LOW</button>
+    <button type="button" data-bench="d_mute" data-level="1">HIGH</button>
+  </div>
+  <p>A.MUTE (GPIO6): <strong id="bench-a_mute"></strong></p>
+  <div class="stations">
+    <button type="button" data-bench="a_mute" data-level="0">LOW</button>
+    <button type="button" data-bench="a_mute" data-level="1">HIGH</button>
+  </div>
+  <p>RELAY (GPIO7): <strong id="bench-relay"></strong></p>
+  <div class="stations">
+    <button type="button" data-bench="relay" data-level="0">LOW</button>
+    <button type="button" data-bench="relay" data-level="1">HIGH</button>
+  </div>
+  <label><input type="checkbox" id="bench-isolated"> Sony outputs physically disconnected</label>
+  <p>PCM mirror: <strong id="bench-pcm_mirror"></strong></p>
+  <div class="stations">
+    <button type="button" data-bench="pcm_mirror" data-level="0">Off</button>
+    <button type="button" data-bench="pcm_mirror" data-level="1">On</button>
+  </div>
+  <p id="bench-control-error" role="alert" hidden></p>
+</section>
 <section class="card" id="sony-controls" hidden>
   <h2>Sony manual controls</h2>
   <p class="muted">Levels are ESP output commands, not measured Sony voltages.
@@ -246,7 +274,7 @@ dd { margin: 0; overflow-wrap: anywhere; }
   </div>
   <p class="muted" id="airplay-selection">While AirPlay is connected, your selection is queued for when you disconnect.</p>
 </section>
-<section class="card">
+<section class="card" id="preset-card">
   <h2>Buttons 1–16</h2>
   <p class="muted">Assign a name and a direct HTTP/HTTPS MP3 or AAC stream URL to each
     physical button. Clear both fields and save to unassign a button. Keypad
@@ -283,6 +311,8 @@ const error = document.getElementById("error");
 const urlInput = document.getElementById("url");
 const buttons = [...document.querySelectorAll("[data-station], #custom-play")];
 const controlButtons = [...document.querySelectorAll("[data-control]")];
+const benchButtons = [...document.querySelectorAll("[data-bench]")];
+const benchIsolated = document.getElementById("bench-isolated");
 const replayButton = document.getElementById("replay-startup");
 let busy = false;
 let urlLoaded = false;
@@ -295,6 +325,12 @@ presetRows.innerHTML = Array.from({length:16}, (_, index) => {
 }).join("");
 async function loadPresets() {
   try {
+    const state = await request();
+    if (state.pcm_bench_controls) {
+      document.getElementById("preset-card").textContent =
+        "Edit physical buttons 1–16 on the controller’s settings page.";
+      return;
+    }
     const response = await fetch("/api/radio/presets", {cache:"no-store", signal:AbortSignal.timeout(8000)});
     if (!response.ok) throw new Error(await response.text());
     const presets = await response.json();
@@ -343,6 +379,20 @@ function render(state) {
     ", DATA GPIO" + i2s.data_gpio + ", BCK GPIO" + i2s.bck_gpio +
     " \u00b7 " + (i2s.sample_rate / 1000) + " kHz / " + i2s.bits +
     "-bit stereo \u00b7 write errors: " + i2s.write_errors;
+  const bench = state.pcm_bench_controls;
+  document.getElementById("pcm-bench-controls").hidden = !bench;
+  if (bench) {
+    document.getElementById("bench-pcm_mirror").textContent = bench.pcm_mirror ? "On" : "Off";
+    for (const name of ["d_mute", "a_mute", "relay"])
+      document.getElementById("bench-" + name).textContent =
+        (bench[name] === 0 ? "LOW" : "HIGH") +
+        (name === "d_mute" && bench.d_mute_mode === -1 ? " (Auto)" : "");
+    for (const button of benchButtons) {
+      const name = button.dataset.bench;
+      const mode = name === "d_mute" ? bench.d_mute_mode : bench[name];
+      button.setAttribute("aria-pressed", String(mode === Number(button.dataset.level)));
+    }
+  }
   const controls = state.sony_controls;
   document.getElementById("sony-controls").hidden = !controls;
   if (controls) {
@@ -429,6 +479,34 @@ controlButtons.forEach(button => button.addEventListener("click", async () => {
   } finally {
     busy = false;
     buttons.concat(controlButtons).forEach(item => item.disabled = false);
+  }
+}));
+function updateBenchButtons() {
+  benchButtons.forEach(button => button.disabled = busy || !benchIsolated.checked);
+}
+benchIsolated.addEventListener("change", updateBenchButtons);
+updateBenchButtons();
+benchButtons.forEach(button => button.addEventListener("click", async () => {
+  if (busy || !benchIsolated.checked) return;
+  busy = true;
+  updateBenchButtons();
+  const error = document.getElementById("bench-control-error");
+  error.hidden = true;
+  try {
+    const response = await fetch("/api/sony-control", {
+      method: "POST",
+      headers: {"Content-Type": "application/json", "X-Sony-Bench": "outputs-disconnected"},
+      body: JSON.stringify({signal: button.dataset.bench, level: Number(button.dataset.level)}),
+      signal: AbortSignal.timeout(8000)
+    });
+    if (!response.ok) throw new Error(await response.text() || "Control failed");
+    render(await response.json());
+  } catch (err) {
+    error.textContent = err.message;
+    error.hidden = false;
+  } finally {
+    busy = false;
+    updateBenchButtons();
   }
 }));
 replayButton.addEventListener("click", async () => {

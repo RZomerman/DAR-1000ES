@@ -7,6 +7,156 @@ ROOT = Path(__file__).resolve().parents[1]
 
 
 class KeypadConfigurationTests(unittest.TestCase):
+    def test_bus_recovery_is_bounded_and_leaves_idle_bus_untouched(self):
+        source = (ROOT / "main/sony_keypad.c").read_text()
+        delay_and_clock = source[source.index("static void bus_delay(void)"):
+                                 source.index("static esp_err_t bus_start(void)")]
+        recovery = source[source.index("static void bus_stop(void)"):
+                          source.index("static esp_err_t bus_send(")]
+        harness = r"""
+#include <assert.h>
+#include <stdbool.h>
+typedef int esp_err_t;
+enum { KEYPAD_SDA = 10, KEYPAD_SCL = 9, ESP_OK = 0, ESP_ERR_TIMEOUT = 1 };
+static int scl, sda, pulses, release_after, clock_stuck;
+static void esp_rom_delay_us(int us) { (void)us; }
+static void gpio_set_level(int pin, int level) {
+    if (pin == KEYPAD_SDA) sda = level;
+    else { if (!scl && level) ++pulses; scl = level; }
+}
+static int gpio_get_level(int pin) {
+    return pin == KEYPAD_SCL ? scl && !clock_stuck :
+           sda && pulses >= release_after;
+}
+""" + delay_and_clock + recovery + r"""
+int main(void) {
+    scl = sda = 1; release_after = 0;
+    bus_recover();
+    assert(pulses == 0);
+    release_after = 4;
+    bus_recover();
+    assert(pulses == 4 && scl && sda);
+    pulses = 0; release_after = 100;
+    bus_recover();
+    assert(pulses == 9 && scl && sda);
+    pulses = 0; clock_stuck = 1;
+    bus_recover();
+    assert(pulses == 1 && sda);
+    return 0;
+}
+"""
+        with tempfile.TemporaryDirectory() as temp:
+            path = Path(temp) / "bus_recovery.c"
+            path.write_text(harness)
+            binary = Path(temp) / "bus_recovery"
+            subprocess.run(["cc", "-Wall", "-Wextra", "-Werror",
+                            str(path), "-o", str(binary)], check=True)
+            subprocess.run([str(binary)], check=True)
+
+    def test_controller_debounce_memory_and_check_holds(self):
+        source = (ROOT / "main/sony_keypad.c").read_text()
+        decoder = source[source.index("enum { DISPLAY_KEY_CODE"):
+                         source.index("static void bus_delay(void)")]
+        harness = r"""
+#define CONFIG_SONY_CONTROLLER_NODE 1
+#include <assert.h>
+#include <stdbool.h>
+#include <stdint.h>
+#include <string.h>
+""" + decoder + r"""
+static void press(unsigned code, int64_t down, int64_t up, int expected) {
+    display_button_reset(&display_button, 0);
+    assert(display_button_poll(&display_button, 200) == -1);
+    display_button_event(&display_button, code | 0x80, down);
+    assert(display_button_poll(&display_button, down + 60) == -1);
+    display_button_event(&display_button, code, up);
+    assert(display_button_poll(&display_button, up + 60) == expected);
+}
+static void press_on_down(unsigned code, int expected) {
+    display_button_reset(&display_button, 0);
+    assert(display_button_poll(&display_button, 200) == -1);
+    display_button_event(&display_button, code | 0x80, 300);
+    assert(display_button_poll(&display_button, 319) == -1);
+    assert(display_button_poll(&display_button, 320) == expected);
+    assert(display_button_poll(&display_button, 1600) == -1);
+    display_button_event(&display_button, code, 1700);
+    assert(display_button_poll(&display_button, 1720) == -1);
+}
+int main(void) {
+    press_on_down(23, 0x100 | 23);
+    press_on_down(22, 0x100 | 22);
+    press_on_down(53, 0x100 | 53);
+    press_on_down(59, 0x100 | 59);
+    press_on_down(33, 0x100 | 33);
+    press_on_down(52, 0x100 | 52);
+    press_on_down(27, 0x100 | 27);
+    press_on_down(5, 2);
+    press_on_down(29, BUTTON_MONO_ACTION);
+    press(51, 300, 450, 0x100 | 51);
+    press(51, 300, 1550, 0x200 | 51);
+    press(25, 300, 450, 0x100 | 25);
+    press(25, 300, 2350, 0x200 | 25);
+    press(26, 300, 450, 0x100 | 26);
+    press(26, 300, 1550, 0x200 | 26);
+    press(58, 300, 450, 0);
+    press(58, 300, 1550, 1);
+    display_button_reset(&display_button, 0);
+    assert(display_button_poll(&display_button, 200) == -1);
+    display_button_event(&display_button, 51 | 0x80, 300);
+    assert(display_button_poll(&display_button, 360) == -1);
+    assert(display_button_poll(&display_button, 1500) == (0x200 | 51));
+    assert(display_button_poll(&display_button, 1700) == -1);
+    display_button_event(&display_button, 51, 1800);
+    assert(display_button_poll(&display_button, 1860) == -1);
+    display_button_event(&display_button, 26 | 0x80, 1900);
+    assert(display_button_poll(&display_button, 1960) == -1);
+    assert(display_button_poll(&display_button, 3100) == (0x200 | 26));
+    display_button_event(&display_button, 26, 3200);
+    assert(display_button_poll(&display_button, 3260) == -1);
+    display_button_event(&display_button, 23 | 0x80, 3300);
+    display_button_event(&display_button, 22 | 0x80, 3320);
+    assert(display_button_poll(&display_button, 3380) == -1);
+    display_button_event(&display_button, 23, 3400);
+    display_button_event(&display_button, 22, 3410);
+    assert(display_button_poll(&display_button, 3470) == -1);
+    display_button_reset(&display_button, 0);
+    assert(display_button_poll(&display_button, 200) == -1);
+    display_button_event(&display_button, 53 | 0x80, 300);
+    assert(display_button_poll(&display_button, 310) == -1);
+    display_button_event(&display_button, 53, 340);
+    assert(display_button_poll(&display_button, 359) == -1);
+    assert(display_button_poll(&display_button, 360) == (0x100 | 53));
+    display_button_event(&display_button, 53 | 0x80, 500);
+    display_button_event(&display_button, 53, 510);
+    assert(display_button_poll(&display_button, 530) == -1);
+    display_button_event(&display_button, 53 | 0x80, 550);
+    display_button_event(&display_button, 53, 550);
+    assert(display_button_poll(&display_button, 570) == -1);
+    display_button_event(&display_button, 53 | 0x80, 600);
+    display_button_event(&display_button, 53, 630);
+    assert(display_button_poll(&display_button, 650) == (0x100 | 53));
+    display_button_event(&display_button, 53 | 0x80, 660);
+    display_button_event(&display_button, 53, 690);
+    assert(display_button_poll(&display_button, 710) == (0x100 | 53));
+    display_button_event(&display_button, 53 | 0x80, 800);
+    display_button_event(&display_button, 22 | 0x80, 810);
+    display_button_event(&display_button, 53, 840);
+    display_button_event(&display_button, 22, 850);
+    assert(display_button_poll(&display_button, 870) == -1);
+    display_button_event(&display_button, 26 | 0x80, 1000);
+    display_button_event(&display_button, 26, 2250);
+    assert(display_button_poll(&display_button, 2270) == (0x200 | 26));
+    return 0;
+}
+"""
+        with tempfile.TemporaryDirectory() as temp:
+            path = Path(temp) / "controller_keys.c"
+            path.write_text(harness)
+            binary = Path(temp) / "controller_keys"
+            subprocess.run(["cc", "-Wall", "-Wextra", "-Werror",
+                            str(path), "-o", str(binary)], check=True)
+            subprocess.run([str(binary)], check=True)
+
     def test_virtual_and_physical_events_share_actions_and_lost_lease_cancels(self):
         source = (ROOT / "main/sony_keypad.c").read_text()
         decoder = source[source.index("enum { DISPLAY_KEY_CODE"):
@@ -31,6 +181,7 @@ static bool virtual_enabled;
 static int64_t virtual_seen_ms;
 static int actions[16], count, stops;
 static int sony_screen_start_from_check(void) { actions[count++] = 18; return 0; }
+static int sony_screen_startup_press(void) { actions[count++] = 19; return 0; }
 static int radio_select_preset(unsigned number) { actions[count++] = number + 1; return 0; }
 static int sony_screen_display_button_press(bool long_press) {
     actions[count++] = long_press; return 0;
@@ -42,6 +193,16 @@ static void tick(bool virtual_input, int64_t now) {
     else dispatch_button(display_button_poll(&display_button, now));
 }
 int main(void) {
+    const unsigned measured_codes[] = {23, 22, 26, 27};
+    const char *measured_names[] = {"FINE -", "FINE +", "DIRECT", "LINK"};
+    for (unsigned n = 0; n < 4; ++n) {
+        bool found = false;
+        for (unsigned i = 0; i < sizeof(key_bindings) / sizeof(key_bindings[0]); ++i)
+            if (!strcmp(key_bindings[i].name, measured_names[n]) &&
+                key_bindings[i].code == measured_codes[n])
+                found = true;
+        assert(found);
+    }
     for (unsigned source = 0; source < 2; ++source) {
         count = 0;
         virtual_enabled = source;
@@ -69,13 +230,18 @@ int main(void) {
         record_key(0x23, 4200, source, true);
         tick(source, 4260);
         assert(count == 3);
+        record_key(0x9d, 4400, source, true);
+        tick(source, 4460);
+        record_key(0x1d, 4600, source, true);
+        tick(source, 4660);
+        assert(count == 4 && actions[3] == 19);
         assert(events[(sequence - 1) % EVENT_CAPACITY].virtual_input == (bool)source);
     }
     record_key(0xba, 5000, true, true);
     virtual_seen_ms = 5000;
     virtual_enabled = true;
     poll_virtual(11001);
-    assert(!virtual_enabled && stops == 1 && count == 3);
+    assert(!virtual_enabled && stops == 1 && count == 4);
     assert(!display_button.down[0] && !display_button.down[1]);
     return 0;
 }

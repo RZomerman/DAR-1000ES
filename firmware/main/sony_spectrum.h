@@ -10,6 +10,8 @@ typedef struct {
   uint32_t updates;
   uint32_t dropped_frames;
   uint32_t last_fft_us;
+  uint32_t generation;
+  uint32_t rms[2], peak[2], held[2];
   uint8_t levels[SONY_SPECTRUM_COLUMNS];
 } sony_spectrum_status_t;
 

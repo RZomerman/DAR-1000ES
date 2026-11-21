@@ -16,6 +16,7 @@ typedef struct {
 } sony_text_t;
 
 bool sony_text_parse(sony_text_t *text, const char *utf8, int64_t now_us);
+uint64_t sony_text_ascii_word(unsigned char ch);
 void sony_text_frame(const sony_text_t *text, int64_t now_us,
                      uint64_t words[26]);
 void sony_text_frame_width(const sony_text_t *text, int64_t now_us,

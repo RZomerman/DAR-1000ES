@@ -43,5 +43,16 @@ vm.runInContext(html.match(/<script>([\s\S]*?)<\/script>/)[1], context);
             {sequence:2,pressed:false,row:2,column:3,code:24}]})`, context);
   assert.match(elements.events.textContent, /PRESS  ROW2 COL3/);
   assert.match(elements.events.textContent, /RELEASE  ROW2 COL3/);
+  vm.runInContext(`render({present:true,scanning:false,hardware_scan_active:false,
+    fixed_6x9:true,rows:0,columns:0,errors:0,overflows:0,last_error:"ESP_OK",events:[]})`, context);
+  assert.equal(elements.rows.value, "6");
+  assert.equal(elements.columns.value, "9");
+  assert.equal(elements.rows.readOnly, true);
+  assert.equal(elements.columns.readOnly, true);
+  assert.equal(elements.remember.checked, true);
+  assert.equal(elements.remember.disabled, true);
+  await vm.runInContext("command(true)", context);
+  assert.deepEqual(JSON.parse(requests.at(-1).options.body),
+    {enable:true, rows:6, columns:9, isolated_matrix_confirmed:true, remember:true});
   console.log("Keypad UI safety and event checks passed");
 })().catch(error => { console.error(error); process.exitCode = 1; });

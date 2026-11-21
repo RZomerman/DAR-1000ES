@@ -63,6 +63,10 @@ static uint64_t lookup(uint32_t cp, uint32_t accent, bool unsupported) {
   return replacement;
 }
 
+uint64_t sony_text_ascii_word(unsigned char ch) {
+  return lookup(ch, 0, false);
+}
+
 bool sony_text_parse(sony_text_t *text, const char *utf8, int64_t now_us) {
   if (!text || !utf8 || strlen(utf8) > SONY_TEXT_BYTES)
     return false;

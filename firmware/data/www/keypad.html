@@ -19,8 +19,8 @@ has been explicitly remembered below. Disabling scanning clears that setting.</p
 they connect exclusively to isolated passive switches—not to the original
 Sony controller or another powered circuit. Pin counts use consecutive
 ROW0 onward and COL0 onward. Unknown wiring: leave scanning off.</p>
-<label>Rows (1–8) <input id="rows" type="number" min="1" max="8" value="1"></label>
-<label>Columns (1–10) <input id="columns" type="number" min="1" max="10" value="1"></label>
+<label>Rows (1–8) <input id="rows" type="number" min="1" max="8" value="6"></label>
+<label>Columns (1–10) <input id="columns" type="number" min="1" max="10" value="9"></label>
 <label><input id="confirm" type="checkbox"> I verified these matrix lines
 connect only to isolated passive switches.</label>
 <label><input id="remember" type="checkbox"> Remember this isolated 6 × 9
@@ -35,8 +35,9 @@ overflow indicates events were lost. A short press of Display Mode (R5–C7)
 starts a stopped display in Now Playing, then cycles display modes and OFF.
 A long press changes DIM once while DISPLAY is still held; a short press
 acts after release.</p>
-<p>CHECK (R2–C4) starts a stopped display in Stereo VU. DISPLAY and CHECK
-restore the brightness from before OFF, initially 1.2% after reboot.
+<p>On the controller-only prototype, CHECK (R2–C4) checks Wi-Fi and the
+diagnostic audio link; on older radio firmware it starts Stereo VU.
+DISPLAY restores the brightness from before OFF, initially 1.2% after reboot.
 Neither button can sense Sony power or buffer /OE: use either start action
 only after the Sony is powered, the original drivers are isolated and outputs are ready.
 It does not replace a running scan.</p>
@@ -56,6 +57,11 @@ async function request(body) {
   return response.json();
 }
 function render(state) {
+  if (state.fixed_6x9) {
+    $('rows').value = '6'; $('rows').readOnly = true;
+    $('columns').value = '9'; $('columns').readOnly = true;
+    $('remember').checked = true; $('remember').disabled = true;
+  }
   $('status').textContent = (state.present ? 'TCA8418 responding' : 'TCA8418 not detected') +
     ' · managed scan ' + (state.scanning ? 'ON (' + state.rows + ' × ' + state.columns + ')' : 'OFF') +
     ' · auto-resume ' + (state.restore_on_boot ? 'ON' : 'off') +

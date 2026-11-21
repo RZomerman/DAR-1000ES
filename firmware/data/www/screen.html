@@ -155,13 +155,29 @@ pre { white-space: pre-wrap; }
 <section id="travel-demo">
 <h2>DAR-1000ES travel front panel</h2>
 <p><strong>Hardware-backed front panel:</strong> buttons inject actual TCA8418
-press/release codes. DISPLAY/CHECK run the real display driver and GPIO timing.
+press/release codes. DISPLAY controls the real display driver and GPIO timing.
 The canvas shows the last frame queued to that driver, not fabricated pixels.</p>
+<p>The controller-only prototype starts a normal scan automatically at boot.
+Use it only with a verified power-aware hardware buffer interlock. Stop output
+and disable physical keypad scanning before arming virtual input.</p>
+<p>Controller search: short DIRECT builds the station index on first use, then
+opens the blinking character editor. FINE changes character, BLOCK skips six
+available characters, and short MEMORY locks one. LINK opens matching stations;
+FINE/BLOCK browse them, and hold DIRECT for 1.2 seconds to queue a station.
+MHz/CLEAR goes back. Space appears as a blinking underscore while editing.
+DIRECT indexes the Netherlands by default. Apply a country filter first to
+search another country. The Dutch index is saved in flash across power
+cycles; other country indexes are cached in RAM. Starting a station still
+requires network access. Audio playback is not confirmed without an audio receiver.</p>
 <label><input id="demo-confirm" type="checkbox"> All Sony-side signal wires are
 disconnected and buffers disabled; GPIOs may run on unconnected pins.</label><br>
 <label><input id="demo-enabled" type="checkbox" disabled> Arm virtual keypad input</label>
 <button id="demo-stop" type="button">STOP output / disarm</button>
 <p id="demo-notice" role="status">Read-only preview. No inputs are armed on page load.</p>
+<button id="startup-arm" type="button">Arm MONO startup test (30 seconds)</button>
+<p id="startup-notice" role="status">Bench only: stop output and confirm isolation above.
+Then arm and press physical or virtual MONO MODE. The animation uses real GPIOs
+and must not run with the Sony display connected.</p>
 <p id="demo-pins"></p>
 <div class="demo-scroll">
 <div id="demo-panel" class="demo-panel">
@@ -269,7 +285,8 @@ Held-grid duty is capped at 1/26 (OFF >= 25 x ON), a conservative software
 guard, not a manufacturer glass rating. Frame duration is limited by the
 65 ms DMA buffer. No setting is a guarantee of safe VFD drive.</p>
 <p>Presets only change form values, never start output. Settings may be saved
-in this browser; firmware does not restore or start output on reboot.
+in this browser. The controller-only prototype starts its normal scan at boot;
+it does not restore this timing form.
 Analogue edge times (maximum 1 us), 5 V thresholds, translator glitches and
 visual flicker still require measurement at the TD62 inputs.
 Isolate the Sony signal wires for USB reset/reflash or when its logic supply
@@ -365,15 +382,15 @@ the captured Sony timing and needs analyser validation. The first eight-frame DM
 chunk preloads registers while blanked; later chunks continue without repeating
 the blank/preload sequence. A DMA alignment hold of under 8 us remains. Stop waits
 for the current chunk (about 32 ms plus overhead), then holds CLEAR LOW.
-This is not a hardware fail-safe against CPU/power failure. No output starts on boot
-or merely by loading this page.</p>
+This is not a hardware fail-safe against CPU/power failure. Loading this page
+does not start output.</p>
 <p>V1: FLGDATA GPIO4 / FLGCLK GPIO5 / FLCLEAR GPIO6 / FLSTB GPIO15 /
 FLSDATA GPIO16 / FLSCLK GPIO7.
 V2: FLGDATA GPIO2 / FLGCLK GPIO1 / FLCLEAR GPIO40 / FLSTB GPIO38 /
 FLSDATA GPIO21 / FLSCLK GPIO39. Level-shifter OE is external,
 not controlled or measured by firmware. Firmware initializes the selected outputs to
 DATA LOW, CLEAR LOW, STB LOW, clocks HIGH and holds those levels when idle.</p>
-<p>All previous audio and control assignments are disabled. No scan runs on boot.
+<p>All previous audio and control assignments are disabled.
 An enabled translator can expose floating inputs during reset or while its GPIO
 profile is inactive. Hardware-disable unused interfaces and provide external
 biasing where required; software does not guarantee reset-time levels.</p>
@@ -464,6 +481,20 @@ function renderPinControls(state) {
       names[index] + "=GPIO" + pin.gpio).join(" / ");
 }
 window.screenRequest = request;
+document.getElementById("startup-arm").addEventListener("click", async () => {
+  const notice = document.getElementById("startup-notice");
+  if (!document.getElementById("demo-confirm").checked) {
+    notice.textContent = "Disconnect Sony-side display signals and disable the buffers first.";
+    return;
+  }
+  try {
+    await request({method:"POST", headers:{"Content-Type":"application/json"},
+      body:JSON.stringify({sample:"Arm startup", startup_isolated:true})});
+    notice.textContent = "Press MONO MODE within 30 seconds. Arm again for another run.";
+  } catch (error) {
+    notice.textContent = error.message;
+  }
+});
 async function request(options) {
   const response = await fetch("/api/screen", {cache: "no-store", ...options,
     signal: AbortSignal.timeout(5000)});

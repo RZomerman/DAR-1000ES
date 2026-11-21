@@ -75,6 +75,15 @@ requirements. INIT's active polarity, destination(s), relation to stable audio
 clocks and warm-reset behavior remain unverified. A single power-up rise does
 not demonstrate a deliberate reset pulse.
 
+The [CXD1244S reference](https://archive.org/download/bitsavers_sonydataSh_330970/cxd-1244S_text.pdf)
+describes resynchronization on INIT's rising edge. That is consistent with
+the Sony capture but does not establish that the CXD2560M has the same
+behavior. With Sony disconnected, the `chip2-init` bench mode drives INIT
+LOW then HIGH, waits approximately 810 ms, and sends the two captured
+16-clock words with INIT held HIGH. It omits the long initial LATCH and
+the unclassified 96- and 24-clock bursts. This is a reduced waveform
+replay, not a verified DAC initialization.
+
 ### Two latched 16-clock transfers
 
 An initial decoder grouped clock edges separated by less than 1 ms. That made

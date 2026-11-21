@@ -1,4 +1,19 @@
 menu "Airplay ESP Configuration"
+    config SONY_CONTROLLER_NODE
+        bool "DAR-1000ES controller-only node"
+        depends on IDF_TARGET_ESP32S3
+        default n
+        help
+            Build the separate controller without local audio decoding or output.
+
+    config SONY_STARTUP_ISOLATED_DISPLAY
+        bool "Run the startup animation at boot on the isolated display bench"
+        depends on SONY_CONTROLLER_NODE
+        default n
+        help
+            For disconnected display signals only. The full-fill frame
+            is not approved for automatic startup on the Sony.
+
     config SONY_UART_LINK
         bool "DAR-1000ES controller/audio UART bench link"
         depends on IDF_TARGET_ESP32S3
@@ -12,6 +27,27 @@ menu "Airplay ESP Configuration"
             Replaces the application with a UART responder. No radio or Wi-Fi
             starts. Chip4 GPIO5 /OE is held HIGH except during requested,
             finite mapping tests with Sony-side wires disconnected.
+
+    config SONY_SPLIT_AUDIO_NODE
+        bool "DAR-1000ES split audio player"
+        depends on SONY_UART_LINK && !SONY_UART_AUDIO_NODE && !SONY_CONTROLLER_NODE
+        default n
+        help
+            Receive station selections over UART while running the radio player.
+
+    config SONY_OPTICAL_BENCH
+        bool "Isolated chip 4 optical analyzer test"
+        depends on SONY_SPLIT_AUDIO_NODE && AUDIO_OUTPUT_SPDIF
+        default n
+
+    config SONY_OPTICAL_ISOLATED_PLAYBACK
+        bool "Enable the shared optical buffer for isolated playback"
+        depends on SONY_SPLIT_AUDIO_NODE && AUDIO_OUTPUT_SPDIF && !SONY_OPTICAL_BENCH
+        default n
+        help
+            For analyzer-only operation with Sony-side wires disconnected.
+            Enables the shared buffer early at boot. Releases D.MUTE
+            during playback and holds A.MUTE and RELAY high.
 
     # Board configuration is now in components/boards/Kconfig.projbuild
 
