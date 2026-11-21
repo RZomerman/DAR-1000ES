@@ -173,3 +173,32 @@ per button: 8 R0-C8, 16 R1-C8, SCIENCE R3-C8, UNDEFINED R4-C8,
 BLOCK- R5-C8 and MONO MODE R2-C8. No extra events, I2C errors or FIFO
 overflows occurred. Prior intermittent failures mean continued observation
 is warranted.
+
+## 2026-11-20 individual navigation-key measurements
+
+With the passive matrix isolated from IC701 and scanned as 6 x 9, separate
+user-directed tests recorded FINE - at R2-C2 (code 23), FINE + at R2-C1
+(code 22), DIRECT at R2-C5 (code 26), and LINK/LNC at R2-C6 (code 27).
+Each produced physical press and release events; FINE + and DIRECT produced
+two pairs during their individual tests. The older unexplained R2-C6 events
+may therefore have been LINK, but their source remains unconfirmed.
+
+Moving PROGRAM to OFF, ON and SET produced no TCA8418 events. Its input
+path and actual positions still need independent electrical tracing; do not
+infer a switch state from the absence of an event.
+
+A deliberate MEMORY hold measured 2.36 seconds and a quick press 0.289
+seconds. The owner selected 1.2 seconds as the future MEMORY-hold threshold.
+These measurements alone do not implement browsing or preset storage.
+
+## Controller prototype fixed layout
+
+The controller-only prototype uses a fixed 6 x 9 scan. On 2026-11-20 the
+owner confirmed that the original Sony keypad connections had been removed,
+and requested automatic restoration. Scanning was enabled and verified to
+resume after reset. Disabling scanning clears the saved setting; disable it
+before reconnecting or changing the matrix wiring. The controller cannot
+detect whether the original scanner is connected.
+
+The fixed layout does not establish a PROGRAM mapping: the earlier tests
+recorded no PROGRAM events.

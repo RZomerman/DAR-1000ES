@@ -1,6 +1,8 @@
 #include "sony_spectrum.h"
+#ifndef CONFIG_SONY_SPLIT_AUDIO_NODE
 #include "sony_screen.h"
 #include "sony_vfd.h"
+#endif
 
 #include "esp_heap_caps.h"
 #include "esp_timer.h"
@@ -28,14 +30,20 @@ static portMUX_TYPE status_lock = portMUX_INITIALIZER_UNLOCKED;
 static sony_spectrum_status_t latest;
 
 static void clear_levels(void) {
-  uint8_t zeros[SONY_SPECTRUM_COLUMNS] = {0};
   sony_spectrum_dsp_reset(dsp);
   portENTER_CRITICAL(&status_lock);
   memset(latest.levels, 0, sizeof(latest.levels));
+  memset(latest.rms, 0, sizeof(latest.rms));
+  memset(latest.peak, 0, sizeof(latest.peak));
+  memset(latest.held, 0, sizeof(latest.held));
+  latest.generation = atomic_load(&source_generation);
   portEXIT_CRITICAL(&status_lock);
+#ifndef CONFIG_SONY_SPLIT_AUDIO_NODE
+  uint8_t zeros[SONY_SPECTRUM_COLUMNS] = {0};
   sony_vfd_show_spectrum(zeros);
   const uint32_t silence[2] = {0, 0};
   sony_vfd_show_vu(silence, silence, silence);
+#endif
 }
 
 static void spectrum_task(void *unused) {
@@ -43,28 +51,42 @@ static void spectrum_task(void *unused) {
   int16_t chunk[512];
   size_t cursor = 0, filled = 0;
   unsigned current_epoch = 0;
+#ifndef CONFIG_SONY_SPLIT_AUDIO_NODE
   sony_display_mode_t current_mode = SONY_DISPLAY_MODE_COUNT;
+#endif
   sony_vu_state_t vu;
   sony_vu_reset(&vu);
   bool active = false;
-  int64_t last_analysis = 0;
+#ifdef CONFIG_SONY_SPLIT_AUDIO_NODE
+  const int64_t analysis_interval_us = 50000;
+#else
+  const int64_t analysis_interval_us = 100000;
+#endif
+  int64_t next_analysis = 0;
   int64_t last_input = 0;
   for (;;) {
     bool on = atomic_load(&enabled);
     unsigned next_epoch = atomic_load(&epoch);
+#ifndef CONFIG_SONY_SPLIT_AUDIO_NODE
     sony_display_mode_t mode = sony_screen_display_mode();
-    if (!on || !active || current_epoch != next_epoch || mode != current_mode) {
+    bool mode_changed = mode != current_mode;
+#else
+    bool mode_changed = false;
+#endif
+    if (!on || !active || current_epoch != next_epoch || mode_changed) {
       while (xStreamBufferReceive(input, chunk, sizeof(chunk), 0)) {
       }
       cursor = filled = 0;
-      last_analysis = 0;
+      next_analysis = 0;
       last_input = 0;
       sony_vu_reset(&vu);
       if (active || on)
         clear_levels();
       active = on;
       current_epoch = next_epoch;
+#ifndef CONFIG_SONY_SPLIT_AUDIO_NODE
       current_mode = mode;
+#endif
     }
     if (on) {
       size_t bytes;
@@ -72,7 +94,13 @@ static void spectrum_task(void *unused) {
       while ((bytes = xStreamBufferReceive(input, chunk, sizeof(chunk), 0))) {
         size_t frames = bytes / 4;
         received += frames;
-        if (mode == SONY_DISPLAY_EQUALIZER) {
+        if (
+#ifndef CONFIG_SONY_SPLIT_AUDIO_NODE
+            mode == SONY_DISPLAY_EQUALIZER
+#else
+            true
+#endif
+        ) {
           size_t first = SONY_SPECTRUM_SIZE - cursor;
           if (first > frames)
             first = frames;
@@ -82,12 +110,26 @@ static void spectrum_task(void *unused) {
           filled += frames;
           if (filled > SONY_SPECTRUM_SIZE)
             filled = SONY_SPECTRUM_SIZE;
-        } else {
+        }
+#ifndef CONFIG_SONY_SPLIT_AUDIO_NODE
+        else {
           uint32_t rms[2], peak[2], held[2];
           if (sony_vu_analyze(&vu, chunk, frames, rms, peak, held) &&
               atomic_load(&enabled) && current_epoch == atomic_load(&epoch))
             sony_vfd_show_vu(rms, peak, held);
         }
+#else
+        uint32_t rms[2], peak[2], held[2];
+        if (sony_vu_analyze(&vu, chunk, frames, rms, peak, held) &&
+            atomic_load(&enabled) && current_epoch == atomic_load(&epoch)) {
+          portENTER_CRITICAL(&status_lock);
+          memcpy(latest.rms, rms, sizeof(rms));
+          memcpy(latest.peak, peak, sizeof(peak));
+          memcpy(latest.held, held, sizeof(held));
+          latest.generation = atomic_load(&source_generation);
+          portEXIT_CRITICAL(&status_lock);
+        }
+#endif
       }
       int64_t now = esp_timer_get_time();
       if (received)
@@ -97,17 +139,25 @@ static void spectrum_task(void *unused) {
         cursor = filled = 0;
         sony_vu_reset(&vu);
         last_input = 0;
-      } else if (received && mode == SONY_DISPLAY_EQUALIZER &&
+      } else if (received &&
+#ifndef CONFIG_SONY_SPLIT_AUDIO_NODE
+                 mode == SONY_DISPLAY_EQUALIZER &&
+#endif
                  filled == SONY_SPECTRUM_SIZE &&
-                 now - last_analysis >= 100000) {
+                 now >= next_analysis) {
         uint8_t levels[SONY_SPECTRUM_COLUMNS];
-        last_analysis = now;
+        if (!next_analysis || now - next_analysis >= analysis_interval_us)
+          next_analysis = now;
+        next_analysis += analysis_interval_us;
         sony_spectrum_analyze(dsp, history, cursor, levels);
         unsigned elapsed = (unsigned)(esp_timer_get_time() - now);
         if (atomic_load(&enabled) && current_epoch == atomic_load(&epoch)) {
+#ifndef CONFIG_SONY_SPLIT_AUDIO_NODE
           sony_vfd_show_spectrum(levels);
+#endif
           portENTER_CRITICAL(&status_lock);
           memcpy(latest.levels, levels, sizeof(levels));
+          latest.generation = atomic_load(&source_generation);
           latest.last_fft_us = elapsed;
           ++latest.updates;
           portEXIT_CRITICAL(&status_lock);

@@ -4,6 +4,10 @@
 #include "sony_vfd.h"
 #include "sony_pins.h"
 #include "sony_spectrum.h"
+#include "sony_startup.h"
+#ifdef CONFIG_SONY_STARTUP_ISOLATED_DISPLAY
+#include "sony_uart_link.h"
+#endif
 
 #include "cJSON.h"
 #include "driver/gpio.h"
@@ -59,11 +63,17 @@ static const uint64_t no_dsr[] = {0x045257C62FULL,
                                   0};
 static uint64_t words[26];
 static uint64_t output_words[26];
+#ifdef CONFIG_SONY_CONTROLLER_NODE
+static uint64_t menu_words[26];
+static bool menu_active;
+#endif
 static bool output_valid;
 static int64_t output_frame_us;
 static sony_text_t scrolling_text;
 static bool display_dim = true;
 static atomic_bool running;
+static atomic_bool startup_active;
+static int64_t startup_arm_until_us; /* Protected by control_lock. */
 static atomic_bool stop_requested;
 static atomic_uint completed_frames;
 static atomic_int last_error;
@@ -82,6 +92,41 @@ static bool remembered_radio_timing_valid;
 static atomic_uint timing_revision;
 static atomic_uint submitted_timing_revision;
 static portMUX_TYPE frame_lock = portMUX_INITIALIZER_UNLOCKED;
+#ifdef CONFIG_SONY_CONTROLLER_NODE
+static bool menu_browsing, menu_storing;
+static bool controller_ready, audio_connected, airplay_active;
+static int64_t memory_started_us;
+
+void sony_screen_board_indicators(bool connected, bool airplay) {
+  portENTER_CRITICAL(&frame_lock);
+  controller_ready = true;
+  audio_connected = connected;
+  airplay_active = airplay;
+  portEXIT_CRITICAL(&frame_lock);
+}
+
+void sony_screen_menu_indicators(bool browsing, bool storing) {
+  portENTER_CRITICAL(&frame_lock);
+  if (storing && !menu_storing) memory_started_us = esp_timer_get_time();
+  menu_browsing = browsing;
+  menu_storing = storing;
+  portEXIT_CRITICAL(&frame_lock);
+}
+
+void sony_screen_menu_text(const char *message) {
+  sony_text_t text = {0};
+  uint64_t frame[26] = {0};
+  bool active = message && sony_text_parse(&text, message, 0);
+  if (active) {
+    text.scroll = false;
+    sony_text_frame_width(&text, 0, frame, 22);
+  }
+  portENTER_CRITICAL(&frame_lock);
+  menu_active = active;
+  memcpy(menu_words, frame, sizeof(frame));
+  portEXIT_CRITICAL(&frame_lock);
+}
+#endif
 static SemaphoreHandle_t control_lock;
 static bool follow_radio;
 static bool follow_spectrum;
@@ -566,6 +611,9 @@ static void scan_task(void *unused) {
     int64_t schedule_start = 0;
     int64_t last_switch = 0;
     int prior_held_slot = -1;
+    bool startup = atomic_load(&startup_active);
+    int64_t startup_started_us = startup ? esp_timer_get_time() : 0;
+    unsigned blank_submissions = 0;
     while (!atomic_load(&stop_requested) && err == ESP_OK) {
       uint64_t frame[26];
       bool dim;
@@ -573,6 +621,10 @@ static void scan_task(void *unused) {
       unsigned revision;
       bool searching;
       int64_t search_start;
+#ifdef CONFIG_SONY_CONTROLLER_NODE
+      bool controller_indicators, browsing, memory_visible, cable, satellite, airplay;
+      sony_radio_status_t indicators;
+#endif
       portENTER_CRITICAL(&frame_lock);
       if (!follow_spectrum)
         sony_text_frame_width(&scrolling_text, esp_timer_get_time(), words,
@@ -583,11 +635,38 @@ static void scan_task(void *unused) {
       revision = atomic_load(&timing_revision);
       bool overlay = follow_radio &&
                      preset_overlay_frame(esp_timer_get_time(), frame);
+#ifdef CONFIG_SONY_CONTROLLER_NODE
+      controller_indicators = follow_radio;
+      cable = controller_ready;
+      satellite = audio_connected;
+      airplay = airplay_active;
+      browsing = menu_browsing;
+      memory_visible = menu_storing &&
+          (esp_timer_get_time() - memory_started_us) / 500000 % 2 == 0;
+      indicators = last_radio_status;
+      if (follow_radio && menu_active) {
+        memcpy(frame + 1, menu_words + 1, 22 * sizeof(*frame));
+        overlay = true;
+      }
+#endif
       searching = !overlay && follow_radio && last_radio_status.searching;
       search_start = search_started_us;
       portEXIT_CRITICAL(&frame_lock);
-      if (searching)
+      if (startup) {
+        unsigned elapsed_ms = (esp_timer_get_time() - startup_started_us) / 1000;
+        if (elapsed_ms >= SONY_STARTUP_DEADLINE_MS)
+          break;
+        sony_startup_frame(elapsed_ms, frame);
+        /* Two DMA chunks can be queued; the third blank means one completed. */
+        if (elapsed_ms >= SONY_STARTUP_ART_MS)
+          ++blank_submissions;
+      } else if (searching)
         sony_search_frame(esp_timer_get_time() - search_start, frame);
+#ifdef CONFIG_SONY_CONTROLLER_NODE
+      if (controller_indicators)
+        sony_radio_controller_indicators(frame, &indicators, browsing,
+                                         memory_visible, cable, satellite, airplay);
+#endif
       if (timed && timing.hold && timing.alternate_ms) {
         int64_t now = esp_timer_get_time();
         if (!schedule_start || schedule_revision != revision) {
@@ -662,6 +741,10 @@ static void scan_task(void *unused) {
       err = timed ? sony_scan_submit_timed(engine, frame, &timing)
                   : sony_scan_submit(engine, frame, dim);
       if (err == ESP_OK) {
+#ifdef CONFIG_SONY_STARTUP_ISOLATED_DISPLAY
+        if (startup && !queued && !atomic_load(&stop_requested))
+          sony_uart_link_startup_sound(true);
+#endif
         record_output_frame(frame);
         engine_blanked = false;
         if (timed && timing.hold) {
@@ -686,8 +769,14 @@ static void scan_task(void *unused) {
         ++queued;
         if (timed)
           atomic_store(&submitted_timing_revision, revision);
+        if (blank_submissions == 3)
+          break;
       }
     }
+#ifdef CONFIG_SONY_STARTUP_ISOLATED_DISPLAY
+    if (startup)
+      sony_uart_link_startup_sound(false);
+#endif
     esp_err_t cleanup = sony_scan_close(engine);
     free(gpio_wave);
     if (err == ESP_OK) {
@@ -702,6 +791,7 @@ static void scan_task(void *unused) {
     atomic_store(&last_error, err);
     atomic_store(&active_held_slot, -1);
     sony_spectrum_enable(false);
+    atomic_store(&startup_active, false);
     atomic_store(&running, false);
     vTaskDelete(NULL);
     return;
@@ -749,17 +839,17 @@ static void scan_task(void *unused) {
   vTaskDelete(NULL);
 }
 
-static esp_err_t start_radio_display_locked(sony_display_mode_t mode) {
+static esp_err_t start_radio_display_locked(sony_display_mode_t mode, bool startup) {
   sony_timing_t timing = {
       .setup_ns = 500, .clock_low_ns = 1000, .clock_high_ns = 1000,
       .strobe_ns = 5000, .latch_guard_ns = 10000,
       .blank_before_ns = 10000, .blank_after_ns = 10000,
       .on_ns = 93625, .off_ns = 68875, .pulses = 1};
   portENTER_CRITICAL(&frame_lock);
-  if (remembered_radio_timing_valid)
+  if (!startup && remembered_radio_timing_valid)
     timing = remembered_radio_timing;
   portEXIT_CRITICAL(&frame_lock);
-  bool spectrum = sony_display_mode_graphical(mode);
+  bool spectrum = !startup && sony_display_mode_graphical(mode);
   esp_err_t err = ESP_OK;
   if (atomic_load(&running) || atomic_load(&pin_profile_index) != 1)
     err = ESP_ERR_INVALID_STATE;
@@ -770,14 +860,18 @@ static esp_err_t start_radio_display_locked(sony_display_mode_t mode) {
   if (err == ESP_OK && atomic_exchange(&running, true))
     err = ESP_ERR_INVALID_STATE;
   if (err == ESP_OK) {
+    startup_arm_until_us = 0;
+    atomic_store(&startup_active, startup);
     portENTER_CRITICAL(&frame_lock);
     scrolling_text.active = false;
     preset_overlay.active = false;
-    follow_radio = true;
+    follow_radio = !startup;
     follow_spectrum = spectrum;
-    radio_display_mode = mode;
-    display_dim = true;
-    memset(words, 0, sizeof(words));
+    if (!startup) {
+      radio_display_mode = mode;
+      display_dim = true;
+      memset(words, 0, sizeof(words));
+    }
     display_timing = timing;
     atomic_fetch_add(&timing_revision, 1);
     portEXIT_CRITICAL(&frame_lock);
@@ -798,6 +892,7 @@ static esp_err_t start_radio_display_locked(sony_display_mode_t mode) {
       atomic_store(&display_requested, false);
       atomic_store(&timing_requested, false);
       atomic_store(&stop_requested, true);
+      atomic_store(&startup_active, false);
       atomic_store(&running, false);
       atomic_store(&last_error, ESP_ERR_NO_MEM);
       err = ESP_ERR_NO_MEM;
@@ -810,16 +905,46 @@ esp_err_t sony_screen_start_from_check(void) {
   if (!control_lock)
     return ESP_ERR_INVALID_STATE;
   xSemaphoreTake(control_lock, portMAX_DELAY);
-  esp_err_t err = start_radio_display_locked(SONY_DISPLAY_VU_STEREO);
+  esp_err_t err = start_radio_display_locked(SONY_DISPLAY_VU_STEREO, false);
+  xSemaphoreGive(control_lock);
+  return err;
+}
+
+static esp_err_t arm_startup_locked(bool isolated) {
+  if (!isolated || atomic_load(&running) || atomic_load(&pin_profile_index) != 1)
+    return ESP_ERR_INVALID_STATE;
+  startup_arm_until_us = esp_timer_get_time() + 30000000;
+  return ESP_OK;
+}
+
+#ifdef CONFIG_SONY_STARTUP_ISOLATED_DISPLAY
+esp_err_t sony_screen_startup_boot_isolated(void) {
+  xSemaphoreTake(control_lock, portMAX_DELAY);
+  esp_err_t err = start_radio_display_locked(SONY_DISPLAY_NOW_PLAYING, true);
+  xSemaphoreGive(control_lock);
+  return err;
+}
+#endif
+
+esp_err_t sony_screen_startup_press(void) {
+  if (!control_lock)
+    return ESP_ERR_INVALID_STATE;
+  xSemaphoreTake(control_lock, portMAX_DELAY);
+  bool armed = startup_arm_until_us > esp_timer_get_time();
+  startup_arm_until_us = 0;
+  esp_err_t err = armed ? start_radio_display_locked(SONY_DISPLAY_NOW_PLAYING, true)
+                       : ESP_ERR_INVALID_STATE;
   xSemaphoreGive(control_lock);
   return err;
 }
 
 static esp_err_t display_button_action_locked(bool long_press) {
+  if (atomic_load(&startup_active))
+    return ESP_ERR_INVALID_STATE;
   if (long_press)
     return sony_screen_display_mode_press(true);
   if (!atomic_load(&running))
-    return start_radio_display_locked(SONY_DISPLAY_NOW_PLAYING);
+    return start_radio_display_locked(SONY_DISPLAY_NOW_PLAYING, false);
   portENTER_CRITICAL(&frame_lock);
   bool ready = radio_controls_ready();
   bool last = radio_display_mode == SONY_DISPLAY_MODE_COUNT - 1;
@@ -848,6 +973,7 @@ esp_err_t sony_screen_display_button_press(bool long_press) {
 bool sony_screen_is_running(void) { return atomic_load(&running); }
 
 static void stop_display_locked(void) {
+  startup_arm_until_us = 0;
   portENTER_CRITICAL(&frame_lock);
   remember_radio_timing_locked();
   atomic_store(&stop_requested, true);
@@ -956,6 +1082,7 @@ static esp_err_t status_handler(httpd_req_t *req) {
   sony_timing_t timing = display_timing;
   portEXIT_CRITICAL(&frame_lock);
   cJSON_AddBoolToObject(root, "output_frame_valid", valid_output);
+  cJSON_AddBoolToObject(root, "startup_active", atomic_load(&startup_active));
   cJSON_AddNumberToObject(root, "output_frame_age_ms", output_age < 0 ? -1 : output_age / 1000);
   for (unsigned i = 0; i < 26; ++i) {
     char hex[11];
@@ -1118,6 +1245,21 @@ static esp_err_t control_handler_unlocked(httpd_req_t *req) {
   cJSON *profile = cJSON_GetObjectItemCaseSensitive(root, "pin_profile");
   cJSON *action = cJSON_GetObjectItemCaseSensitive(root, "display_action");
   cJSON *mode_item = cJSON_GetObjectItemCaseSensitive(root, "display_mode");
+  const char *name = cJSON_IsString(sample) ? sample->valuestring : "";
+  if (!strcmp(name, "Arm startup")) {
+    bool isolated = cJSON_IsTrue(cJSON_GetObjectItemCaseSensitive(root, "startup_isolated"));
+    cJSON_Delete(root);
+    if (arm_startup_locked(isolated) != ESP_OK)
+      return httpd_resp_send_err(req, HTTPD_400_BAD_REQUEST,
+          "Stop output, select AHCT v2 and confirm disconnected Sony display signals");
+    return status_handler(req);
+  }
+  startup_arm_until_us = 0; /* Other screen controls revoke the one-shot arm. */
+  if (atomic_load(&startup_active) && strcmp(name, "stop") && strcmp(name, "blank")) {
+    cJSON_Delete(root);
+    httpd_resp_set_status(req, "409 Conflict");
+    return httpd_resp_sendstr(req, "Stop startup playback before changing display controls");
+  }
   if (action || (mode_item && !sample)) {
     sony_display_mode_t mode = SONY_DISPLAY_NOW_PLAYING;
     bool valid_action = cJSON_IsString(action) &&

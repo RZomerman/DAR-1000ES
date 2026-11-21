@@ -5,10 +5,11 @@
 #include "spdif_encoder.h"
 #include "led.h"
 #include "rtsp_server.h"
-#ifdef CONFIG_SONY_SCREEN_BENCH
+#if defined(CONFIG_SONY_SCREEN_BENCH) || defined(CONFIG_SONY_SPLIT_AUDIO_NODE)
 #include "sony_spectrum.h"
 #endif
 #include "driver/i2s_std.h"
+#include "driver/gpio.h"
 #include "esp_check.h"
 #include "esp_attr.h"
 #include "esp_timer.h"
@@ -23,8 +24,72 @@
 #define MAX_OUTPUT_FRAMES 600
 #define DMA_FRAMES 384
 #define DMA_COUNT 12
+#define AUDIO_IDLE_US 250000
 
 _Static_assert(OUTPUT_RATE == 48000, "Radio S/PDIF encoder requires 48 kHz output");
+
+#ifdef SONY_PCM_BENCH_CONTROLS
+static portMUX_TYPE bench_control_lock = portMUX_INITIALIZER_UNLOCKED;
+static int dmute_auto;
+static int dmute_override = -1;
+static int amute_level = 1;
+static int relay_level = 1;
+static atomic_bool pcm_mirror_requested = true;
+static atomic_bool pcm_mirror_active = true;
+
+bool audio_output_bench_mirror_active(void) {
+  return atomic_load(&pcm_mirror_active);
+}
+
+esp_err_t audio_output_set_bench_control(const char *signal, int level) {
+  esp_err_t err;
+  if (level < -1 || level > 1) return ESP_ERR_INVALID_ARG;
+  if (!strcmp(signal, "d_mute")) {
+    portENTER_CRITICAL(&bench_control_lock);
+    err = gpio_set_level(GPIO_NUM_4, level < 0 ? dmute_auto : level);
+    if (err == ESP_OK) dmute_override = level;
+    portEXIT_CRITICAL(&bench_control_lock);
+  } else if (level >= 0 && !strcmp(signal, "a_mute")) {
+    err = gpio_set_level(GPIO_NUM_6, level);
+    if (err == ESP_OK) amute_level = level;
+  } else if (level >= 0 && !strcmp(signal, "relay")) {
+    err = gpio_set_level(GPIO_NUM_7, level);
+    if (err == ESP_OK) relay_level = level;
+  } else if (level >= 0 && !strcmp(signal, "pcm_mirror")) {
+    atomic_store(&pcm_mirror_requested, level);
+    return ESP_OK;
+  } else {
+    return ESP_ERR_INVALID_ARG;
+  }
+  return err;
+}
+
+void audio_output_get_bench_controls(int *dmute, int *override, int *amute, int *relay) {
+  portENTER_CRITICAL(&bench_control_lock);
+  *dmute = dmute_override < 0 ? dmute_auto : dmute_override;
+  *override = dmute_override;
+  portEXIT_CRITICAL(&bench_control_lock);
+  *amute = amute_level;
+  *relay = relay_level;
+}
+#endif
+
+#if defined(CONFIG_SONY_SPLIT_AUDIO_NODE) && !defined(CONFIG_SONY_OPTICAL_BENCH)
+_Static_assert(CONFIG_SPDIF_DO_IO == 15, "Split optical output must use GPIO15");
+
+static void set_dmute(bool muted) {
+#ifdef SONY_PCM_BENCH_CONTROLS
+  portENTER_CRITICAL(&bench_control_lock);
+  dmute_auto = !muted;
+  if (dmute_override < 0) gpio_set_level(GPIO_NUM_4, dmute_auto);
+  portEXIT_CRITICAL(&bench_control_lock);
+#else
+  gpio_set_level(GPIO_NUM_4, !muted);
+#endif
+}
+#else
+static void set_dmute(bool muted) { (void)muted; }
+#endif
 
 static i2s_chan_handle_t tx;
 #ifdef CONFIG_SONY_I2S_MIRROR
@@ -37,11 +102,29 @@ static atomic_bool stopping;
 static atomic_int requested_rate = 44100;
 static atomic_uint write_errors;
 static uint32_t sent_frames;
+static uint32_t total_sent_frames;
 static portMUX_TYPE cursor_lock = portMUX_INITIALIZER_UNLOCKED;
 static uint32_t submitted_frames;
 static uint32_t lost_frames;
 static atomic_uint dma_underruns;
+static atomic_uint radio_pcm_gap_frames;
 static spdif_encoder_t encoder;
+
+#ifdef CONFIG_SONY_OPTICAL_ISOLATED_PLAYBACK
+#include "dar_startup_pcm.h"
+enum { STARTUP_UNUSED, STARTUP_PLAY, STARTUP_DONE };
+static atomic_uint startup_sound;
+static atomic_bool startup_ready;
+
+void audio_output_startup_sound(bool play) {
+  if (play && atomic_load(&startup_ready) && !radio_airplay_active()) {
+    unsigned expected = STARTUP_UNUSED;
+    atomic_compare_exchange_strong(&startup_sound, &expected, STARTUP_PLAY);
+  } else if (!play) {
+    atomic_store(&startup_sound, STARTUP_DONE);
+  }
+}
+#endif
 
 static bool IRAM_ATTR spdif_on_sent(i2s_chan_handle_t handle,
                                     i2s_event_data_t *event, void *context) {
@@ -50,6 +133,7 @@ static bool IRAM_ATTR spdif_on_sent(i2s_chan_handle_t handle,
   if (event) {
     portENTER_CRITICAL_ISR(&cursor_lock);
     sent_frames += event->size / 16;
+    total_sent_frames += event->size / 16;
     portEXIT_CRITICAL_ISR(&cursor_lock);
   }
   return false;
@@ -87,16 +171,21 @@ static esp_err_t spdif_write(const int16_t *pcm, size_t frames) {
     size_t count = frames - offset;
     if (count > 96) count = 96;
 #ifdef CONFIG_SONY_I2S_MIRROR
-    size_t pcm_written = 0;
-    size_t pcm_bytes = count * 2 * sizeof(*pcm);
-    esp_err_t pcm_err = i2s_channel_write(pcm_tx, pcm + offset * 2,
-                                          pcm_bytes, &pcm_written, 100);
-    if (pcm_err != ESP_OK || pcm_written != pcm_bytes) {
-      atomic_fetch_add(&pcm_write_errors, 1);
-      ESP_LOGE(TAG, "PCM I2S write failed: %s (%u/%u)",
-               esp_err_to_name(pcm_err), (unsigned)pcm_written,
-               (unsigned)pcm_bytes);
-      return pcm_err == ESP_OK ? ESP_FAIL : pcm_err;
+#ifdef SONY_PCM_BENCH_CONTROLS
+    if (audio_output_bench_mirror_active())
+#endif
+    {
+      size_t pcm_written = 0;
+      size_t pcm_bytes = count * 2 * sizeof(*pcm);
+      esp_err_t pcm_err = i2s_channel_write(pcm_tx, pcm + offset * 2,
+                                            pcm_bytes, &pcm_written, 100);
+      if (pcm_err != ESP_OK || pcm_written != pcm_bytes) {
+        atomic_fetch_add(&pcm_write_errors, 1);
+        ESP_LOGE(TAG, "PCM I2S write failed: %s (%u/%u)",
+                 esp_err_to_name(pcm_err), (unsigned)pcm_written,
+                 (unsigned)pcm_bytes);
+        return pcm_err == ESP_OK ? ESP_FAIL : pcm_err;
+      }
     }
 #endif
     for (size_t i = 0; i < count; ++i)
@@ -133,19 +222,62 @@ static void playback_task(void *unused) {
   uint32_t generation = 0;
   int64_t last_audio_us = 0;
   int32_t gain = 32768;
+#ifdef CONFIG_SONY_OPTICAL_ISOLATED_PLAYBACK
+  size_t startup_offset = 0;
+  const size_t startup_frames = sizeof(startup_pcm) / (2 * sizeof(int16_t));
+  bool startup_playing = false;
+  int64_t startup_deadline_us = 0;
+  atomic_store(&startup_ready, true);
+#endif
   while (!atomic_load(&stopping)) {
     bool ap = radio_airplay_active();
     uint32_t next_generation = radio_generation();
-    if (ap != previous_airplay || generation != next_generation ||
-        atomic_exchange(&flush_requested, false)) {
+    bool flush = atomic_exchange(&flush_requested, false);
+#ifdef SONY_PCM_BENCH_CONTROLS
+    bool mirror = atomic_load(&pcm_mirror_requested);
+    if (mirror != audio_output_bench_mirror_active()) {
+      if (!mirror) gpio_set_level(GPIO_NUM_1, 1);
+      esp_err_t err = mirror ? i2s_channel_enable(pcm_tx) : i2s_channel_disable(pcm_tx);
+      if (err == ESP_OK) {
+        if (mirror) gpio_set_level(GPIO_NUM_1, 0);
+        atomic_store(&pcm_mirror_active, mirror);
+      } else {
+        if (!mirror) gpio_set_level(GPIO_NUM_1, 0);
+        atomic_fetch_add(&pcm_write_errors, 1);
+        ESP_LOGE(TAG, "PCM mirror switch failed: %s", esp_err_to_name(err));
+        atomic_store(&pcm_mirror_requested, !mirror);
+      }
+    }
+#endif
+#ifdef CONFIG_SONY_OPTICAL_ISOLATED_PLAYBACK
+    bool chime = atomic_load(&startup_sound) == STARTUP_PLAY;
+    if (chime && (ap || (startup_playing && esp_timer_get_time() >= startup_deadline_us))) {
+      atomic_store(&startup_sound, STARTUP_DONE);
+      chime = false;
+    }
+    if (chime != startup_playing) {
+      flush = true;
+      startup_playing = chime;
+      if (chime) startup_deadline_us = esp_timer_get_time() + 6200000;
+    }
+#endif
+    if (ap != previous_airplay || generation != next_generation || flush) {
+      set_dmute(true);
+      last_audio_us = 0;
       ESP_ERROR_CHECK(i2s_channel_disable(tx));
 #ifdef CONFIG_SONY_I2S_MIRROR
+#ifdef SONY_PCM_BENCH_CONTROLS
+      if (audio_output_bench_mirror_active())
+#endif
       ESP_ERROR_CHECK(i2s_channel_disable(pcm_tx));
 #endif
       output_cursor_reset();
       memset(&encoder, 0, sizeof(encoder));
       ESP_ERROR_CHECK(i2s_channel_enable(tx));
 #ifdef CONFIG_SONY_I2S_MIRROR
+#ifdef SONY_PCM_BENCH_CONTROLS
+      if (audio_output_bench_mirror_active())
+#endif
       ESP_ERROR_CHECK(i2s_channel_enable(pcm_tx));
 #endif
       audio_resample_reset();
@@ -153,9 +285,31 @@ static void playback_task(void *unused) {
       previous_airplay = ap;
       generation = next_generation;
     }
+#ifdef CONFIG_SONY_OPTICAL_ISOLATED_PLAYBACK
+    if (chime) {
+      size_t count = startup_frames - startup_offset;
+      if (count > FRAME_SAMPLES) count = FRAME_SAMPLES;
+      output_queued_frames();
+      if (spdif_write(startup_pcm + startup_offset * 2, count) != ESP_OK) {
+        set_dmute(true);
+        atomic_store(&startup_sound, STARTUP_DONE);
+      } else {
+        set_dmute(false);
+        startup_offset += count;
+        last_audio_us = esp_timer_get_time();
+        if (startup_offset == startup_frames) {
+          atomic_store(&startup_sound, STARTUP_DONE);
+          startup_playing = false;  // Let DMA drain the natural tail.
+        }
+      }
+      continue;
+    }
+#endif
     uint32_t source_rate = atomic_load(&requested_rate);
     size_t frames = ap ? audio_receiver_read(pcm, FRAME_SAMPLES + 1) :
                         radio_read(pcm, FRAME_SAMPLES, &source_rate);
+    bool radio_pcm_gap = !ap && !frames && radio_pcm_active() &&
+                         generation == radio_generation();
     int16_t *data = pcm;
     if (frames) {
       if (source_rate != rate) {
@@ -178,21 +332,35 @@ static void playback_task(void *unused) {
         }
       } else gain = 32768;
     }
-    int64_t now_us = esp_timer_get_time();
-    if (frames && (!ap || audio_receiver_is_playing())) last_audio_us = now_us;
-    led_set_playing(last_audio_us != 0 && now_us - last_audio_us < 250000);
+    bool source_audio = frames && (!ap || audio_receiver_is_playing());
     if (!frames) {
       memset(pcm, 0, FRAME_SAMPLES * 4);
       data = pcm;
       frames = FRAME_SAMPLES;
     }
-#ifdef CONFIG_SONY_SCREEN_BENCH
+#if defined(CONFIG_SONY_SCREEN_BENCH) || defined(CONFIG_SONY_SPLIT_AUDIO_NODE)
     sony_spectrum_write(data, frames, generation);
 #endif
     output_queued_frames();
-    if (spdif_write(data, frames) != ESP_OK)
+    if (spdif_write(data, frames) != ESP_OK) {
+      set_dmute(true);
+      last_audio_us = 0;
       vTaskDelay(pdMS_TO_TICKS(10));
+    } else if (source_audio) {
+      last_audio_us = esp_timer_get_time();
+    } else if (radio_pcm_gap) {
+      atomic_fetch_add(&radio_pcm_gap_frames, frames);
+    }
+    bool playing = last_audio_us != 0 &&
+                   esp_timer_get_time() - last_audio_us < AUDIO_IDLE_US;
+    set_dmute(!playing);
+    led_set_playing(playing);
   }
+#ifdef CONFIG_SONY_OPTICAL_ISOLATED_PLAYBACK
+  atomic_store(&startup_ready, false);
+  atomic_store(&startup_sound, STARTUP_DONE);
+#endif
+  set_dmute(true);
   free(pcm);
   free(output);
   led_set_playing(false);
@@ -201,6 +369,12 @@ static void playback_task(void *unused) {
 }
 
 esp_err_t audio_output_init(void) {
+#if defined(CONFIG_SONY_SPLIT_AUDIO_NODE) && !defined(CONFIG_SONY_OPTICAL_BENCH) && \
+    !defined(CONFIG_SONY_OPTICAL_ISOLATED_PLAYBACK)
+  ESP_RETURN_ON_ERROR(gpio_set_level(GPIO_NUM_4, 0), TAG, "Set optical mute");
+  ESP_RETURN_ON_ERROR(gpio_set_direction(GPIO_NUM_4, GPIO_MODE_OUTPUT), TAG,
+                      "Configure optical mute");
+#endif
 #ifdef CONFIG_SONY_I2S_MIRROR
   i2s_chan_config_t pcm_channel = I2S_CHANNEL_DEFAULT_CONFIG(I2S_NUM_1, I2S_ROLE_MASTER);
   pcm_channel.dma_desc_num = DMA_COUNT;
@@ -280,6 +454,15 @@ bool audio_output_get_pipeline_us(int64_t *now_us, uint32_t *pipeline_us) {
 }
 uint32_t audio_output_get_underruns(void) { return atomic_load(&dma_underruns); }
 uint32_t audio_output_get_write_errors(void) { return atomic_load(&write_errors); }
+uint32_t audio_output_get_radio_pcm_gap_frames(void) {
+  return atomic_load(&radio_pcm_gap_frames);
+}
+uint32_t audio_output_get_sent_frames(void) {
+  portENTER_CRITICAL(&cursor_lock);
+  uint32_t total = total_sent_frames;
+  portEXIT_CRITICAL(&cursor_lock);
+  return total;
+}
 #ifdef CONFIG_SONY_I2S_MIRROR
 uint32_t audio_output_get_i2s_write_errors(void) { return atomic_load(&pcm_write_errors); }
 #endif

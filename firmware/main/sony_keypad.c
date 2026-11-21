@@ -1,6 +1,9 @@
 #include "sony_keypad.h"
 #include "sony_screen.h"
 #include "radio.h"
+#ifdef CONFIG_SONY_CONTROLLER_NODE
+#include "sony_controller_menu.h"
+#endif
 
 #include "cJSON.h"
 #include "driver/gpio.h"
@@ -42,8 +45,14 @@ static bool virtual_enabled;
 static uint32_t virtual_session;
 static int64_t virtual_seen_ms;
 
-enum { DISPLAY_KEY_CODE = 58, CHECK_KEY_CODE = 25, BUTTON_CHECK_ACTION = 18,
+enum { DISPLAY_KEY_CODE = 58, CHECK_KEY_CODE = 25, MONO_KEY_CODE = 29,
+       BUTTON_CHECK_ACTION = 18, BUTTON_MONO_ACTION = 19,
+#ifdef CONFIG_SONY_CONTROLLER_NODE
+       BUTTON_DEBOUNCE_MS = 20, KEYPAD_POLL_MS = 10,
+#else
        BUTTON_DEBOUNCE_MS = 60,
+       KEYPAD_POLL_MS = 40,
+#endif
        BUTTON_ARM_MS = 200, BUTTON_LONG_MS = 1200 };
 
 typedef struct {
@@ -66,7 +75,8 @@ static const struct {
     {"DRAMA",32}, {"CULTURE",33}, {"SCIENCE",39}, {"VARIED",45},
     {"POP M",46}, {"ROCK M",47}, {"M.O.R. M",48}, {"MUSIC",28}, {"SPEECH",21},
     {"LIGHT M",41}, {"CLASSICS",42}, {"OTHER M",43}, {"UNDEFINED",49},
-    {"MEMORY",51}, {"MHz/CLEAR",52}, {"MONO MODE",29}, {"BLOCK -",59}, {"BLOCK +",53},
+    {"MEMORY",51}, {"MHz/CLEAR",52}, {"MONO MODE",MONO_KEY_CODE}, {"BLOCK -",59}, {"BLOCK +",53},
+    {"FINE -",23}, {"FINE +",22}, {"DIRECT",26}, {"LINK",27},
 };
 
 static int preset_number(unsigned code) {
@@ -74,6 +84,15 @@ static int preset_number(unsigned code) {
     if (key_bindings[i].code == code) return (int)i + 1;
   return 0;
 }
+
+#ifdef CONFIG_SONY_CONTROLLER_NODE
+static bool menu_key(unsigned code) {
+  for (unsigned i = 16; i < sizeof(key_bindings) / sizeof(key_bindings[0]); ++i)
+    if (key_bindings[i].code == code)
+      return true;
+  return false;
+}
+#endif
 
 static void display_button_reset(display_button_t *button, int64_t now) {
   memset(button, 0, sizeof(*button));
@@ -95,7 +114,12 @@ static void display_button_event(display_button_t *button, uint8_t raw,
   if (!button->armed)
     button->change_ms = now;
   if (!button->key_code && pressed && button->armed &&
-      (code == DISPLAY_KEY_CODE || code == CHECK_KEY_CODE || preset_number(code)))
+      (code == DISPLAY_KEY_CODE || code == CHECK_KEY_CODE || code == MONO_KEY_CODE ||
+       preset_number(code)
+#ifdef CONFIG_SONY_CONTROLLER_NODE
+       || menu_key(code)
+#endif
+       ))
     button->key_code = code;
   if (code != button->key_code) {
     if (pressed && (button->candidate || button->stable))
@@ -104,6 +128,12 @@ static void display_button_event(display_button_t *button, uint8_t raw,
   }
   if (pressed == button->candidate)
     return;
+  if (!pressed && button->candidate && !button->stable &&
+      now - button->change_ms >= BUTTON_DEBOUNCE_MS) {
+    button->stable = true;
+    button->pressed_ms = button->change_ms;
+    button->long_sent = false;
+  }
   button->candidate = pressed;
   button->change_ms = now;
   if (pressed) {
@@ -113,7 +143,7 @@ static void display_button_event(display_button_t *button, uint8_t raw,
   }
 }
 
-/* Returns -1 for no action, 0/1 for display, 2-17 for presets, or 18 for CHECK. */
+/* Returns -1 for no action, 0/1 for display, 2-17 for presets, 18/19 for CHECK/MONO. */
 static int display_button_poll(display_button_t *button, int64_t now) {
   if (!button->armed) {
     if (!button->down[0] && !button->down[1] &&
@@ -126,9 +156,25 @@ static int display_button_poll(display_button_t *button, int64_t now) {
   if (button->candidate == button->stable) {
     if (!button->stable)
       button->key_code = 0;
-    else if (button->key_code == DISPLAY_KEY_CODE && !button->contaminated &&
-             !button->long_sent && now - button->pressed_ms >= BUTTON_LONG_MS) {
+    else if ((button->key_code == DISPLAY_KEY_CODE
+#ifdef CONFIG_SONY_CONTROLLER_NODE
+              || button->key_code == 51 || button->key_code == 26 ||
+                 button->key_code == CHECK_KEY_CODE
+#endif
+              ) && !button->contaminated &&
+             !button->long_sent && now - button->pressed_ms >=
+#ifdef CONFIG_SONY_CONTROLLER_NODE
+                 (button->key_code == CHECK_KEY_CODE ? 2000 : BUTTON_LONG_MS)
+#else
+                 BUTTON_LONG_MS
+#endif
+             ) {
       button->long_sent = true;
+#ifdef CONFIG_SONY_CONTROLLER_NODE
+      if (button->key_code == 51 || button->key_code == 26 ||
+          button->key_code == CHECK_KEY_CODE)
+        return 0x200 | button->key_code;
+#endif
       return 1;
     }
     return -1;
@@ -137,6 +183,18 @@ static int display_button_poll(display_button_t *button, int64_t now) {
   if (button->stable) {
     button->pressed_ms = button->change_ms;
     button->long_sent = false;
+#ifdef CONFIG_SONY_CONTROLLER_NODE
+    unsigned code = button->key_code;
+    if (!button->contaminated && code != DISPLAY_KEY_CODE &&
+        code != CHECK_KEY_CODE && code != 51 && code != 26) {
+      button->long_sent = true;
+      if (code == MONO_KEY_CODE)
+        return BUTTON_MONO_ACTION;
+      if (menu_key(code))
+        return 0x100 | code;
+      return preset_number(code) + 1;
+    }
+#endif
     return -1;
   }
   unsigned code = button->key_code;
@@ -144,7 +202,19 @@ static int display_button_poll(display_button_t *button, int64_t now) {
   if (button->contaminated || button->long_sent)
     return -1;
   if (code == CHECK_KEY_CODE)
+#ifdef CONFIG_SONY_CONTROLLER_NODE
+    return button->change_ms - button->pressed_ms >= 2000 ? (0x200 | code) : (0x100 | code);
+#else
     return BUTTON_CHECK_ACTION;
+#endif
+  if (code == MONO_KEY_CODE)
+    return BUTTON_MONO_ACTION;
+#ifdef CONFIG_SONY_CONTROLLER_NODE
+  if (code != DISPLAY_KEY_CODE && menu_key(code))
+    return ((code == 51 || code == 26) &&
+            button->change_ms - button->pressed_ms >= BUTTON_LONG_MS)
+               ? (0x200 | code) : (0x100 | code);
+#endif
   if (code != DISPLAY_KEY_CODE)
     return preset_number(code) + 1;
   return button->change_ms - button->pressed_ms >= BUTTON_LONG_MS ? 1 : 0;
@@ -184,6 +254,19 @@ static void bus_stop(void) {
   clock_high();
   gpio_set_level(KEYPAD_SDA, 1);
   bus_delay();
+}
+
+static void bus_recover(void) {
+  gpio_set_level(KEYPAD_SDA, 1);
+  if (gpio_get_level(KEYPAD_SDA))
+    return;
+  for (unsigned i = 0; i < 9 && !gpio_get_level(KEYPAD_SDA); ++i) {
+    gpio_set_level(KEYPAD_SCL, 0);
+    bus_delay();
+    if (clock_high() != ESP_OK)
+      return;
+  }
+  bus_stop();
 }
 
 static esp_err_t bus_send(uint8_t byte) {
@@ -254,8 +337,17 @@ static void record_key(uint8_t raw, int64_t now, bool virtual_input, bool feed) 
 }
 
 static void dispatch_button(int action) {
+#ifdef CONFIG_SONY_CONTROLLER_NODE
+  if (action >= 0x100)
+    sony_controller_menu_key((unsigned)action & 0xff, (action & 0x200) != 0);
+  else if (action >= 2 && action <= 17)
+    sony_controller_menu_key(key_bindings[action - 2].code, false);
+  else
+#endif
   if (action == BUTTON_CHECK_ACTION)
     (void)sony_screen_start_from_check();
+  else if (action == BUTTON_MONO_ACTION)
+    (void)sony_screen_startup_press();
   else if (action >= 2)
     (void)radio_select_preset((unsigned)action - 1);
   else if (action >= 0)
@@ -318,7 +410,7 @@ static void keypad_task(void *unused) {
     if (virtual_enabled) {
       poll_virtual(esp_timer_get_time() / 1000);
       xSemaphoreGive(lock);
-      vTaskDelay(pdMS_TO_TICKS(40));
+      vTaskDelay(pdMS_TO_TICKS(KEYPAD_POLL_MS));
       continue;
     }
     uint8_t cfg;
@@ -377,7 +469,7 @@ static void keypad_task(void *unused) {
     last_error = err;
     dispatch_button(button_action);
     xSemaphoreGive(lock);
-    vTaskDelay(pdMS_TO_TICKS(40));
+    vTaskDelay(pdMS_TO_TICKS(KEYPAD_POLL_MS));
   }
 }
 
@@ -394,6 +486,7 @@ esp_err_t sony_keypad_init(void) {
   esp_err_t err = gpio_config(&config);
   if (err != ESP_OK)
     return err;
+  bus_recover();
   uint8_t remembered = 0;
   nvs_handle_t nvs;
   if (nvs_open("keypad", NVS_READONLY, &nvs) == ESP_OK) {
@@ -427,12 +520,19 @@ static esp_err_t status_handler(httpd_req_t *req) {
       cJSON_AddStringToObject(binding, "name", key_bindings[i].name);
       cJSON_AddNumberToObject(binding, "code", key_bindings[i].code);
       cJSON_AddBoolToObject(binding, "action",
+#ifdef CONFIG_SONY_CONTROLLER_NODE
+          true);
+#else
           i < 16 || key_bindings[i].code == CHECK_KEY_CODE ||
-          key_bindings[i].code == DISPLAY_KEY_CODE);
+          key_bindings[i].code == DISPLAY_KEY_CODE || key_bindings[i].code == MONO_KEY_CODE);
+#endif
       cJSON_AddItemToArray(bindings, binding);
     }
   }
   cJSON_AddBoolToObject(root, "restore_on_boot", restore_on_boot);
+#ifdef CONFIG_SONY_CONTROLLER_NODE
+  cJSON_AddBoolToObject(root, "fixed_6x9", true);
+#endif
   cJSON_AddBoolToObject(root, "hardware_scan_active", present &&
       hardware_rows && (hardware_columns || (hardware_columns_hi & 3)));
   cJSON_AddNumberToObject(root, "hardware_row_mask", hardware_rows);
@@ -563,13 +663,20 @@ static esp_err_t control_handler(httpd_req_t *req) {
   cJSON *confirmed = cJSON_GetObjectItemCaseSensitive(root, "isolated_matrix_confirmed");
   cJSON *remember = cJSON_GetObjectItemCaseSensitive(root, "remember");
   bool start = cJSON_IsTrue(enabled);
+#ifdef CONFIG_SONY_CONTROLLER_NODE
+  bool persist = start;
+#else
   bool persist = start && cJSON_IsTrue(remember);
+#endif
   bool valid = cJSON_IsBool(enabled) &&
       (!remember || cJSON_IsBool(remember)) &&
       (!start || (cJSON_IsTrue(confirmed) && cJSON_IsNumber(r) &&
                   r->valuedouble == r->valueint && r->valueint >= 1 && r->valueint <= 8 &&
                   cJSON_IsNumber(c) && c->valuedouble == c->valueint &&
                   c->valueint >= 1 && c->valueint <= 10 &&
+#ifdef CONFIG_SONY_CONTROLLER_NODE
+                  r->valueint == 6 && c->valueint == 9 &&
+#endif
                   (!persist || (r->valueint == 6 && c->valueint == 9))));
   if (!valid) {
     cJSON_Delete(root);

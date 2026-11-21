@@ -505,6 +505,41 @@ int main(void) {
 
 
 class ScreenCheckStartTests(unittest.TestCase):
+    def test_startup_artwork_fill_title_star_order_and_blank(self):
+        with tempfile.TemporaryDirectory() as temp:
+            library = Path(temp) / "startup.so"
+            subprocess.run(["cc", "-shared", "-fPIC", "-Wall", "-Wextra", "-Werror",
+                            str(ROOT / "main/sony_startup.c"),
+                            str(ROOT / "main/sony_text.c"), "-o", str(library)], check=True)
+            driver = ctypes.CDLL(str(library))
+            driver.sony_text_ascii_word.argtypes = [ctypes.c_ubyte]
+            driver.sony_text_ascii_word.restype = ctypes.c_uint64
+            driver.sony_startup_frame.argtypes = [ctypes.c_uint, ctypes.POINTER(ctypes.c_uint64)]
+            driver.sony_startup_frame.restype = None
+
+            def frame(ms):
+                words = (ctypes.c_uint64 * 26)()
+                driver.sony_startup_frame(ms, words)
+                self.assertEqual([words[i] for i in (0, 23, 24, 25)], [0] * 4)
+                return list(words)[1:23][::-1]
+
+            def glyphs(text):
+                return [driver.sony_text_ascii_word(ch) for ch in text]
+
+            self.assertLess(sum(word.bit_count() for word in frame(300)), 770)
+            self.assertEqual(frame(1200), [(1 << 35) - 1] * 22)
+            self.assertEqual(frame(2150), glyphs(b"   SONY DAR-1000ES    "))
+            early = frame(3200)
+            for cell, ch in ((1, b"E"), (10, b"S")):
+                mask = glyphs(ch)[0]
+                self.assertEqual(early[cell] & mask, mask)
+            self.assertTrue(all(word.bit_count() <= 1 for i, word in enumerate(early)
+                                if i not in (1, 10)))
+            phrase = glyphs(b" Elevated Standard    ")
+            self.assertEqual(frame(4250), phrase)
+            self.assertNotEqual(frame(5750), phrase)
+            self.assertEqual(frame(6250), [0] * 22)
+
     def test_check_start_is_guarded_and_uses_standard_radio_scan(self):
         source = (ROOT / "main/sony_screen.c").read_text()
         ready = source[source.index("static bool radio_controls_ready("):
@@ -522,7 +557,9 @@ typedef int esp_err_t;
 enum { ESP_OK = 0, ESP_ERR_INVALID_STATE = 1, ESP_ERR_INVALID_ARG = 2,
        ESP_ERR_NO_MEM = 3, pdPASS = 1, portMAX_DELAY = 0 };
 static int control_lock, frame_lock, task_result = pdPASS, init_result;
-static atomic_bool running, display_requested, timing_requested, stop_requested;
+static atomic_bool running, display_requested, timing_requested, stop_requested, startup_active;
+static int64_t now_us, startup_arm_until_us;
+static int64_t esp_timer_get_time(void) { return now_us; }
 static atomic_uint pin_profile_index, timing_revision, completed_frames;
 static atomic_uint held_switches, held_last_interval_us;
 static atomic_int last_error;
@@ -557,6 +594,19 @@ static int xTaskCreatePinnedToCore(void (*fn)(void *), const char *name,
 int main(void) {
     assert(sony_screen_start_from_check() == ESP_ERR_INVALID_STATE);
     control_lock = 1;
+    pin_profile_index = 1;
+    assert(sony_screen_startup_press() == ESP_ERR_INVALID_STATE);
+    assert(arm_startup_locked(false) == ESP_ERR_INVALID_STATE);
+    assert(arm_startup_locked(true) == ESP_OK);
+    now_us = 30000000;
+    assert(sony_screen_startup_press() == ESP_ERR_INVALID_STATE);
+    assert(arm_startup_locked(true) == ESP_OK);
+    assert(sony_screen_startup_press() == ESP_OK);
+    assert(startup_active && running && !follow_radio && !analyzer_enabled);
+    assert(arm_startup_locked(true) == ESP_ERR_INVALID_STATE);
+    running = startup_active = false;
+    assert(sony_screen_startup_press() == ESP_ERR_INVALID_STATE);
+    pin_profile_index = 0;
     assert(sony_screen_start_from_check() == ESP_ERR_INVALID_STATE);
     atomic_store(&pin_profile_index, 1);
     atomic_store(&running, true);
@@ -622,7 +672,7 @@ int main(void) {
 typedef int esp_err_t;
 enum { ESP_OK = 0, ESP_ERR_INVALID_STATE = 1, portMAX_DELAY = 0 };
 static int control_lock = 1, frame_lock, long_presses, starts;
-static atomic_bool running, stop_requested;
+static atomic_bool running, stop_requested, startup_active;
 static bool follow_radio, follow_spectrum, analyzer_enabled;
 static sony_display_mode_t radio_display_mode;
 #define portENTER_CRITICAL(p) ((void)(p))
@@ -634,7 +684,8 @@ static bool radio_controls_ready(void) {
 }
 static void remember_radio_timing_locked(void) {}
 static void sony_spectrum_enable(bool on) { analyzer_enabled = on; }
-static esp_err_t start_radio_display_locked(sony_display_mode_t mode) {
+static esp_err_t start_radio_display_locked(sony_display_mode_t mode, bool startup) {
+    assert(!startup);
     ++starts;
     running = follow_radio = true;
     stop_requested = false;
@@ -765,11 +816,11 @@ int main(void) {
     assert(words[0] == 0 && words[24] == 0x2011 && words[25] == 0);
     status = sony_radio_status(true, 2, "192", "Mixed");
     assert(sony_vfd_show_radio("New title", &status) == ESP_OK);
-    assert(words[0] == 0 && words[24] == 0x2000 && words[25] == 1);
+    assert(words[0] == 0 && words[24] == 0x2003 && words[25] == 1);
     assert(sony_screen_set_display_mode(SONY_DISPLAY_VU_STEREO) == ESP_OK);
-    assert(words[0] == 0xff && words[24] == 0x2000 && words[25] == 1);
+    assert(words[0] == 0xff && words[24] == 0x2003 && words[25] == 1);
     assert(sony_screen_set_display_mode(SONY_DISPLAY_EQUALIZER) == ESP_OK);
-    assert(words[0] == 0 && words[24] == 0x2000 && words[25] == 1);
+    assert(words[0] == 0 && words[24] == 0x2003 && words[25] == 1);
     status = sony_radio_status(false, 2, "192", "Mixed");
     assert(sony_vfd_show_radio("New title", &status) == ESP_OK);
     assert(words[0] == 0x4000 && words[24] == 0 && words[25] == 0);

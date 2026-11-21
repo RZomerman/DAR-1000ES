@@ -17,12 +17,20 @@
 #include "rtsp_server.h"
 #include "settings.h"
 #include "web_server.h"
+#ifdef CONFIG_SONY_OPTICAL_BENCH
+#include "sony_optical_bench.h"
+#elif defined(CONFIG_SONY_SPLIT_AUDIO_NODE) && defined(CONFIG_AUDIO_OUTPUT_SPDIF)
+#include "driver/gpio.h"
+#endif
 #include "log_stream.h"
 #include "wifi.h"
 #include "spiffs_storage.h"
 #include "radio.h"
 #ifdef CONFIG_SONY_UART_LINK
 #include "sony_uart_link.h"
+#endif
+#ifdef CONFIG_SONY_SPLIT_AUDIO_NODE
+#include "sony_spectrum.h"
 #endif
 
 #ifdef CONFIG_SONY_SCREEN_BENCH
@@ -56,6 +64,15 @@
 
 static const char *TAG = "main";
 
+#ifdef CONFIG_SONY_OPTICAL_ISOLATED_PLAYBACK
+static void disable_isolated_optical_buffer(void) {
+#ifdef CONFIG_SONY_I2S_MIRROR
+  gpio_set_level(GPIO_NUM_1, 1);
+#endif
+  gpio_set_level(GPIO_NUM_5, 1);
+}
+#endif
+
 // AP mode IP address (192.168.4.1 in network byte order)
 #define AP_IP_ADDR 0x0104A8C0
 
@@ -83,7 +100,9 @@ static void start_airplay_services(void) {
 
     ESP_ERROR_CHECK(hap_init());
     ESP_ERROR_CHECK(audio_receiver_init());
+#ifndef CONFIG_SONY_OPTICAL_ISOLATED_PLAYBACK
     ESP_ERROR_CHECK(audio_output_init());
+#endif
     mdns_airplay_init();
     s_airplay_infrastructure_ready = true;
   }
@@ -227,7 +246,31 @@ static void on_airplay_client_event(rtsp_event_t event,
 void app_main(void) {
   ESP_LOGW(TAG, "Boot: reset reason %d", (int)esp_reset_reason());
 
-#ifdef CONFIG_SONY_UART_LINK
+#ifdef CONFIG_SONY_OPTICAL_BENCH
+  ESP_ERROR_CHECK(sony_optical_bench_init());
+#elif defined(CONFIG_SONY_SPLIT_AUDIO_NODE) && defined(CONFIG_AUDIO_OUTPUT_SPDIF)
+  ESP_ERROR_CHECK(gpio_set_level(GPIO_NUM_5, 1));
+  ESP_ERROR_CHECK(gpio_set_direction(GPIO_NUM_5, GPIO_MODE_OUTPUT));
+#ifdef CONFIG_SONY_OPTICAL_ISOLATED_PLAYBACK
+#ifdef CONFIG_SONY_I2S_MIRROR
+  ESP_ERROR_CHECK(gpio_set_level(GPIO_NUM_1, 1));
+  ESP_ERROR_CHECK(gpio_set_direction(GPIO_NUM_1, GPIO_MODE_OUTPUT));
+#endif
+  ESP_ERROR_CHECK(gpio_set_level(GPIO_NUM_4, 0));
+  ESP_ERROR_CHECK(gpio_set_level(GPIO_NUM_6, 1));
+  ESP_ERROR_CHECK(gpio_set_level(GPIO_NUM_7, 1));
+  ESP_ERROR_CHECK(gpio_set_level(GPIO_NUM_15, 0));
+  const gpio_config_t outputs = {
+      .pin_bit_mask = (1ULL << 4) | (1ULL << 6) | (1ULL << 7) | (1ULL << 15),
+      .mode = GPIO_MODE_OUTPUT,
+  };
+  ESP_ERROR_CHECK(gpio_config(&outputs));
+  ESP_ERROR_CHECK(esp_register_shutdown_handler(disable_isolated_optical_buffer));
+  ESP_ERROR_CHECK(gpio_set_level(GPIO_NUM_5, 0));
+#endif
+#endif
+
+#if defined(CONFIG_SONY_UART_LINK) && !defined(CONFIG_SONY_SPLIT_AUDIO_NODE)
   ESP_ERROR_CHECK(sony_uart_link_init());
 #endif
 
@@ -263,6 +306,13 @@ void app_main(void) {
     }
   }
   ESP_ERROR_CHECK(radio_init());
+#ifdef CONFIG_SONY_SPLIT_AUDIO_NODE
+  ESP_ERROR_CHECK(sony_spectrum_init());
+  sony_spectrum_enable(true);
+#ifndef CONFIG_SONY_OPTICAL_ISOLATED_PLAYBACK
+  ESP_ERROR_CHECK(sony_uart_link_init());
+#endif
+#endif
 #ifdef CONFIG_SONY_SCREEN_BENCH
   ESP_ERROR_CHECK(sony_keypad_init());
 #endif
@@ -327,6 +377,14 @@ void app_main(void) {
   if (err != ESP_OK) {
     ESP_LOGE(TAG, "Board init failed: %s", esp_err_to_name(err));
   }
+#ifdef CONFIG_SONY_OPTICAL_ISOLATED_PLAYBACK
+  ESP_ERROR_CHECK(audio_output_init());
+#ifdef CONFIG_SONY_I2S_MIRROR
+  ESP_ERROR_CHECK(gpio_set_level(GPIO_NUM_1, 0));
+#endif
+  audio_output_start();
+  ESP_ERROR_CHECK(sony_uart_link_init());
+#endif
 
   // Pass the board-owned bus to the display so it reuses it rather than
   // creating a duplicate bus on the same pins.

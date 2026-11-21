@@ -41,6 +41,15 @@ typedef enum {
  * Initialize the audio output backend (I2S / SPDIF / USB UAC).
  */
 esp_err_t audio_output_init(void);
+#ifdef CONFIG_SONY_OPTICAL_ISOLATED_PLAYBACK
+void audio_output_startup_sound(bool play);
+#endif
+#if defined(CONFIG_SONY_OPTICAL_ISOLATED_PLAYBACK) && defined(CONFIG_SONY_I2S_MIRROR)
+#define SONY_PCM_BENCH_CONTROLS 1
+esp_err_t audio_output_set_bench_control(const char *signal, int level);
+bool audio_output_bench_mirror_active(void);
+void audio_output_get_bench_controls(int *dmute, int *override, int *amute, int *relay);
+#endif
 
 /**
  * Start the audio playback task.
@@ -125,6 +134,10 @@ bool audio_output_get_pipeline_us(int64_t *now_us, uint32_t *pipeline_us);
 uint32_t audio_output_get_underruns(void);
 
 uint32_t audio_output_get_write_errors(void);
+#ifdef CONFIG_AUDIO_OUTPUT_SPDIF
+uint32_t audio_output_get_radio_pcm_gap_frames(void);
+uint32_t audio_output_get_sent_frames(void);
+#endif
 
 #ifdef CONFIG_SONY_I2S_MIRROR
 uint32_t audio_output_get_i2s_write_errors(void);

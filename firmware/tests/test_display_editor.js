@@ -35,6 +35,13 @@ assert.equal(display.glyph("漢"), display.glyph("*"));
 assert.equal(display.glyph("\u0301"), display.glyph("*"));
 assert.equal(display.glyph("\uFFFD"), display.glyph("*"));
 assert.notEqual(display.glyph("*"), display.glyph("?"));
+const firmwareFont = fs.readFileSync(require("node:path").join(__dirname, "../main/sony_text_font.inc"), "utf8");
+for (const character of "#$%^_=<>@\\`{}|~") {
+  const word = display.glyph(character);
+  assert.notEqual(word, 0n);
+  assert.notEqual(word, display.glyph("*"));
+  assert.match(firmwareFont, new RegExp(`\\{0x${character.codePointAt(0).toString(16)}, 0x[0-9a-f]+, 0x[0-9a-f]+, 0x${display.hex(word)}ULL\\}`));
+}
 assert.equal(display.glyph("H\u0301"), display.glyph("H"));
 assert.equal(display.glyph("é"), display.unicodeFont["é"].word);
 for (const {rows, word} of Object.values(display.unicodeFont)) {

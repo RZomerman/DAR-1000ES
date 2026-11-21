@@ -228,7 +228,7 @@ const SonyFrontPanel = (() => {
         const words = available && state.output_frame_valid ?
           state.output_words.map(word => BigInt("0x" + word)) : Array(26).fill(0n);
         draw($("demo-canvas"), words, available ?
-          `${state.output_frame_valid ? "REAL OUTPUT" : "OUTPUT OFF"}  ${state.display_mode_label || ""}  ` +
+          `${state.output_frame_valid ? "REAL OUTPUT" : "OUTPUT OFF"}  ${state.startup_active ? "Startup" : state.display_mode_label || ""}  ` +
           `grid duty ${(100 * (state.timing_grid_duty || 0)).toFixed(3)}%` : "Update firmware for real output preview");
         $("demo-raw").textContent = words.map((word, i) =>
           "Slot " + i + ": " + word.toString(16).padStart(10,"0")).join("\n");

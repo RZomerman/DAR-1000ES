@@ -12,7 +12,7 @@ int main(void) {
   status = sony_radio_status(false, 2, "320", "Music");
   assert(status.meter == 0x4000 && !status.audio && !status.stereo);
   status = sony_radio_status(true, 0, "192", "Pop");
-  assert(status.meter == 0x4000 && !status.audio && !status.stereo);
+  assert(status.meter == 0x4000 && status.audio == 2 && !status.stereo);
 
   const char *invalid[] = {NULL,
                            "",
@@ -34,8 +34,7 @@ int main(void) {
   assert(status.meter == 0x7FF && status.audio == 0x2002);
   status = sony_radio_status(true, 2, "1000", "R&B");
   assert(status.meter == 0x3FFF && status.audio == 0x2002);
-  const char *unknown[] = {NULL,         "",          "Mixed",
-                           "Pop / Talk", "newspaper", "variety"};
+  const char *unknown[] = {NULL, "", "newspaper", "variety"};
   for (size_t i = 0; i < sizeof(unknown) / sizeof(unknown[0]); ++i) {
     status = sony_radio_status(true, 2, "320", unknown[i]);
     assert(status.audio == 0x2000);
@@ -46,6 +45,34 @@ int main(void) {
   assert(sony_radio_status(true, 2, "192", long_genre).audio == 0x2001);
 
   uint64_t words[26], before[26];
+  memset(words, 0, sizeof(words));
+  status = sony_radio_status(false, 0, "", "");
+  sony_radio_controller_indicators(words, &status, false, false, false, false, false);
+  assert(words[23] == 0x08);
+  sony_radio_controller_indicators(words, &status, false, false, true, false, false);
+  assert(words[23] == 0x09);
+  sony_radio_controller_indicators(words, &status, false, false, true, true, false);
+  assert(words[23] == 0x0B);
+  status = sony_radio_status(true, 2, "128", "Pop / Talk");
+  assert((status.audio & 3) == 3);
+  assert(sony_radio_genre_labels("Mixed") == 3);
+  status.preset = 16;
+  words[24] = 0x600;
+  words[25] = 0x101;
+  sony_radio_controller_indicators(words, &status, true, true, true, true, false);
+  assert(words[23] == 0x200007 && words[24] == 3 && words[25] == 0x103);
+  status.preset = 1;
+  sony_radio_controller_indicators(words, &status, false, false, true, false, false);
+  assert(words[23] == 0x41 && words[25] == 0x101);
+  memcpy(before, words, sizeof(words));
+  words[25] |= 0x800220;
+  sony_radio_controller_indicators(words, &status, false, false, true, true, true);
+  assert(words[23] == 0x03 && words[24] == 0x5003 && words[25] == 0x1DD);
+  assert(status.preset == 1);
+  memcpy(words, before, sizeof(words));  // Next scan starts from the base frame.
+  sony_radio_controller_indicators(words, &status, false, false, true, true, false);
+  assert(words[23] == 0x43 && words[24] == 3 && words[25] == 0x101);
+
   for (unsigned i = 0; i < 26; ++i)
     words[i] = before[i] = 0xFFFFFFFFFFULL;
   status = sony_radio_status(true, 1, "192", "Talk");
